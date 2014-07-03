@@ -2817,18 +2817,18 @@ ORDER BY frequency DESC LIMIT ".$n." ;";
 FROM  
 (SELECT query_tag.tag, value_table.value   
 FROM query_tag, event_attribute_value as query_table, event_attribute_value as value_table
-WHERE query_tag.id = '32' AND
+WHERE query_tag.id = :dossier AND
 query_tag.tag = query_table.value AND
 query_table.event = value_table.event
 UNION ALL
 SELECT  query_tag.tag, tag_attribute_id_value.value
 FROM tag_attribute, tag_attribute_id_value, query_tag
-WHERE query_tag.id = '32' AND
+WHERE query_tag.id = :dossier AND
 tag_attribute.tag = query_tag.tag AND
 tag_attribute.id = tag_attribute_id_value.tag_attribute_id) as result
 LEFT JOIN tag_name ON  tag_name.tag = result.value
 WHERE 
- EXISTS (SELECT qt.tag FROM query_tag as qt WHERE qt.id = '32' AND qt.tag = result.value)
+ EXISTS (SELECT qt.tag FROM query_tag as qt WHERE qt.id = :dossier AND qt.tag = result.value)
 GROUP BY result.value
 ORDER BY frequency DESC LIMIT ".$n." ;";
 	$result = db_query($query, array(':dossier' => $dossier));
