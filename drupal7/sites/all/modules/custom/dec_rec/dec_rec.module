@@ -821,7 +821,10 @@ function check_freebase_saved_image($topic = '/m/01qwfk', $thumbnail_url = FALSE
 	$image_query = 'https://www.googleapis.com/freebase/v1/topic'.$topic.'?filter=/common/topic/image&limit=1';
 	$result = drupal_http_request($image_query);
 
-	$data = drupal_json_decode($result->data);
+	if(isset($result->data)) {
+		$data = drupal_json_decode($result->data);
+	}
+	
 	if(isset($data['property']['/common/topic/image']['values']['0']['id'])) {
 		$image_topic = $data['property']['/common/topic/image']['values']['0']['id'];
 	}
@@ -1150,7 +1153,7 @@ event_time.value LIKE '".$year."%';";
 	
 }
 
-function dec_setting() {//***here
+function dec_setting() {
 	$output = "";
 	if(isset($_GET['location']) && isset($_GET['time'])) {
 		$location = $_GET['location'];
@@ -1191,7 +1194,7 @@ function dec_setting() {//***here
 	}
 
 	if(!empty($themes)) {
-		$output .= '<div style="clear:both"><h2>Themes derived from the event space: </h2></div>';
+		$output .= '<div style="clear:both"><h2>Themes: </h2></div>';
 		foreach($themes as $theme) {
 			$output .= l('<div style="float: left; white-space: nowrap; background-color: #ebebeb; margin: 5px;">'.$theme->name."</div>", "tag".$theme->value, array("html"=>TRUE));
 		}
@@ -1207,11 +1210,11 @@ function dec_setting() {//***here
 // 	}	
 
 	if(!empty($all_events)) {
-		$output .= '<div style="clear:both"><div style="align:right; text-align:right">'.l('Timeline','timeline_for_setting',array('query'=>array('location'=>$location, 'time'=>$year))).'</div></div>';
 		$output .= '<div style="clear:both"><h2>Event space: </h2></div>';
+		$output .= '<div style="clear:both"><div style="align:right; text-align:right">'.l('Timeline','timeline_for_setting',array('query'=>array('location'=>$location, 'time'=>$year))).'</div></div>';
 		foreach($all_events as $label=>$events) {
-			$output .= '<div style="clear:both"><div style="align:right; text-align:right">'.l('Timeline '.ucfirst($label),'timeline_for_setting',array('query'=>array('location'=>$location, 'time'=>$year, 'event_type'=>$label))).'</div></div>';
 			$output .= '<div style="clear:both">'.ucfirst($label).':</div>';
+			$output .= '<div style="clear:both"><div style="align:right; text-align:right">'.l('Timeline '.ucfirst($label),'timeline_for_setting',array('query'=>array('location'=>$location, 'time'=>$year, 'event_type'=>$label))).'</div></div>';
 			foreach($events as $event) {
 				$output .= '<div style="float: left; width: 200px;">'.output_event_table($event)."</div>";
 	
@@ -1506,9 +1509,14 @@ function dec_list_of_tags($tag_array, $max_value) {
 	//matching themes
 	$matching_themes = top_n_matching_themes_of_dossier($max_value, 10);
 	if(!empty($matching_themes)) {
-		$output .= '<div style="clear:both"><h2>Current themes: </h2></div>';
+		$output .= '<div style="clear:both"><h2>Tags: </h2></div>';
 		foreach($matching_themes as $theme) {
-			$output .= l('<div style="float: left; white-space: nowrap; background-color: #ebebeb; margin: 5px;">'.$theme->name."</div>", "tag".$theme->value, array("html"=>TRUE));
+			if($theme->value && !$theme->name) {
+				$output .= '<div style="float: left; white-space: nowrap; background-color: #ebebeb; margin: 5px;">'.$theme->value."</div>";
+			}
+			else {
+				$output .= l('<div style="float: left; white-space: nowrap; background-color: #ebebeb; margin: 5px;">'.$theme->name."</div>", "tag".$theme->value, array("html"=>TRUE));
+			}
 		}
 	
 	}
@@ -1516,7 +1524,7 @@ function dec_list_of_tags($tag_array, $max_value) {
 	//non-matching themes
 	$nonmatching_themes = top_n_nonmatching_themes_of_dossier($max_value, 10);
 	if(!empty($nonmatching_themes)) {
-		$output .= '<div style="clear:both"><h2>New themes: </h2></div>';
+		$output .= '<div style="clear:both"><h2>Themes: </h2></div>';
 		foreach($nonmatching_themes as $theme) {
 			$output .= l('<div style="float: left; white-space: nowrap; background-color: #ebebeb; margin: 5px;">'.$theme->name."</div>", "tag".$theme->value, array("html"=>TRUE));
 		}
@@ -1527,7 +1535,7 @@ function dec_list_of_tags($tag_array, $max_value) {
 	$overlapping_settings = get_n_matching_settings_for_a_dossier($max_value, $n = 5);
 
 	if(!empty($overlapping_settings)) {
-		$output .= '<div style="clear:both"><h2>Settings including a tag: </h2></div>';
+		$output .= '<div style="clear:both"><h2>Settings that include a tag: </h2></div>';
 		foreach($overlapping_settings as $setting) {
 			$output .= '<div style="float: left; white-space: nowrap; background-color: #ebebeb; margin: 5px;">'.
 					l($setting->name." ".$setting->time,'setting',array('query' => array('location' => $setting->location, 'time' => $setting->time))).
@@ -1540,7 +1548,7 @@ function dec_list_of_tags($tag_array, $max_value) {
 	$non_overlapping_settings = get_n_nonmatching_settings_for_a_dossier($max_value, $n = 5);
 
 	if(!empty($non_overlapping_settings)) {
-		$output .= '<div style="clear:both"><h2>Settings not including a tag: </h2></div>';
+		$output .= '<div style="clear:both"><h2>Settings that do not include a tag: </h2></div>';
 		foreach($non_overlapping_settings as $setting) {
 			$output .= '<div style="float: left; white-space: nowrap; background-color: #ebebeb; margin: 5px;">'.
 					l($setting->name." ".$setting->time,'setting',array('query' => array('location' => $setting->location, 'time' => $setting->time))).
@@ -1556,11 +1564,12 @@ function dec_list_of_tags($tag_array, $max_value) {
 	$all_events = get_all_events_for_dossier($max_value);
 
 	if(!empty($all_events)) {
-		$output .= '<div style="clear:both"><div style="align:right; text-align:right">'.l('Timeline','timeline_for_tags/'.$max_value).'</div></div>';
 		$output .= '<div style="clear:both"><h2>Event space: </h2></div>';
+		$output .= '<div style="clear:both"><div style="align:right; text-align:right">'.l('Timeline','timeline_for_tags/'.$max_value).'</div></div>';
+		
 		foreach($all_events as $label=>$events) {
-			$output .= '<div style="clear:both"><div style="align:right; text-align:right">'.l('Timeline '.ucfirst($label),'timeline_for_tags/'.$max_value,array('query'=>array('event_type'=>$label))).'</div></div>';
 			$output .= '<div style="clear:both">'.ucfirst($label).':</div>';
+			$output .= '<div style="clear:both"><div style="align:right; text-align:right">'.l('Timeline '.ucfirst($label),'timeline_for_tags/'.$max_value,array('query'=>array('event_type'=>$label))).'</div></div>';
 			foreach($events as $event) {
 				$output .= '<div style="float: left; width: 200px;">'.output_event_table($event)."</div>";
 	
@@ -1713,7 +1722,7 @@ function dec_tag($m, $id) {
 	//tag themes
 	$themes = top_n_themes_of_tag($topic, 10);
 	if(!empty($themes)) {
-		$output .= '<div style="clear:both"><h2>Themes derived from the event space: </h2></div>';
+		$output .= '<div style="clear:both"><h2>Themes: </h2></div>';
 		foreach($themes as $theme) {
 			$output .= l('<div style="float: left; white-space: nowrap; background-color: #ebebeb; margin: 5px;">'.$theme->name."</div>", "tag".$theme->value, array("html"=>TRUE));
 		}
@@ -1724,7 +1733,7 @@ function dec_tag($m, $id) {
 	$settings = get_n_settings_for_a_tag($topic);
 
 	if(!empty($settings)) {
-		$output .= '<div style="clear:both"><h2>Settings derived from the event space: </h2></div>';
+		$output .= '<div style="clear:both"><h2>Settings: </h2></div>';
 		foreach($settings as $setting) {
 			$output .= '<div style="float: left; white-space: nowrap; background-color: #ebebeb; margin: 5px;">'.
 			l($setting->name." ".$setting->time,'setting',array('query' => array('location' => $setting->location, 'time' => $setting->time))).
@@ -1740,11 +1749,11 @@ function dec_tag($m, $id) {
 	
 	$all_events = get_all_events_for_tag($topic);
 	if(!empty($all_events)) {
-		$output .= '<div style="clear:both"><div style="align:right; text-align:right">'.l('Timeline','timeline'.$topic).'</div></div>';
 		$output .= '<div style="clear:both"><h2>Event space: </h2></div>';
+		$output .= '<div style="clear:both"><div style="align:right; text-align:right">'.l('Timeline','timeline'.$topic).'</div></div>';
 				foreach($all_events as $all_event) {
-					$output .= '<div style="clear:both"><div style="align:right; text-align:right">'.l('Timeline '.ucfirst($all_event['label']),'timeline'.$topic,array('query'=>array('attribute'=>$all_event['name']))).'</div></div>';
 					$output .= '<div style="clear:both">'.ucfirst($all_event['label']).':</div>';
+					$output .= '<div style="clear:both"><div style="align:right; text-align:right">'.l('Timeline '.ucfirst($all_event['label']),'timeline'.$topic,array('query'=>array('attribute'=>$all_event['name']))).'</div></div>';
 						foreach($all_event['events'] as $event) {
 							$output .= '<div style="float: left; width: 200px;">'.output_event_table_dec_tag($event, $types)."</div>";
 				
@@ -2574,7 +2583,7 @@ WHERE result.location = tag_name.tag LIMIT ".$n.";";
 		$output[$record->location.'-'.$record->time] = $record;
 			
 	}
-	
+
 	uasort($output, 'setting_frequency');
 	if(count($output) > $n) {
 		$output = array_slice($output, 0, $n);
@@ -2744,7 +2753,7 @@ function top_n_themes_of_tag($tag = '/m/01qwfk', $n = 5) {
 	
 	
 	//query based on value in events and direct properties of the tag
-	$query = "SELECT result.tag as value, COUNT(result.tag) as frequency, result.name
+	$query = "SELECT * FROM (SELECT result.tag as value, COUNT(result.tag) as frequency, result.name
 FROM tag_name as result,
 (SELECT tag_name.tag
 FROM tag_attribute, tag_attribute_id_value, tag_name 
@@ -2758,7 +2767,8 @@ WHERE event_table.value = :tag AND event_table.event = value_table.event AND
 tag_name.tag = value_table.value) as data
 WHERE result.tag = data.tag AND NOT(result.tag = :tag)
 GROUP BY result.tag
-ORDER BY frequency DESC LIMIT ".$n." ;";
+ORDER BY frequency DESC) as frequency
+WHERE frequency > 1 LIMIT ".$n." ;";
 	
 	$result = db_query($query, array(':tag' => $tag));
 	$output = array();
@@ -2803,7 +2813,24 @@ WHERE result.value = tag_name.tag AND
  EXISTS (SELECT qt.tag FROM query_tag as qt WHERE qt.id = :dossier AND qt.tag = result.value)
 GROUP BY result.value
 ORDER BY frequency DESC LIMIT ".$n." ;";
-	
+	$query = "SELECT COUNT(DISTINCT result.tag) as frequency, result.value, tag_name.name
+FROM  
+(SELECT query_tag.tag, value_table.value   
+FROM query_tag, event_attribute_value as query_table, event_attribute_value as value_table
+WHERE query_tag.id = '32' AND
+query_tag.tag = query_table.value AND
+query_table.event = value_table.event
+UNION ALL
+SELECT  query_tag.tag, tag_attribute_id_value.value
+FROM tag_attribute, tag_attribute_id_value, query_tag
+WHERE query_tag.id = '32' AND
+tag_attribute.tag = query_tag.tag AND
+tag_attribute.id = tag_attribute_id_value.tag_attribute_id) as result
+LEFT JOIN tag_name ON  tag_name.tag = result.value
+WHERE 
+ EXISTS (SELECT qt.tag FROM query_tag as qt WHERE qt.id = '32' AND qt.tag = result.value)
+GROUP BY result.value
+ORDER BY frequency DESC LIMIT ".$n." ;";
 	$result = db_query($query, array(':dossier' => $dossier));
 	
 	$used_tags = array();
@@ -2814,20 +2841,29 @@ ORDER BY frequency DESC LIMIT ".$n." ;";
 	}
 
 	$dossier_tags = get_tags_names_for_a_dossier($dossier);
+
 	foreach($dossier_tags as $dossier_tag) {
-		if($dossier_tag['1']) {
-			if(!in_array($dossier_tag['0'], $used_tags)) {
+		if(!in_array($dossier_tag['0'], $used_tags)) {
+			if($dossier_tag['1']) {
 				$out = new stdClass();
 	    		$out->value = $dossier_tag['0'];
 	    		$out->frequency = 0;
 	    		$out->name = $dossier_tag['1'];
 	    		$output[] = $out;
 			}
+			else {
+				$out = new stdClass();
+				$out->value = FALSE;
+				$out->frequency = 0;
+				$out->name = $dossier_tag['0'];
+				$output[] = $out;				
+			}
 		}
 	}
-	
+
 	return $output;
 }
+
 
 function top_n_nonmatching_themes_of_dossier($dossier = 9, $n = 5) {
 	$n = (int) $n;
