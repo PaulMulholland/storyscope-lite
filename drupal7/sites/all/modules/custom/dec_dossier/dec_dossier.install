@@ -1,0 +1,15 @@
+<?php
+
+/* dec_rec.install
+ *
+ * Database set up
+ * 
+ */
+
+function dec_rec_install() {
+
+}
+
+function dec_rec_uninstall() {
+
+}
