@@ -392,7 +392,7 @@ function dec_setting_timeline($location, $year, $end = 0, $event_type = FALSE) {
 	if(!empty($events)) {
 		foreach($events as $label=>$events) {
 			foreach($events as $event) {
-				$output[] = load_art_event_without_title_addition($event);
+				$output[] = load_art_event_without_title_addition($event, TRUE);
 			}
 		}
 	}
@@ -419,7 +419,7 @@ function dec_tags_timeline($story_id, $event_type = FALSE) {
 	if(!empty($events)) {
 		foreach($events as $label=>$events) {
 			foreach($events as $event) {
-				$output[] = load_art_event_without_title_addition($event);
+				$output[] = load_art_event_without_title_addition($event, TRUE);
 			}
 		}
 	}
@@ -1784,17 +1784,26 @@ function dec_list_of_tags($tag_array, $max_value) {
 // 		}
 	
 // 	}
+
+	
 	if(!empty($overlapping_settings)) {
+// 		dpm($overlapping_settings);
+	
 		$output .= '<div style="clear:both"><h2>Settings that include a tag: </h2></div>';
 		foreach($overlapping_settings as $setting) {
-			if($setting->end && $setting->start !== $setting->end) {
+			if($setting->end && $setting->start && $setting->start !== $setting->end) {
 				$output .= '<div style="float: left; white-space: nowrap; background-color: #ebebeb; margin: 5px;">'.
 						l($setting->name." ".$setting->start."-".$setting->end,'setting',array('query' => array('location' => $setting->location, 'time' => $setting->start, 'end' => $setting->end))).
 						"</div>";				
 			}
-			else {
+			elseif($setting->start && !$setting->end) {
 				$output .= '<div style="float: left; white-space: nowrap; background-color: #ebebeb; margin: 5px;">'.
 					l($setting->name." ".$setting->start,'setting',array('query' => array('location' => $setting->location, 'time' => $setting->start))).
+					"</div>";
+			}
+			elseif($setting->end && !$setting->start) {
+				$output .= '<div style="float: left; white-space: nowrap; background-color: #ebebeb; margin: 5px;">'.
+					l($setting->name." ".$setting->end,'setting',array('query' => array('location' => $setting->location, 'time' => $setting->end))).
 					"</div>";
 			}
 		}
@@ -1805,31 +1814,48 @@ function dec_list_of_tags($tag_array, $max_value) {
 // 	$non_overlapping_settings = get_n_nonmatching_settings_for_a_story($max_value, $n = 5);
 	$non_overlapping_settings = get_n_nonmatching_settings_for_a_story2($max_value, $n = 5);
 	
-// 	if(!empty($non_overlapping_settings)) {
-// 		$output .= '<div style="clear:both"><h2>Settings that do not include a tag: </h2></div>';
-// 		foreach($non_overlapping_settings as $setting) {
-// 			$output .= '<div style="float: left; white-space: nowrap; background-color: #ebebeb; margin: 5px;">'.
-// 					l($setting->name." ".$setting->time,'setting',array('query' => array('location' => $setting->location, 'time' => $setting->time))).
-// 					"</div>";
-// 		}
-	
-// 	}
 	if(!empty($non_overlapping_settings)) {
 		$output .= '<div style="clear:both"><h2>Settings that do not include a tag: </h2></div>';
 		foreach($non_overlapping_settings as $setting) {
-			if($setting->end && $setting->start !== $setting->end) {
+			if($setting->end && $setting->start && $setting->start !== $setting->end) {
 				$output .= '<div style="float: left; white-space: nowrap; background-color: #ebebeb; margin: 5px;">'.
 						l($setting->name." ".$setting->start."-".$setting->end,'setting',array('query' => array('location' => $setting->location, 'time' => $setting->start, 'end' => $setting->end))).
 						"</div>";
 			}
-			else {
+			elseif($setting->start && !$setting->end) {
 				$output .= '<div style="float: left; white-space: nowrap; background-color: #ebebeb; margin: 5px;">'.
 						l($setting->name." ".$setting->start,'setting',array('query' => array('location' => $setting->location, 'time' => $setting->start))).
 						"</div>";
 			}
+			elseif($setting->end && !$setting->start) {
+				$output .= '<div style="float: left; white-space: nowrap; background-color: #ebebeb; margin: 5px;">'.
+						l($setting->name." ".$setting->end,'setting',array('query' => array('location' => $setting->location, 'time' => $setting->end))).
+						"</div>";
+			}	
+// 			$output .= '<div style="float: left; white-space: nowrap; background-color: #ebebeb; margin: 5px;">'.
+// 					l($setting->name." ".$setting->time,'setting',array('query' => array('location' => $setting->location, 'time' => $setting->time))).
+// 					"</div>";
 		}
 	
-	}		
+	}
+	
+	
+// 	if(!empty($non_overlapping_settings)) {
+// 		$output .= '<div style="clear:both"><h2>Settings that do not include a tag: </h2></div>';
+// 		foreach($non_overlapping_settings as $setting) {
+// 			if($setting->end && $setting->start !== $setting->end) {
+// 				$output .= '<div style="float: left; white-space: nowrap; background-color: #ebebeb; margin: 5px;">'.
+// 						l($setting->name." ".$setting->start."-".$setting->end,'setting',array('query' => array('location' => $setting->location, 'time' => $setting->start, 'end' => $setting->end))).
+// 						"</div>";
+// 			}
+// 			else {
+// 				$output .= '<div style="float: left; white-space: nowrap; background-color: #ebebeb; margin: 5px;">'.
+// 						l($setting->name." ".$setting->start,'setting',array('query' => array('location' => $setting->location, 'time' => $setting->start))).
+// 						"</div>";
+// 			}
+// 		}
+	
+// 	}		
 	//events
 	//combined events of the tag array via tag event link
 // 	$linked_events = get_link_events_for_story($max_value);
@@ -2139,7 +2165,7 @@ function output_event_table_dec_tag($event_id, $topic_types) {
 }
 
 function output_event_table_tags_timeline($event_id) {
-	$event = load_art_event_without_title_addition($event_id);
+	$event = load_art_event_without_title_addition($event_id, TRUE);
 
 	$rows = array();
 	foreach($event as $key=>$elements) {
@@ -2439,7 +2465,7 @@ LEFT JOIN tag_name ON tag_name.tag = events.value;";
 	return $output;
 }
 
-function load_art_event_without_title_addition($event_id) {
+function load_art_event_without_title_addition($event_id, $for_timeline = FALSE) {
 	$query = "SELECT events.name as attribute, events.value, tag_name.name FROM
 (SELECT attribute_name.name, event_attribute_value.value FROM event_attribute_value, attribute_name
 WHERE event_attribute_value.event = '".$event_id."' AND
@@ -2523,12 +2549,13 @@ LEFT JOIN tag_name ON tag_name.tag = events.value;";
 				}
 			}
 		}
-
-		if(isset($output['end_time']) && !isset($output['start_time'])) {
-			$output['start_time'] = $output['end_time'];
-			unset($output['end_time']);
+		
+		if($for_timeline) {
+			if(isset($output['end_time']) && !isset($output['start_time'])) {
+				$output['start_time'] = $output['end_time'];
+				unset($output['end_time']);
+			}
 		}
-
 		return $output;
 }
 
@@ -2613,16 +2640,22 @@ GROUP BY attribute_name.reverse_name;";
 	$result = db_query($query);
 
 	$output = array();
+	$event_list = array();
 	foreach ($result as $record) {
-		$output[$record->attribute] =  array('name'=>$record->attribute, 'label'=>$record->reverse_name, 'events'=>explode(',',$record->events));
+		$events = explode(',',$record->events);
+		$output[$record->attribute] =  array('name'=>$record->attribute, 'label'=>$record->reverse_name, 'events'=>$events);
+		$event_list = array_merge($event_list, $events);
 	}
-	
+
 	//if tag is itself an event
-	$query = "SELECT event_attribute_value.event FROM event_attribute_value WHERE event_attribute_value.event = '".$topic."';";
-	$result = db_query($query);
-	$object = $result->fetchObject();
-	if(isset($object->event)) {
-		$output['event'] = array('name'=>'event', 'label'=>'event', 'events'=>array($topic));
+	if(!in_array($topic, $event_list)) {
+		$query = "SELECT event_attribute_value.event FROM event_attribute_value WHERE event_attribute_value.event = '".$topic."';";
+		$result = db_query($query);
+		$object = $result->fetchObject();
+		if(isset($object->event)) {
+			if(!in_array())
+			$output['event'] = array('name'=>'event', 'label'=>'event', 'events'=>array($topic));
+		}
 	}
 	return $output;
 }
@@ -2746,8 +2779,9 @@ event_activity.value = '".$event_type."') as result_table
 }
 
 function get_all_temporal_events_for_story_event_type($story, $event_type = 'award_nomination') {
-	$query = "SELECT GROUP_CONCAT(event_table.event) as events, event_table.value FROM event_attribute_value as value_table, event_attribute_value as event_table,query_tag, event_attribute_value as time_table, attribute_name, event_attribute_value as activity_table WHERE
+	$query = "SELECT GROUP_CONCAT(event_table.event) as events, event_table.value FROM event_attribute_value as value_table, event_attribute_value as event_table,query_tag, event_attribute_value as time_table, attribute_name, event_attribute_value as activity_table, tag_name WHERE
 	query_tag.id = '".$story."' AND
+	query_tag.tag = tag_name.tag AND
 	query_tag.tag = value_table.value AND
 	value_table.event = event_table.event AND
 	event_table.attribute = 'activity' AND
@@ -3185,7 +3219,8 @@ function get_related_events_for_tag($topic) {
 function get_n_matching_settings_for_a_story2($story, $n = 5) {//*****here
 	$query = "SELECT COUNT(DISTINCT event_location_start.tag) as tags, COUNT(DISTINCT event_location_start.event) as frequency, event_location_start.location, SUBSTRING(event_location_start.start,1,4) as start, SUBSTRING(event_end.end,1,4) as end, tag_name.name 
 FROM query_tag as q, tag_name,
-(SELECT query_tag.tag, event_attribute_value.event, location_table.value as location, start_table.value as start
+(			
+SELECT query_tag.tag, event_attribute_value.event, location_table.value as location, start_table.value as start
 FROM query_tag, event_attribute_value, event_attribute_value as location_table, event_attribute_value as start_table, attribute_name as location_attribute_name, attribute_name as time_attribute_name, tag_name
 WHERE query_tag.id = '".$story."' AND 
 query_tag.tag = tag_name.tag AND
@@ -3195,7 +3230,8 @@ event_attribute_value.event = start_table.event AND
 location_table.attribute = location_attribute_name.attribute AND
 location_attribute_name.name = 'location' AND
 start_table.attribute = time_attribute_name.attribute AND 
-time_attribute_name.name = 'start_time') as event_location_start
+time_attribute_name.name = 'start_time'	
+) as event_location_start
 LEFT JOIN 
 (SELECT event_attribute_value.event, end_table.value as end
 FROM query_tag, event_attribute_value, event_attribute_value as end_table, attribute_name as time_attribute_name
@@ -3209,7 +3245,50 @@ WHERE q.id = '".$story."' AND
 tag_name.tag = event_location_start.location
 GROUP BY event_location_start.location, event_location_start.start, event_end.end
 ORDER BY tags DESC, frequency DESC LIMIT ".$n.";";
-
+	$query = "SELECT COUNT(DISTINCT event_location_start.tag) as tags, COUNT(DISTINCT event_location_start.event) as frequency, event_location_start.location, SUBSTRING(event_location_start.start,1,4) as start, SUBSTRING(event_end.end,1,4) as end, tag_name.name
+FROM query_tag as q, tag_name,
+(
+SELECT events_table.tag, events_table.event, events_table.location, event_start_table.start
+FROM
+(SELECT query_tag.tag, event_attribute_value.event, location_table.value as location 
+FROM query_tag, event_attribute_value, event_attribute_value as location_table, event_attribute_value as start_table, attribute_name as location_attribute_name, attribute_name as time_attribute_name, tag_name
+WHERE query_tag.id = '".$story."' AND 
+query_tag.tag = tag_name.tag AND
+(event_attribute_value.value = query_tag.tag OR event_attribute_value.event = query_tag.tag) AND 
+event_attribute_value.event = location_table.event AND
+event_attribute_value.event = start_table.event AND
+location_table.attribute = location_attribute_name.attribute AND
+location_attribute_name.name = 'location' AND
+((start_table.attribute = time_attribute_name.attribute AND 
+time_attribute_name.name = 'start_time') OR 
+(start_table.attribute = time_attribute_name.attribute AND 
+time_attribute_name.name = 'end_time'))) as events_table
+LEFT JOIN 
+(SELECT query_tag.tag, event_attribute_value.event, location_table.value as location, start_table.value as start
+FROM query_tag, event_attribute_value, event_attribute_value as location_table, event_attribute_value as start_table, attribute_name as location_attribute_name, attribute_name as time_attribute_name, tag_name
+WHERE query_tag.id = '108' AND 
+query_tag.tag = tag_name.tag AND
+(event_attribute_value.value = query_tag.tag OR event_attribute_value.event = query_tag.tag) AND 
+event_attribute_value.event = location_table.event AND
+event_attribute_value.event = start_table.event AND
+location_table.attribute = location_attribute_name.attribute AND
+location_attribute_name.name = 'location' AND
+start_table.attribute = time_attribute_name.attribute AND 
+time_attribute_name.name = 'start_time') as event_start_table ON event_start_table.event = events_table.event	
+) as event_location_start
+LEFT JOIN
+(SELECT event_attribute_value.event, end_table.value as end
+FROM query_tag, event_attribute_value, event_attribute_value as end_table, attribute_name as time_attribute_name
+WHERE query_tag.id = '".$story."' AND
+(event_attribute_value.value = query_tag.tag OR event_attribute_value.event = query_tag.tag) AND
+event_attribute_value.event = end_table.event AND
+end_table.attribute = time_attribute_name.attribute AND
+time_attribute_name.name = 'end_time') as event_end ON event_location_start.event = event_end.event
+WHERE q.id = '".$story."' AND
+(event_location_start.location = q.tag OR SUBSTRING(event_location_start.start,1,4) = q.tag OR SUBSTRING(event_end.end,1,4) = q.tag) AND
+tag_name.tag = event_location_start.location
+GROUP BY event_location_start.location, event_location_start.start, event_end.end
+ORDER BY tags DESC, frequency DESC LIMIT ".$n.";";
 	$output = array();
 	$result = db_query($query);
 	$output = array();
@@ -3265,8 +3344,9 @@ WHERE result.location = tag_name.tag LIMIT ".$n.";";
 
 function get_n_nonmatching_settings_for_a_story2($story, $n = 5) {///**here
 	$query = "SELECT COUNT(DISTINCT event_location_start.tag) as tags, COUNT(DISTINCT event_location_start.event) as frequency, event_location_start.location, SUBSTRING(event_location_start.start,1,4) as start, SUBSTRING(event_end.end,1,4) as end, tag_name.name 
-FROM tag_name,
-(SELECT query_tag.tag, event_attribute_value.event, location_table.value as location, start_table.value as start
+FROM tag_name,			
+(		
+SELECT query_tag.tag, event_attribute_value.event, location_table.value as location, start_table.value as start
 FROM query_tag, event_attribute_value, event_attribute_value as location_table, event_attribute_value as start_table, attribute_name as location_attribute_name, attribute_name as time_attribute_name
 WHERE query_tag.id = '".$story."' AND 
 (event_attribute_value.value = query_tag.tag OR event_attribute_value.event = query_tag.tag) AND 
@@ -3275,7 +3355,52 @@ event_attribute_value.event = start_table.event AND
 location_table.attribute = location_attribute_name.attribute AND
 location_attribute_name.name = 'location' AND
 start_table.attribute = time_attribute_name.attribute AND 
-time_attribute_name.name = 'start_time') as event_location_start
+time_attribute_name.name = 'start_time'	
+	) as event_location_start
+LEFT JOIN 
+(SELECT event_attribute_value.event, end_table.value as end
+FROM query_tag, event_attribute_value, event_attribute_value as end_table, attribute_name as time_attribute_name
+WHERE query_tag.id = '".$story."' AND 
+(event_attribute_value.value = query_tag.tag OR event_attribute_value.event = query_tag.tag) AND 
+event_attribute_value.event = end_table.event AND
+end_table.attribute = time_attribute_name.attribute AND 
+time_attribute_name.name = 'end_time') as event_end ON event_location_start.event = event_end.event
+WHERE event_location_start.location = tag_name.tag AND NOT EXISTS (SELECT q.tag FROM  query_tag as q WHERE
+q.id = '".$story."' AND 
+(event_location_start.location = q.tag OR SUBSTRING(event_location_start.start,1,4) = q.tag OR SUBSTRING(event_end.end,1,4) = q.tag))
+GROUP BY event_location_start.location, event_location_start.start, event_end.end
+ORDER BY tags DESC, frequency DESC LIMIT ".$n.";";
+	$query = "SELECT COUNT(DISTINCT event_location_start.tag) as tags, COUNT(DISTINCT event_location_start.event) as frequency, event_location_start.location, SUBSTRING(event_location_start.start,1,4) as start, SUBSTRING(event_end.end,1,4) as end, tag_name.name 
+FROM tag_name,			
+(
+SELECT events_table.tag, events_table.event, events_table.location, event_start_table.start
+FROM
+(SELECT query_tag.tag, event_attribute_value.event, location_table.value as location 
+FROM query_tag, event_attribute_value, event_attribute_value as location_table, event_attribute_value as start_table, attribute_name as location_attribute_name, attribute_name as time_attribute_name, tag_name
+WHERE query_tag.id = '".$story."' AND 
+query_tag.tag = tag_name.tag AND
+(event_attribute_value.value = query_tag.tag OR event_attribute_value.event = query_tag.tag) AND 
+event_attribute_value.event = location_table.event AND
+event_attribute_value.event = start_table.event AND
+location_table.attribute = location_attribute_name.attribute AND
+location_attribute_name.name = 'location' AND
+((start_table.attribute = time_attribute_name.attribute AND 
+time_attribute_name.name = 'start_time') OR 
+(start_table.attribute = time_attribute_name.attribute AND 
+time_attribute_name.name = 'end_time'))) as events_table
+LEFT JOIN 
+(SELECT query_tag.tag, event_attribute_value.event, location_table.value as location, start_table.value as start
+FROM query_tag, event_attribute_value, event_attribute_value as location_table, event_attribute_value as start_table, attribute_name as location_attribute_name, attribute_name as time_attribute_name, tag_name
+WHERE query_tag.id = '108' AND 
+query_tag.tag = tag_name.tag AND
+(event_attribute_value.value = query_tag.tag OR event_attribute_value.event = query_tag.tag) AND 
+event_attribute_value.event = location_table.event AND
+event_attribute_value.event = start_table.event AND
+location_table.attribute = location_attribute_name.attribute AND
+location_attribute_name.name = 'location' AND
+start_table.attribute = time_attribute_name.attribute AND 
+time_attribute_name.name = 'start_time') as event_start_table ON event_start_table.event = events_table.event
+) as event_location_start
 LEFT JOIN 
 (SELECT event_attribute_value.event, end_table.value as end
 FROM query_tag, event_attribute_value, event_attribute_value as end_table, attribute_name as time_attribute_name
