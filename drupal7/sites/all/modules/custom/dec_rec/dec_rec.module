@@ -2027,7 +2027,7 @@ function dec_tag($m, $id) {
 // 	$related_events = get_related_events_for_tag($topic);
 	
 	$all_events = get_all_events_for_tag($topic);
-	dpm($all_events);
+
 	if(!empty($all_events)) {
 		$output .= '<div style="clear:both"><h2>Event space: </h2></div>';
 		$output .= '<div style="clear:both"><div style="align:right; text-align:right">'.l('Timeline','timeline'.$topic).'</div></div>';
@@ -2134,9 +2134,7 @@ function produce_event_table($event) {
 
 function output_event_table_dec_tag($event_id, $topic_types) {
 	$event = load_art_event_dec_tag($event_id, $topic_types);
-	if($event_id == '/m/0n1mkd5') {
-		dpm($event);
-	}
+
 	return produce_event_table($event);
 }
 
@@ -3069,6 +3067,15 @@ function get_all_events_for_story($story) {//***here
 	value_table.event = event_table.event AND
 	event_table.attribute = 'activity'
 			GROUP BY event_table.value;";
+	
+	$query = "SELECT GROUP_CONCAT(event_table.event) as events, event_table.value FROM event_attribute_value as value_table, event_attribute_value as event_table,query_tag, tag_name WHERE
+	query_tag.id = '".$story."' AND
+	query_tag.tag = value_table.value AND
+	value_table.event = event_table.event AND
+	event_table.attribute = 'activity' AND
+	query_tag.tag = tag_name.tag
+	GROUP BY event_table.value;";
+	
 	$result = db_query($query);
 	
 	$output = array();
@@ -3179,8 +3186,9 @@ function get_n_matching_settings_for_a_story2($story, $n = 5) {//*****here
 	$query = "SELECT COUNT(DISTINCT event_location_start.tag) as tags, COUNT(DISTINCT event_location_start.event) as frequency, event_location_start.location, SUBSTRING(event_location_start.start,1,4) as start, SUBSTRING(event_end.end,1,4) as end, tag_name.name 
 FROM query_tag as q, tag_name,
 (SELECT query_tag.tag, event_attribute_value.event, location_table.value as location, start_table.value as start
-FROM query_tag, event_attribute_value, event_attribute_value as location_table, event_attribute_value as start_table, attribute_name as location_attribute_name, attribute_name as time_attribute_name
+FROM query_tag, event_attribute_value, event_attribute_value as location_table, event_attribute_value as start_table, attribute_name as location_attribute_name, attribute_name as time_attribute_name, tag_name
 WHERE query_tag.id = '".$story."' AND 
+query_tag.tag = tag_name.tag AND
 (event_attribute_value.value = query_tag.tag OR event_attribute_value.event = query_tag.tag) AND 
 event_attribute_value.event = location_table.event AND
 event_attribute_value.event = start_table.event AND
