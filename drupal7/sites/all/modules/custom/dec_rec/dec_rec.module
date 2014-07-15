@@ -367,12 +367,13 @@ function dec_timeline($m, $id) {
         var timeline_config = {
             width:              "100%",
             height:             "600",';
-	if(isset($attribute)) {
-		$output .= 'source:             "'.$base_url.'/tagtimelinedata'.$topic.'?attribute='.$attribute.'"';
-	}
-    else {
-    	$output .= 'source:             "'.$base_url.'/tagtimelinedata'.$topic.'"';
-    }
+	$output .= 'source:             "'.'http://localhost/my-data.json'.'"';
+// 	if(isset($attribute)) {
+// 		$output .= 'source:             "'.$base_url.'/tagtimelinedata'.$topic.'?attribute='.$attribute.'"';
+// 	}
+//     else {
+//     	$output .= 'source:             "'.$base_url.'/tagtimelinedata'.$topic.'"';
+//     }
     
     $output .= '    }
     </script>
@@ -753,17 +754,18 @@ time_table.attribute = attribute_name.attribute AND
 	}
 
 	//if tag is itself an event
-	$query = "SELECT event_attribute_value.event
-FROM event_attribute_value, attribute_name
-WHERE event_attribute_value.event = '".$topic."' AND
-event_attribute_value.attribute = attribute_name.attribute AND
-attribute_name.name = 'start_time';";
-	$result = db_query($query);
-	$object = $result->fetchObject();
-	if(isset($object->event)) {
-		$output[] = $topic;
+	if(!in_array($topic, $output)) {
+		$query = "SELECT event_attribute_value.event
+	FROM event_attribute_value, attribute_name
+	WHERE event_attribute_value.event = '".$topic."' AND
+	event_attribute_value.attribute = attribute_name.attribute AND
+	attribute_name.name = 'start_time';";
+		$result = db_query($query);
+		$object = $result->fetchObject();
+		if(isset($object->event)) {
+			$output[] = $topic;
+		}
 	}
-	
 	return $output;
 }
 
@@ -1787,7 +1789,6 @@ function dec_list_of_tags($tag_array, $max_value) {
 
 	
 	if(!empty($overlapping_settings)) {
-// 		dpm($overlapping_settings);
 	
 		$output .= '<div style="clear:both"><h2>Settings that include a tag: </h2></div>';
 		foreach($overlapping_settings as $setting) {
@@ -1795,6 +1796,11 @@ function dec_list_of_tags($tag_array, $max_value) {
 				$output .= '<div style="float: left; white-space: nowrap; background-color: #ebebeb; margin: 5px;">'.
 						l($setting->name." ".$setting->start."-".$setting->end,'setting',array('query' => array('location' => $setting->location, 'time' => $setting->start, 'end' => $setting->end))).
 						"</div>";				
+			}
+			elseif($setting->start == $setting->end) {
+				$output .= '<div style="float: left; white-space: nowrap; background-color: #ebebeb; margin: 5px;">'.
+					l($setting->name." ".$setting->start,'setting',array('query' => array('location' => $setting->location, 'time' => $setting->start))).
+					"</div>";
 			}
 			elseif($setting->start && !$setting->end) {
 				$output .= '<div style="float: left; white-space: nowrap; background-color: #ebebeb; margin: 5px;">'.
@@ -1813,7 +1819,7 @@ function dec_list_of_tags($tag_array, $max_value) {
 	//settings that do not overlap with the tag_array
 // 	$non_overlapping_settings = get_n_nonmatching_settings_for_a_story($max_value, $n = 5);
 	$non_overlapping_settings = get_n_nonmatching_settings_for_a_story2($max_value, $n = 5);
-	
+	dpm($non_overlapping_settings);
 	if(!empty($non_overlapping_settings)) {
 		$output .= '<div style="clear:both"><h2>Settings that do not include a tag: </h2></div>';
 		foreach($non_overlapping_settings as $setting) {
@@ -1821,6 +1827,11 @@ function dec_list_of_tags($tag_array, $max_value) {
 				$output .= '<div style="float: left; white-space: nowrap; background-color: #ebebeb; margin: 5px;">'.
 						l($setting->name." ".$setting->start."-".$setting->end,'setting',array('query' => array('location' => $setting->location, 'time' => $setting->start, 'end' => $setting->end))).
 						"</div>";
+			}
+			elseif($setting->start && $setting->start == $setting->end) {
+				$output .= '<div style="float: left; white-space: nowrap; background-color: #ebebeb; margin: 5px;">'.
+					l($setting->name." ".$setting->start,'setting',array('query' => array('location' => $setting->location, 'time' => $setting->start))).
+					"</div>";
 			}
 			elseif($setting->start && !$setting->end) {
 				$output .= '<div style="float: left; white-space: nowrap; background-color: #ebebeb; margin: 5px;">'.
@@ -2653,7 +2664,6 @@ GROUP BY attribute_name.reverse_name;";
 		$result = db_query($query);
 		$object = $result->fetchObject();
 		if(isset($object->event)) {
-			if(!in_array())
 			$output['event'] = array('name'=>'event', 'label'=>'event', 'events'=>array($topic));
 		}
 	}
@@ -3266,7 +3276,7 @@ time_attribute_name.name = 'end_time'))) as events_table
 LEFT JOIN 
 (SELECT query_tag.tag, event_attribute_value.event, location_table.value as location, start_table.value as start
 FROM query_tag, event_attribute_value, event_attribute_value as location_table, event_attribute_value as start_table, attribute_name as location_attribute_name, attribute_name as time_attribute_name, tag_name
-WHERE query_tag.id = '108' AND 
+WHERE query_tag.id = '".$story."' AND 
 query_tag.tag = tag_name.tag AND
 (event_attribute_value.value = query_tag.tag OR event_attribute_value.event = query_tag.tag) AND 
 event_attribute_value.event = location_table.event AND
@@ -3509,7 +3519,7 @@ location_attribute_name.name = 'location' AND
 event_value.event = event_time.event AND
 event_time.attribute = time_attribute_name.attribute AND
 time_attribute_name.name = 'start_time') as event_start_table ON event_start_table.event = events_name_table.event) as event_name_start_table
-JOIN
+LEFT JOIN
 (SELECT event_value.event, event_time.value as end_time
 FROM event_attribute_value as event_value, event_attribute_value as event_location, event_attribute_value as event_time, attribute_name as location_attribute_name, attribute_name as time_attribute_name
 WHERE (event_value.value = '".$topic."' OR event_value.event = '".$topic."') AND 
