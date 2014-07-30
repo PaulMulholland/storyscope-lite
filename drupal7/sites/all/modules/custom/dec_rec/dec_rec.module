@@ -2,6 +2,8 @@
 define('GOOGLEAPIKEY', 'AIzaSyBYyj76m4jLMbI1ZQH06-OiSmfUwfwKz8k');
 define('ARC2FILEPATH',"/Applications/MAMP/htdocs/recommender/drupal7/sites/all/modules/contrib/rdf/vendor/arc/ARC2.php");
 define('LODENDPOINT', 'http://lod.openlinksw.com/sparql');
+// define('TIMELINECODE', 'http://cdn.knightlab.com/libs/timeline/latest/js/storyjs-embed.js');
+define('TIMELINECODE', 'http://localhost/build/js/storyjs-embed.js');
 //define('LODENDPOINT', 'http://factforge.net/sparql.xml');
 
 /**
@@ -203,7 +205,7 @@ function tagtimeline() {
             source:             "'.$base_url.'/tagtimelinedata/m/01qwfk"
         }
     </script>
-    <script type="text/javascript" src="http://cdn.knightlab.com/libs/timeline/latest/js/storyjs-embed.js"></script>';
+    <script type="text/javascript" src="'.TIMELINECODE.'"></script>';
 	return $output;
 }
 
@@ -286,7 +288,7 @@ function dec_timeline_for_setting() {
 	
 	$output .= '    }
     </script>
-    <script type="text/javascript" src="http://cdn.knightlab.com/libs/timeline/latest/js/storyjs-embed.js"></script>';
+    <script type="text/javascript" src="'.TIMELINECODE.'"></script>';
 
 	return $output;
 }
@@ -329,17 +331,17 @@ function dec_timeline_for_tags($story_id) {
             width:              "100%",
             height:             "600",';
 	
-		$output .= 'source:             "'.'http://localhost/my-data2.json'.'"';
-// 	if(isset($event_type)) {
-// 		$output .= 'source:             "'.$base_url.'/tagstimelinedata/'.$story_id.'?event_type='.$event_type.'"';
-// 	}
-// 	else {
-// 		$output .= 'source:             "'.$base_url.'/tagstimelinedata/'.$story_id.'"';
-// 	}
+// 		$output .= 'source:             "'.'http://localhost/my-data2.json'.'"';
+	if(isset($event_type)) {
+		$output .= 'source:             "'.$base_url.'/tagstimelinedata/'.$story_id.'?event_type='.$event_type.'"';
+	}
+	else {
+		$output .= 'source:             "'.$base_url.'/tagstimelinedata/'.$story_id.'"';
+	}
 	
 	$output .= '    }
     </script>
-    <script type="text/javascript" src="http://cdn.knightlab.com/libs/timeline/latest/js/storyjs-embed.js"></script>';
+    <script type="text/javascript" src="'.TIMELINECODE.'"></script>';
 	return $output;	
 }
 
@@ -369,17 +371,17 @@ function dec_timeline($m, $id) {
         var timeline_config = {
             width:              "100%",
             height:             "600",';
-	$output .= 'source:             "'.'http://localhost/my-data3.json'.'"';
-// 	if(isset($attribute)) {
-// 		$output .= 'source:             "'.$base_url.'/tagtimelinedata'.$topic.'?attribute='.$attribute.'"';
-// 	}
-//     else {
-//     	$output .= 'source:             "'.$base_url.'/tagtimelinedata'.$topic.'"';
-//     }
-    
+// 	$output .= 'source:             "'.'http://localhost/my-data3.json'.'"';
+	if(isset($attribute)) {
+		$output .= 'source:             "'.$base_url.'/tagtimelinedata'.$topic.'?attribute='.$attribute.'"';
+	}
+    else {
+    	$output .= 'source:             "'.$base_url.'/tagtimelinedata'.$topic.'"';
+    }
+
     $output .= '    }
     </script>
-    <script type="text/javascript" src="http://cdn.knightlab.com/libs/timeline/latest/js/storyjs-embed.js"></script>';
+    <script type="text/javascript" src="'.TIMELINECODE.'"></script>';
 	return $output;
 }
 
@@ -1780,7 +1782,7 @@ function dec_list_of_tags($tag_array, $max_value) {
 	//settings that overlap with the tag_array
 // 	$overlapping_settings = get_n_matching_settings_for_a_story($max_value, $n = 5);
 	$overlapping_settings = get_n_matching_settings_for_a_story2($max_value, $n = 5);
-dpm($overlapping_settings);
+
 // 	if(!empty($overlapping_settings)) {
 // 		$output .= '<div style="clear:both"><h2>Settings that include a tag: </h2></div>';
 // 		foreach($overlapping_settings as $setting) {
@@ -3345,7 +3347,7 @@ time_attribute_name.name = 'end_time') as event_end ON event_location_start.even
 GROUP BY event_location_start.location, event_location_start.start, event_end.end
 ORDER BY tags DESC, frequency DESC LIMIT ".$n.") as frequency_table
 JOIN tag_name ON tag_name.tag = frequency_table.location;";
-	dpm($query);
+
 	$output = array();
 	$result = db_query($query);
 	$output = array();
