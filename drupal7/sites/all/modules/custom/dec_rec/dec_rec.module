@@ -135,21 +135,148 @@ function check_topic_name_image_description($topic) {
 	check_for_topic_description($topic);
 	check_for_topic_name($topic);
 }
-function tagtimelinedata($m, $id) {
+
+function tagtimelinedata($m, $id) {//****here
 	if($m == "m") {
 		$topic = "/".$m."/".$id;
 	}
 	else {
 		return drupal_json_output(array(array('timeline'=>array())));
 	}
+
 	if(isset($_GET['attribute'])) {
 		$attribute = $_GET['attribute'];
-		return drupal_json_output(array('timeline'=>dec_tag_timeline($topic, $attribute)));
 	}
-	return drupal_json_output(array('timeline'=>dec_tag_timeline($topic)));
+	else {
+		$attribute = FALSE;
+	}
+	
+	//check for cached version of the timeline data
+ 	$cached_data = check_for_cached_topic_timeline($topic, $attribute);
+	
+ 	if($cached_data) {
+ 		return drupal_json_output(json_decode(stripslashes($cached_data)));
+ 	}
+ 	
+	//generate new timeline data
+		
+	$timeline_data = drupal_json_encode(array('timeline'=>dec_tag_timeline($topic, $attribute)));
+	
+	//save new timeline data
+ 	save_topic_timelime($topic, $attribute, $timeline_data);
+	
+//  	return drupal_json_output(json_decode($timeline_data));
+ 	return drupal_json_output(json_decode($timeline_data));
+ 	
 }
 
-function settingtimelinedata() {
+function my_json_output($data) {
+	// We are returning JSON, so tell the browser.
+	drupal_add_http_header('Content-Type', 'application/json');
+	
+	echo $data;
+}
+
+function check_for_cached_topic_timeline($topic, $attribute = FALSE) {
+	if(!$attribute) {
+		$attribute = 'no_attribute';
+	}
+
+	$query = "SELECT tag_timeline_data.timeline_data
+	FROM tag_timeline_data
+	WHERE tag_timeline_data.tag = '".$topic."' AND tag_timeline_data.attribute = '".$attribute."';";
+	$result = db_query($query);
+	$object = $result->fetchObject();		
+
+	if(isset($object->timeline_data)) {
+		return $object->timeline_data;
+	}
+	return FALSE;
+}
+
+function save_topic_timelime($topic, $attribute = FALSE, $timeline_data) {
+	
+	$timeline_data = my_escape_string($timeline_data);
+	
+	if($attribute) {
+		$query = "INSERT INTO tag_timeline_data (tag, attribute, timeline_data) VALUES (:tag, :attribute, :data) ON DUPLICATE KEY UPDATE tag = VALUES(tag), attribute = VALUES(attribute), timeline_data = VALUES(timeline_data);";
+		db_query($query, array(':tag' => $topic, ':attribute' => $attribute, ':data' => $timeline_data));
+	}
+	else {
+		$query = "INSERT INTO tag_timeline_data (tag, attribute, timeline_data) VALUES (:tag, 'no_attribute', :data) ON DUPLICATE KEY UPDATE tag = VALUES(tag), attribute = VALUES(attribute), timeline_data = VALUES(timeline_data);";
+		db_query($query, array(':tag' => $topic, ':data' => $timeline_data));
+	}
+	
+	
+}
+
+function check_for_cached_story_timeline($story, $event_type = FALSE) {
+	if($event_type) {
+		$query = "SELECT story_timeline_data.timeline_data
+		FROM story_timeline_data
+		WHERE story_timeline_data.story = '".$story."' AND story_timeline_data.event_type = '".$event_type."';";
+		$result = db_query($query);		
+	}
+	else {
+		$query = "SELECT story_timeline_data.timeline_data
+		FROM story_timeline_data
+		WHERE story_timeline_data.story = '".$story."' AND story_timeline_data.event_type = 'no_event_type';";
+		$result = db_query($query);		
+	}
+	$object = $result->fetchObject();
+	if(isset($object->timeline_data)) {
+		return $object->timeline_data;
+	}
+	return FALSE;	
+}
+
+function check_for_cached_setting_timeline($location, $start, $end, $event_type = FALSE) {
+	if($event_type) {
+		$query = "SELECT setting_timeline_data.timeline_data
+		FROM setting_timeline_data
+		WHERE setting_timeline_data.location = '".$location."' AND setting_timeline_data.start = '".$start."' AND setting_timeline_data.end = '".$end."' AND setting_timeline_data.event_type = '".$event_type."';";
+		$result = db_query($query);		
+	}
+	else {
+		$query = "SELECT setting_timeline_data.timeline_data
+		FROM setting_timeline_data
+		WHERE setting_timeline_data.location = '".$location."' AND setting_timeline_data.start = '".$start."' AND setting_timeline_data.end = '".$end."' AND setting_timeline_data.event_type = 'no_event_type';";
+		$result = db_query($query);		
+	}
+
+	$object = $result->fetchObject();
+	if(isset($object->timeline_data)) {
+		return $object->timeline_data;
+	}
+	return FALSE;
+}
+
+function save_setting_timelime($location, $start, $end, $event_type, $timeline_data) {
+	$timeline_data = my_escape_string($timeline_data);
+	if($event_type) {
+		$query = "INSERT INTO setting_timeline_data (location, start, end, event_type, timeline_data) VALUES (:location, :start, :end, :event_type, :data) ON DUPLICATE KEY UPDATE location = VALUES(location), start = VALUES(start), end = VALUES(end), event_type = VALUES(event_type), timeline_data = VALUES(timeline_data);";
+		db_query($query, array(':location' => $location, ':start' => $start, ':end' => $end, ':event_type' => $event_type, ':data' => $timeline_data));
+	}
+	else {
+		$query = "INSERT INTO setting_timeline_data (location, start, end, event_type, timeline_data) VALUES (:location, :start, :end, 'no_event_type', :data) ON DUPLICATE KEY UPDATE location = VALUES(location), start = VALUES(start), end = VALUES(end), event_type = VALUES(event_type), timeline_data = VALUES(timeline_data);";
+		db_query($query, array(':location' => $location, ':start' => $start, ':end' => $end, ':data' => $timeline_data));
+	}
+}
+
+function save_story_timeline($story, $event_type = FALSE, $timeline_data) {
+	$timeline_data = my_escape_string($timeline_data);
+	
+	if($event_type) {
+		$query = "INSERT INTO story_timeline_data (story, event_type, timeline_data) VALUES (:story, :event_type, :data) ON DUPLICATE KEY UPDATE story = VALUES(story), event_type = VALUES(event_type), timeline_data = VALUES(timeline_data);";
+		db_query($query, array(':story' => $story, ':event_type' => $event_type, ':data' => $timeline_data));
+	}
+	else {
+		$query = "INSERT INTO story_timeline_data (story, event_type, timeline_data) VALUES (:story, 'no_event_type', :data) ON DUPLICATE KEY UPDATE story = VALUES(story), event_type = VALUES(event_type), timeline_data = VALUES(timeline_data);";
+		db_query($query, array(':story' => $story, ':data' => $timeline_data));
+	}
+}
+
+function settingtimelinedata() {//***here
 	$output = "";
 	if(isset($_GET['location']) && isset($_GET['time'])) {
 		$location = $_GET['location'];
@@ -166,31 +293,57 @@ function settingtimelinedata() {
 	}
 	else {
 		$end_year = 0;
+		$end = 0;
 	}
 	
-	if($end_year) {
-		if(isset($_GET['event_type'])) {
-			$event_type = $_GET['event_type'];
-			return drupal_json_output(array('timeline'=>dec_setting_timeline($location, $year, $end, $event_type)));
-		}
-		return drupal_json_output(array('timeline'=>dec_setting_timeline($location, $year, $end)));		
-	}
-	else {
-		if(isset($_GET['event_type'])) {
-			$event_type = $_GET['event_type'];
-			return drupal_json_output(array('timeline'=>dec_setting_timeline($location, $year, 0, $event_type)));
-		}
-		return drupal_json_output(array('timeline'=>dec_setting_timeline($location, $year)));		
-	}
-}
-
-function tagstimelinedata($story_id) {
-	$story_id = (int) $story_id;
 	if(isset($_GET['event_type'])) {
 		$event_type = $_GET['event_type'];
-		return drupal_json_output(array('timeline'=>dec_tags_timeline($story_id, $event_type)));
 	}
-	return drupal_json_output(array('timeline'=>dec_tags_timeline($story_id)));
+	else {
+		$event_type = FALSE;
+	}
+
+	//check for cached version of setting timeline data
+	$cached_data = check_for_cached_setting_timeline($location, $year, $end, $event_type);
+
+	if($cached_data) {
+		return drupal_json_output(json_decode(stripslashes($cached_data)));
+	}
+	
+	$timeline_data = drupal_json_encode(array('timeline'=>dec_setting_timeline($location, $year, $end, $event_type)));
+	
+	//save setting timeline data
+	save_setting_timelime($location, $year, $end, $event_type, $timeline_data);
+
+ 	return drupal_json_output(json_decode($timeline_data));
+}
+
+function tagstimelinedata($story_id) {//***here
+	$story_id = (int) $story_id;
+
+	if(isset($_GET['event_type'])) {
+		$event_type = $_GET['event_type'];
+	}
+	else {
+		$event_type = FALSE;
+	}
+	
+	//check for cached version of the timeline data
+ 	$cached_data = check_for_cached_story_timeline($story_id, $event_type);
+	
+ 	if($cached_data) {
+ 		return drupal_json_output(json_decode(stripslashes($cached_data)));
+ 	}
+ 
+	
+ 	$timeline_data = drupal_json_encode(array('timeline'=>dec_tags_timeline($story_id, $event_type)));
+
+
+	//save new timeline data
+	save_story_timeline($story_id, $event_type, $timeline_data);
+	
+	//  	return drupal_json_output(json_decode($timeline_data));
+	return drupal_json_output(json_decode($timeline_data));
 
 }
 
@@ -675,7 +828,7 @@ function dec_tag_attribute_timeline($topic = '/m/01qwfk', $attribute = '/visual_
 	return $output;
 }
 
-function temporal_events_for_story($story_id) {//*****here
+function temporal_events_for_story($story_id) {
 	$query = "SELECT DISTINCT event_table.event
 	FROM event_attribute_value as time_table, event_attribute_value as event_table, attribute_name, query_tag
 	WHERE query_tag.id = '".$story_id."' AND
@@ -949,7 +1102,7 @@ function check_freebase_saved_image($topic = '/m/01qwfk', $thumbnail_url = FALSE
 
 		$values_list = "VALUES ('".$topic."')";
 		$query = "INSERT INTO fb_saved_images (tag) ".$values_list." ON DUPLICATE KEY UPDATE tag = VALUES(tag);";
-		$result = db_query($query, array(':tag'=>$topic));
+		$result = db_query($query);
 		$local_url = FALSE;
 	}
 	else {
@@ -957,7 +1110,7 @@ function check_freebase_saved_image($topic = '/m/01qwfk', $thumbnail_url = FALSE
 		$id = save_fb_image($image_topic);
 		$values_list = "VALUES ('".$topic."', '".$id."')";
 		$query = "INSERT INTO fb_saved_images (tag, image_tag) ".$values_list." ON DUPLICATE KEY UPDATE image_tag = VALUES(image_tag);";
-		$result = db_query($query, array(':tag'=>$topic));
+		$result = db_query($query);
 		if($thumbnail_url) {
 			return $base_url.'/fbimages/'.$id.'_sm.jpeg';
 		}
@@ -972,7 +1125,7 @@ function check_freebase_saved_image($topic = '/m/01qwfk', $thumbnail_url = FALSE
 function save_image_topic_reference($topic, $image_topic) {
 	$values_list = "VALUES ('".$topic."', '".$image_topic."')";
 	$query = "INSERT INTO fb_saved_images (tag, image_tag) ".$values_list." ON DUPLICATE KEY UPDATE image_tag = VALUES(image_tag);";
-	$result = db_query($query, array(':tag'=>$topic));
+	$result = db_query($query);
 }
 
 //this wipes all cached data on tags, events, etc.
@@ -1030,6 +1183,13 @@ function reset_recommender_databse() {
 	//list of cahced freebase images
 	$query = "delete from fb_saved_images where 1;";
 	db_query($query);
+	
+	//cached timeline data for a tag
+	$query = "delete from tag_timeline_data WHERE 1;";
+	db_query($query);
+	
+	//cached timeline data for a story
+
 }
 
 
@@ -2649,7 +2809,7 @@ function get_link_events_for_tag($topic) {
 	return $output;
 }
 
-function get_all_events_for_tag($topic) {//*****here
+function get_all_events_for_tag($topic) {
 	$query = "SELECT attribute_name.attribute, attribute_name.reverse_name, GROUP_CONCAT(event_attribute_value.event) as events FROM event_attribute_value, attribute_name
 WHERE event_attribute_value.value = '".$topic."' AND 
 event_attribute_value.attribute = attribute_name.attribute 
@@ -2838,7 +2998,7 @@ time_table.attribute = attribute_name.attribute AND
 	return $output;
 }
 
-function get_all_temporal_events_for_story($story) {//***here
+function get_all_temporal_events_for_story($story) {
 	$query = "SELECT GROUP_CONCAT(event_table.event) as events, event_table.value FROM event_attribute_value as value_table, event_attribute_value as event_table,query_tag, event_attribute_value as time_table, attribute_name WHERE
 	query_tag.id = '".$story."' AND
 	query_tag.tag = value_table.value AND
@@ -2891,7 +3051,7 @@ WHERE query_tag.id = '".$story."';";
 	return $output;
 }
 
-function get_all_events_for_setting($location, $year, $end = 0) {//*****here
+function get_all_events_for_setting($location, $year, $end = 0) {
 	if($end) {
 		$end_date = $end.'-12-31';
 		$query = "SELECT GROUP_CONCAT(combined_result.event) as events, combined_result.activity
@@ -3110,7 +3270,7 @@ function get_all_events_for_setting_old($location, $year, $end = 0) {
 	return $output;	
 }
 
-function get_all_events_for_story($story) {//***here
+function get_all_events_for_story($story) {
 	$query = "SELECT GROUP_CONCAT(event_table.event) as events, event_table.value FROM event_attribute_value as value_table, event_attribute_value as event_table,query_tag WHERE
 	query_tag.id = '".$story."' AND
 	query_tag.tag = value_table.value AND
@@ -3232,7 +3392,7 @@ function get_related_events_for_tag($topic) {
 	return $output;
 }
 
-function get_n_matching_settings_for_a_story2($story, $n = 5) {//*****here
+function get_n_matching_settings_for_a_story2($story, $n = 5) {
 	$query = "SELECT COUNT(DISTINCT event_location_start.tag) as tags, COUNT(DISTINCT event_location_start.event) as frequency, event_location_start.location, SUBSTRING(event_location_start.start,1,4) as start, SUBSTRING(event_end.end,1,4) as end, tag_name.name 
 FROM query_tag as q, tag_name,
 (			
@@ -3401,7 +3561,7 @@ WHERE result.location = tag_name.tag LIMIT ".$n.";";
 	return $output;
 }
 
-function get_n_nonmatching_settings_for_a_story2($story, $n = 5) {///**here
+function get_n_nonmatching_settings_for_a_story2($story, $n = 5) {
 	$query = "SELECT COUNT(DISTINCT event_location_start.tag) as tags, COUNT(DISTINCT event_location_start.event) as frequency, event_location_start.location, SUBSTRING(event_location_start.start,1,4) as start, SUBSTRING(event_end.end,1,4) as end, tag_name.name 
 FROM tag_name,			
 (		
@@ -3526,7 +3686,7 @@ WHERE result.location = tag_name.tag LIMIT ".$n.";";
 	return $output;
 }
 
-function get_n_settings_for_a_tag($topic, $n = 5) {//***here
+function get_n_settings_for_a_tag($topic, $n = 5) {
 
 // 	$query = "SELECT result.location, result.time, tag_name.name FROM tag_name, 
 // (SELECT location_table.value as location, time_table.value as time, COUNT(*) as frequency
