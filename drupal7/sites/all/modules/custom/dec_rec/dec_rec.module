@@ -157,7 +157,7 @@ function check_topic_name_image_description($topic) {
 	check_for_topic_name($topic);
 }
 
-function containing_locations_of_a_location($location_topic = "/m/0389fd") {//***here
+function containing_locations_of_a_location($location_topic = "/m/0389fd") {
 	$contained_locations = contained_locations($location_topic);
 	if(empty($contained_locations)) {
 		return;
@@ -247,7 +247,6 @@ function tagtimelinedata($m, $id = FALSE) {
 
 	//generate new timeline data	
 	$timeline_data = drupal_json_encode(array('timeline'=>dec_tag_timeline($topic, $attribute)));
-	dd(array("data"=>array($timeline_data)));
 	//save new timeline data
  	save_topic_timelime($topic, $attribute, $timeline_data);
 	
@@ -591,7 +590,7 @@ function dec_timeline_for_tags($story_id) {
 	return $output;	
 }
 
-function dec_timeline($m, $id = FALSE) {
+function dec_timeline($m, $id = FALSE) {//***here
 	global $base_url;
 	if($m == "m") {
 		$topic = "/".$m."/".$id;
@@ -606,15 +605,39 @@ function dec_timeline($m, $id = FALSE) {
 	if(isset($_GET['attribute'])) {
 		$attribute = $_GET['attribute'];
 		if($attribute_title = get_attribute_reverse_title($attribute)) {
-			drupal_set_title(check_for_topic_name($topic).': '.$attribute_title);
+			$name = get_topic_name($topic);
+			if($name) {
+				drupal_set_title($name.': '.$attribute_title);
+			}
+			else {
+				drupal_set_title($topic.': '.$attribute_title);
+			}
+// 			drupal_set_title(check_for_topic_name($topic).': '.$attribute_title);
 		}
 		else {
-			drupal_set_title(check_for_topic_name($topic));
+			$name = get_topic_name($topic);
+			if($name) {
+				drupal_set_title($name.': '.$attribute);
+			}
+			else {
+				drupal_set_title($topic.': '.$attribute);
+			}
+// 			drupal_set_title(check_for_topic_name($topic));
 		}
 	}
 	else {
-		drupal_set_title(check_for_topic_name($topic));
+		$name = get_topic_name($topic);
+		if($name) {
+			drupal_set_title($name);
+		}
+		else {
+			drupal_set_title($topic);
+		}
+// 		drupal_set_title(check_for_topic_name($topic));
 	}
+	
+
+	
 	$output = '<div id="timeline-embed"></div>
     <script type="text/javascript">
         var timeline_config = {
@@ -1005,14 +1028,43 @@ time_table.attribute = attribute_name.attribute AND
 	return $output;
 }
 
-function temporal_events_for_tag($topic) {
-	$query = "SELECT DISTINCT event_table.event
+function temporal_events_for_tag($topic) {//***here
+	if(is_time_stamp($topic)) {
+		$query = "SELECT events_start_end_time_table.event
+FROM event_attribute_value, 
+(SELECT events_start_time_table.event, events_start_time_table.start_time, end_time_table.end_time
+FROM 
+(SELECT events_table.event, start_time_table.start_time
+FROM
+(SELECT DISTINCT events.event
+FROM event_attribute_value as events, attribute_name
+WHERE events.attribute = attribute_name.attribute AND
+(attribute_name.name = 'start_time' OR attribute_name.name = 'end_time')) as events_table
+LEFT JOIN
+(SELECT event_start_time.event, event_start_time.value as start_time
+FROM event_attribute_value as event_start_time, attribute_name
+WHERE event_start_time.attribute = attribute_name.attribute AND
+attribute_name.name = 'start_time') as start_time_table ON start_time_table.event = events_table.event) as events_start_time_table
+LEFT JOIN 
+(SELECT event_end_time.event, event_end_time.value as end_time
+FROM event_attribute_value as event_end_time, attribute_name
+WHERE event_end_time.attribute = attribute_name.attribute AND
+attribute_name.name = 'end_time') as end_time_table ON end_time_table.event = events_start_time_table.event) as events_start_end_time_table
+WHERE
+((events_start_end_time_table.start_time = '".$topic."' and events_start_end_time_table.end_time IS NULL) OR
+(events_start_end_time_table.end_time = '".$topic."' and events_start_end_time_table.start_time IS NULL) OR
+(events_start_end_time_table.start_time <= '".$topic."' and events_start_end_time_table.end_time >= '".$topic."')) AND
+events_start_end_time_table.event = event_attribute_value.event AND 
+event_attribute_value.attribute = 'activity';";
+	}
+	else {
+		$query = "SELECT DISTINCT event_table.event
 FROM event_attribute_value as time_table, event_attribute_value as event_table, attribute_name
 WHERE event_table.value = '".$topic."' AND
 event_table.event = time_table.event AND
 time_table.attribute = attribute_name.attribute AND
 (attribute_name.name = 'start_time' OR attribute_name.name = 'end_time');";
-
+	}
 	$result = db_query($query);
 	$output = array();
 	foreach ($result as $record) {
@@ -1036,7 +1088,37 @@ time_table.attribute = attribute_name.attribute AND
 }
 
 function temporal_events_for_tag_attribute($topic, $attribute = '/visual_art/artwork') {
-	$query = "SELECT DISTINCT event_table.event
+	if(is_time_stamp($topic)) {
+		$query = "SELECT events_start_end_time_table.event
+FROM event_attribute_value, 
+(SELECT events_start_time_table.event, events_start_time_table.start_time, end_time_table.end_time
+FROM 
+(SELECT events_table.event, start_time_table.start_time
+FROM
+(SELECT DISTINCT events.event
+FROM event_attribute_value as events, attribute_name
+WHERE events.attribute = attribute_name.attribute AND
+(attribute_name.name = 'start_time' OR attribute_name.name = 'end_time')) as events_table
+LEFT JOIN
+(SELECT event_start_time.event, event_start_time.value as start_time
+FROM event_attribute_value as event_start_time, attribute_name
+WHERE event_start_time.attribute = attribute_name.attribute AND
+attribute_name.name = 'start_time') as start_time_table ON start_time_table.event = events_table.event) as events_start_time_table
+LEFT JOIN 
+(SELECT event_end_time.event, event_end_time.value as end_time
+FROM event_attribute_value as event_end_time, attribute_name
+WHERE event_end_time.attribute = attribute_name.attribute AND
+attribute_name.name = 'end_time') as end_time_table ON end_time_table.event = events_start_time_table.event) as events_start_end_time_table
+WHERE
+((events_start_end_time_table.start_time = '".$topic."' and events_start_end_time_table.end_time IS NULL) OR
+(events_start_end_time_table.end_time = '".$topic."' and events_start_end_time_table.start_time IS NULL) OR
+(events_start_end_time_table.start_time <= '".$topic."' and events_start_end_time_table.end_time >= '".$topic."')) AND
+events_start_end_time_table.event = event_attribute_value.event AND 
+event_attribute_value.attribute = 'activity' AND
+event_attribute_value.value = '".$attribute."';";
+	}
+	else {
+		$query = "SELECT DISTINCT event_table.event
 FROM event_attribute_value as time_table, event_attribute_value as event_table, attribute_name, event_attribute_value as attribute_table, attribute_name as attribute_attribute_name
 WHERE event_table.value = '".$topic."' AND
 event_table.event = time_table.event AND
@@ -1044,6 +1126,7 @@ time_table.attribute = attribute_name.attribute AND
 event_table.event = attribute_table.event AND
 attribute_table.attribute = '".$attribute."' AND
 (attribute_name.name = 'start_time' OR attribute_name.name = 'end_time');";
+	}
 
 	$result = db_query($query);
 	$output = array();
@@ -1542,6 +1625,19 @@ event_time.value LIKE '".$year."%';";
 
 	return $output;	
 	
+}
+
+function is_time_stamp($date) {
+	if(preg_match("/^\d{4}$/", $date)) {
+		return TRUE;
+	}
+	elseif(preg_match("/^\d{4}-\d{2}$/", $date)) {
+		return TRUE;
+	}
+	elseif(preg_match("/^\d{4}-\d{2}-\d{2}$/", $date)) {
+		return TRUE;
+	}
+	return FALSE;
 }
 
 function complete_time_stamp($date, $start_end = 'start') {
@@ -2298,6 +2394,7 @@ function dec_tag($m, $id = FALSE) {
 		if($name) {
 			drupal_set_title($name);
 		}
+
 // 		$output .= image_html_for_a_freebase_topic($topic);
 		if($image = check_freebase_saved_image($topic, FALSE, $reload)) {
 			$output .= '<img src="'.$image.'">';
@@ -2981,11 +3078,46 @@ function get_link_events_for_tag($topic) {
 	return $output;
 }
 
-function get_all_events_for_tag($topic) {
-	$query = "SELECT attribute_name.attribute, attribute_name.reverse_name, GROUP_CONCAT(event_attribute_value.event) as events FROM event_attribute_value, attribute_name
+function get_all_events_for_time_tag($topic) {
+	
+}
+
+function get_all_events_for_tag($topic) {//*****here
+	if(is_time_stamp($topic)) {
+		$query = "SELECT CONCAT('time of ', event_attribute_value.value) as reverse_name, event_attribute_value.value as attribute, GROUP_CONCAT(events_start_end_time_table.event) as events
+FROM event_attribute_value, 
+(SELECT events_start_time_table.event, events_start_time_table.start_time, end_time_table.end_time
+FROM 
+(SELECT events_table.event, start_time_table.start_time
+FROM
+(SELECT DISTINCT events.event
+FROM event_attribute_value as events, attribute_name
+WHERE events.attribute = attribute_name.attribute AND
+(attribute_name.name = 'start_time' OR attribute_name.name = 'end_time')) as events_table
+LEFT JOIN
+(SELECT event_start_time.event, event_start_time.value as start_time
+FROM event_attribute_value as event_start_time, attribute_name
+WHERE event_start_time.attribute = attribute_name.attribute AND
+attribute_name.name = 'start_time') as start_time_table ON start_time_table.event = events_table.event) as events_start_time_table
+LEFT JOIN 
+(SELECT event_end_time.event, event_end_time.value as end_time
+FROM event_attribute_value as event_end_time, attribute_name
+WHERE event_end_time.attribute = attribute_name.attribute AND
+attribute_name.name = 'end_time') as end_time_table ON end_time_table.event = events_start_time_table.event) as events_start_end_time_table
+WHERE
+((events_start_end_time_table.start_time = '".$topic."' and events_start_end_time_table.end_time IS NULL) OR
+(events_start_end_time_table.end_time = '".$topic."' and events_start_end_time_table.start_time IS NULL) OR
+(events_start_end_time_table.start_time <= '".$topic."' and events_start_end_time_table.end_time >= '".$topic."')) AND
+events_start_end_time_table.event = event_attribute_value.event AND 
+event_attribute_value.attribute = 'activity'
+GROUP BY event_attribute_value.value;";
+	}
+	else {
+		$query = "SELECT attribute_name.attribute, attribute_name.reverse_name, GROUP_CONCAT(event_attribute_value.event) as events FROM event_attribute_value, attribute_name
 WHERE event_attribute_value.value = '".$topic."' AND 
 event_attribute_value.attribute = attribute_name.attribute 
 GROUP BY attribute_name.reverse_name;";
+	}
 	$result = db_query($query);
 
 	$output = array();
@@ -3253,6 +3385,7 @@ ON start_location_result.event = end_location_result.event) as start_end_locatio
 WHERE (start_end_location_result.start_time <= '".$end_date."' AND start_end_location_result.start_time >= '".$year."' AND start_end_location_result.end_time IS NULL) OR
 (start_end_location_result.start_time <= '".$end_date."' AND start_end_location_result.end_time >= '".$year."')) as combined_result
 GROUP BY combined_result.activity;";
+
 		$query = "SELECT GROUP_CONCAT(combined_result.event) as events, combined_result.activity
 FROM
 (SELECT start_end_location_result.event, start_end_location_result.activity
@@ -3303,6 +3436,7 @@ SELECT setting_link_event_id.event_id AS event, event_attribute_value.value as a
      event_attribute_value.event = setting_link_event_id.event_id AND
      event_attribute_value.attribute = 'activity') as combined_result
 GROUP BY combined_result.activity;";
+
 	}
 	else {
 // 		$query = "SELECT GROUP_CONCAT(combined_result.event) as events, combined_result.activity
