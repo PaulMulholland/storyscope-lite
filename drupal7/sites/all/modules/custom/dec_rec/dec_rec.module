@@ -391,18 +391,18 @@ function settingtimelinedata() {
 	else {
 		$event_type = FALSE;
 	}
-	
+
 	//check for cached version of setting timeline data
-	$cached_data = check_for_cached_setting_timeline($location, $year, $end, $event_type);
+	$cached_data = check_for_cached_setting_timeline($location, $time, $end, $event_type);
 
 	if($cached_data) {
 		return drupal_json_output(json_decode(stripslashes($cached_data)));
 	}
 	
 	$timeline_data = drupal_json_encode(array('timeline'=>dec_setting_timeline($location, $full_start_time, $full_end_time, $time, $end, $event_type)));
-	
+
 	//save setting timeline data
-	save_setting_timelime($location, $year, $end, $event_type, $timeline_data);
+	save_setting_timelime($location, $time, $end, $event_type, $timeline_data);
 
  	return drupal_json_output(json_decode($timeline_data));
 }
@@ -512,15 +512,18 @@ function dec_timeline_for_setting() {//***here
 	//check for reload //***here
 	if(isset($_GET['reload'])) {
 		$reload = $_GET['reload'];
+		dpm($reload);
 		if($reload) {
 			//clear cache
 			if(isset($event_type)) {
 				$query = "delete from setting_timeline_data where location = '".$location."' AND start = '".$time."' AND end = '".$end."' AND event_type = '".$event_type."';";
 				db_query($query);
+				dpm($query);
 			}
 			else {
 				$query = "delete from setting_timeline_data where location = '".$location."' AND start = '".$time."' AND end = '".$end."' AND event_type = 'no_event_type';";
 				db_query($query);
+				dpm($query);
 			}
 		}
 	}
@@ -639,7 +642,7 @@ function dec_timeline_for_tags($story_id) {
     <script type="text/javascript" src="'.TIMELINECODE.'"></script>';
 	
 	if(isset($event_type)) {
-		$output .= l("Reload",'timeline_for_tags/'.$story_id, array('query'=>array('event_type'=>$event_type, 'reload'=>'1')));//***here
+		$output .= l("Reload",'timeline_for_tags/'.$story_id, array('query'=>array('event_type'=>$event_type, 'reload'=>'1')));
 	}
 	else {
 		$output .= l("Reload",'timeline_for_tags/'.$story_id, array('query'=>array('reload'=>'1')));
@@ -742,12 +745,17 @@ function dec_timeline($m, $id = FALSE) {
     $output .= '    }
     </script>
     <script type="text/javascript" src="'.TIMELINECODE.'"></script>';
-    
-    if($attribute) {
-    	$output .= l("Reload",'timeline'.$topic, array('query'=>array('attribute'=>$attribute, 'reload'=>'1')));//***here
+    if(is_freebase_topic_id($topic)) {
+    	$topic_path = $topic;
     }
     else {
-    	$output .= l("Reload",'timeline'.$topic, array('query'=>array('reload'=>'1')));
+    	$topic_path = '/'.$topic;
+    }
+    if($attribute) {
+    	$output .= l("Reload",'timeline'.$topic_path, array('query'=>array('attribute'=>$attribute, 'reload'=>'1')));
+    }
+    else {
+    	$output .= l("Reload",'timeline'.$topic_path, array('query'=>array('reload'=>'1')));
     }
 	return $output;
 }
@@ -760,7 +768,7 @@ function dec_setting_timeline($location, $full_year, $full_end = 0, $year, $end 
 	else {
 		$events = get_all_events_for_setting($location, $full_year, $full_end);
 	}
-	
+
 	if(!empty($events)) {
 		foreach($events as $label=>$events) {
 			foreach($events as $event) {
@@ -771,7 +779,7 @@ function dec_setting_timeline($location, $full_year, $full_end = 0, $year, $end 
 	
 	//header
 	$header = create_timeline_setting_header($location, $year, $end);
-	
+
 	//timeline array
 	
 	$timeline_array = translate_story_events_for_timeline($output, $header);
@@ -859,7 +867,10 @@ function create_timeline_setting_header($location, $year, $end = 0) {
 		$header['asset']['media'] = $image;
 		$header['asset']['caption'] = '<div style="clear:both">Setting location: '.l(get_topic_name($location), $base_url.'/tag'.$location).' (pictured above)</div>'.
 				'<div style="clear:both">Setting year: '.$year.'</div>';
-	}	
+	}
+	if(!$header['text']) {
+		$header['text'] = 'timeline';
+	}
 	return $header;
 }
 
@@ -1901,9 +1912,9 @@ SELECT setting_link_event_id.event_id AS event, event_attribute_value.value as a
      event_attribute_value.event = setting_link_event_id.event_id AND
      event_attribute_value.attribute = 'activity') as combined_result
           WHERE combined_result.event = event_attribute_value.event AND
-     event_attribute_value.value = tag_name.tag
+     event_attribute_value.value = tag_name.tag AND NOT EXISTS (SELECT attribute_name.name FROM attribute_name WHERE event_attribute_value.attribute = attribute_name.attribute AND attribute_name.name = 'location')
      group by event_attribute_value.value ORDER BY frequency DESC) as frequency_result
-     WHERE frequency > 1 LIMIT 5;";
+     WHERE frequency > 1 LIMIT 5;";//excludes location by AND NOT EXISTS (SELECT attribute_name.name FROM attribute_name WHERE event_attribute_value.attribute = attribute_name.attribute AND attribute_name.name = 'location')
 	}
 	else {
 		$query = "SELECT * 
@@ -3203,7 +3214,7 @@ function get_link_events_for_tag($topic) {
 
 
 
-function get_all_events_for_tag($topic) {//*****here
+function get_all_events_for_tag($topic) {
 	if(is_time_stamp($topic)) {
 		$query = "SELECT CONCAT('time of ', event_attribute_value.value) as reverse_name, event_attribute_value.value as attribute, GROUP_CONCAT(events_start_end_time_table.event) as events
 FROM event_attribute_value, 
@@ -3385,7 +3396,7 @@ function get_all_temporal_events_for_story_event_type2($story, $event_type = 'aw
 	
 }
 
-function get_all_temporal_events_for_story_event_type($story, $event_type = 'award_nomination') {//***here
+function get_all_temporal_events_for_story_event_type($story, $event_type = 'award_nomination') {
 	$query = "SELECT GROUP_CONCAT(event_table.event) as events, event_table.value FROM event_attribute_value as value_table, event_attribute_value as event_table,query_tag, event_attribute_value as time_table, attribute_name, event_attribute_value as activity_table, tag_name WHERE
 	query_tag.id = '".$story."' AND
 	query_tag.tag = tag_name.tag AND
@@ -3431,7 +3442,7 @@ time_table.attribute = attribute_name.attribute AND
 
 }
 
-function get_all_temporal_events_for_story2($story, $event_type = FALSE) {//**here
+function get_all_temporal_events_for_story2($story, $event_type = FALSE) {
 	$tag_array = tags_of_a_story($story);
 	
 	$dates = array();
@@ -3662,7 +3673,7 @@ WHERE query_tag.id = '".$story."';";
 	return $output;
 }
 
-function get_all_events_for_setting($location, $year, $end = 0) {//***here
+function get_all_events_for_setting($location, $year, $end = 0) {
 	if($end) {
 		$end_date = $end;//.'-12-31';
 		$query = "SELECT GROUP_CONCAT(combined_result.event) as events, combined_result.activity
@@ -3878,7 +3889,7 @@ function get_all_events_for_setting_old($location, $year, $end = 0) {
 }
 
 
-function get_all_events_for_story2($story, $tag_array) {//***here
+function get_all_events_for_story2($story, $tag_array) {
 	$dates = array();
 	$nondates = array();
 	foreach($tag_array as $tag) {
@@ -4692,7 +4703,7 @@ function top_n_themes_of_tag($tag = '/m/01qwfk', $n = 5) {
 				value_table.value = tag_name.tag group by value ORDER BY frequency DESC LIMIT ".$n." ;";
 	
 	
-	//query based on value in events and direct properties of the tag
+	//query based on value in events and direct properties of the tag//***here
 	$query = "SELECT * FROM (SELECT result.tag as value, COUNT(result.tag) as frequency, result.name
 FROM tag_name as result,
 (SELECT tag_name.tag
@@ -4702,14 +4713,31 @@ tag_attribute.id = tag_attribute_id_value.tag_attribute_id and
 tag_name.tag = tag_attribute_id_value.value
 UNION ALL 
 SELECT tag_name.tag 
-FROM event_attribute_value as event_table, event_attribute_value as value_table, tag_name   
+FROM event_attribute_value as event_table, event_attribute_value as value_table, tag_name  
 WHERE event_table.value = :tag AND event_table.event = value_table.event AND
 tag_name.tag = value_table.value) as data
 WHERE result.tag = data.tag AND NOT(result.tag = :tag)
 GROUP BY result.tag
 ORDER BY frequency DESC) as frequency
 WHERE frequency > 1 LIMIT ".$n." ;";
-	
+	//this version of the query excludes locations
+	$query = "SELECT * FROM (SELECT result.tag as value, COUNT(result.tag) as frequency, result.name
+FROM tag_name as result,
+(SELECT tag_name.tag
+FROM tag_attribute, tag_attribute_id_value, tag_name 
+WHERE tag_name.tag = tag_name.tag AND tag_attribute.tag = :tag AND 
+tag_attribute.id = tag_attribute_id_value.tag_attribute_id and
+tag_name.tag = tag_attribute_id_value.value
+UNION ALL 
+SELECT tag_name.tag 
+FROM event_attribute_value as event_table, event_attribute_value as value_table, tag_name  
+WHERE event_table.value = :tag AND event_table.event = value_table.event AND
+tag_name.tag = value_table.value AND NOT EXISTS (SELECT attribute_name.name FROM attribute_name WHERE value_table.attribute = attribute_name.attribute AND attribute_name.name = 'location')) as data
+WHERE result.tag = data.tag AND NOT(result.tag = :tag)
+GROUP BY result.tag
+ORDER BY frequency DESC) as frequency
+WHERE frequency > 1 LIMIT ".$n." ;";
+
 	$result = db_query($query, array(':tag' => $tag));
 	$output = array();
 	foreach ($result as $record) {
@@ -4860,13 +4888,26 @@ function top_n_nonmatching_themes_of_story2($event_list, $max_value, $n = 5) {//
 	$query_list = "('".implode("','",$event_list)."')";
 	$query = "SELECT COUNT(DISTINCT result.value) as tags, COUNT(DISTINCT result.event) as frequency, result.value, result.name
 FROM
-(SELECT * 
+(SELECT *
 FROM event_attribute_value, tag_name
 WHERE event_attribute_value.event IN ".$query_list." AND tag_name.tag = event_attribute_value.value) as result
+WHERE
+ NOT EXISTS (SELECT qt.tag FROM query_tag as qt WHERE qt.id = '".$max_value."' AND qt.tag = result.value)
+GROUP BY result.value
+ORDER BY tags DESC, frequency DESC LIMIT ".$n.";";
+	//this version of the query excludes locations
+	$query = "SELECT COUNT(DISTINCT result.value) as tags, COUNT(DISTINCT result.event) as frequency, result.value, result.name
+FROM
+(SELECT * 
+FROM event_attribute_value, tag_name
+WHERE event_attribute_value.event IN ".$query_list." AND tag_name.tag = event_attribute_value.value
+	AND NOT EXISTS 
+(SELECT attribute_name.name FROM attribute_name WHERE event_attribute_value.attribute = attribute_name.attribute AND attribute_name.name = 'location')) as result
 WHERE 
  NOT EXISTS (SELECT qt.tag FROM query_tag as qt WHERE qt.id = '".$max_value."' AND qt.tag = result.value)
 GROUP BY result.value
 ORDER BY tags DESC, frequency DESC LIMIT ".$n.";";
+
 	$result = db_query($query);
 	
 	$output = array();
@@ -7148,7 +7189,7 @@ function fb_event_happening_of_the_event($topic = '/m/03fyn', $previous_output =
 	foreach($resultarray["result"] as $result) {
 		$notable_types = check_for_notable_types($result["mid"]);
 		if(!empty($notable_types)) {
-			$output[$result["mid"]]["activity"] = $notable_types["0"];
+			$output[$result["mid"]]["activity"] = strtolower(str_replace(' ', '_',$notable_types["0"]));
 		}
 		else {
 			$output[$result["mid"]]["activity"] = "event";
