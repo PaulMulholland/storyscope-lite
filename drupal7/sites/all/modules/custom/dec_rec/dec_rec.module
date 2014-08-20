@@ -464,7 +464,7 @@ function get_attribute_reverse_title($attribute = '/visual_art/artwork/artist') 
 	}	
 }
 
-function dec_timeline_for_setting() {
+function dec_timeline_for_setting() {//***here
 	global $base_url;
 	$output = "";
 
@@ -483,6 +483,7 @@ function dec_timeline_for_setting() {
 	}
 	else {
 		$end_year = 0;
+		$end = 0;
 	}
 
 	//check the event space of the location has been calculated
@@ -492,7 +493,7 @@ function dec_timeline_for_setting() {
 	$name = get_topic_name($location);
 	if(isset($_GET['event_type'])) {
 		$event_type = $_GET['event_type'];
-		if($end_year) {
+		if($end) {
 			drupal_set_title($name.", ".$time." to ".$end.': '.$event_type);			
 		}
 		else {
@@ -500,7 +501,7 @@ function dec_timeline_for_setting() {
 		}
 	}
 	else {
-		if($end_year) {
+		if($end) {
 			drupal_set_title($name.", ".$time." to ".$end);
 		}
 		else {
@@ -508,6 +509,22 @@ function dec_timeline_for_setting() {
 		}
 	}
 
+	//check for reload //***here
+	if(isset($_GET['reload'])) {
+		$reload = $_GET['reload'];
+		if($reload) {
+			//clear cache
+			if(isset($event_type)) {
+				$query = "delete from setting_timeline_data where location = '".$location."' AND start = '".$time."' AND end = '".$end."' AND event_type = '".$event_type."';";
+				db_query($query);
+			}
+			else {
+				$query = "delete from setting_timeline_data where location = '".$location."' AND start = '".$time."' AND end = '".$end."' AND event_type = 'no_event_type';";
+				db_query($query);
+			}
+		}
+	}
+	
 	//timeline
 	$output = '<div id="timeline-embed"></div>
     <script type="text/javascript">
@@ -515,7 +532,7 @@ function dec_timeline_for_setting() {
             width:              "100%",
             height:             "600",';
 	if(isset($event_type)) {
-		if($end_year) {
+		if($end) {
 			$output .= 'source:             "'.$base_url.'/settingtimelinedata?location='.$location.'&time='.$time.'&event_type='.$event_type.'&end='.$end.'"';
 		}
 		else {
@@ -523,7 +540,7 @@ function dec_timeline_for_setting() {
 		}
 	}
 	else {
-		if($end_year) {
+		if($end) {
 			$output .= 'source:             "'.$base_url.'/settingtimelinedata?location='.$location.'&time='.$time.'&end='.$end.'"';
 		}
 		else {
@@ -535,6 +552,23 @@ function dec_timeline_for_setting() {
     </script>
     <script type="text/javascript" src="'.TIMELINECODE.'"></script>';
 
+	if(isset($event_type)) {
+		if($end) {
+			$output .= l("Reload",'timeline_for_setting', array('query'=>array('location'=>$location, 'time'=>$time, 'end'=>$end, 'event_type'=>$event_type, 'reload'=>'1')));
+		}
+		else {
+			$output .= l("Reload",'timeline_for_setting', array('query'=>array('location'=>$location, 'time'=>$time, 'event_type'=>$event_type, 'reload'=>'1')));
+		}
+	}
+	else {
+		if($end) {
+			$output .= l("Reload",'timeline_for_setting', array('query'=>array('location'=>$location, 'time'=>$time, 'end'=>$end, 'reload'=>'1')));
+		}
+		else {
+			$output .= l("Reload",'timeline_for_setting', array('query'=>array('location'=>$location, 'time'=>$time, 'reload'=>'1')));
+		}
+	}
+	
 	return $output;
 }
 
@@ -569,7 +603,7 @@ function dec_timeline_for_tags($story_id) {
 		drupal_set_title($story_title);
 	}
 
-	//check for reload //***here
+	//check for reload 
 	if(isset($_GET['reload'])) {
 		$reload = $_GET['reload'];
 		if($reload) {
