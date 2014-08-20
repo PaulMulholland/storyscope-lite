@@ -568,6 +568,22 @@ function dec_timeline_for_tags($story_id) {
 	else {
 		drupal_set_title($story_title);
 	}
+
+	//check for reload //***here
+	if(isset($_GET['reload'])) {
+		$reload = $_GET['reload'];
+		if($reload) {
+			//clear cache
+			if(isset($event_type)) {
+				$query = "delete from story_timeline_data where story = '".$story_id."' AND event_type = '".$event_type."';";
+				db_query($query);
+			}
+			else {
+				$query = "delete from story_timeline_data where story = '".$story_id."'AND event_type = 'no_event_type';";
+				db_query($query);
+			}
+		}
+	}
 	
 	//timeline
 	$output = '<div id="timeline-embed"></div>
@@ -587,6 +603,14 @@ function dec_timeline_for_tags($story_id) {
 	$output .= '    }
     </script>
     <script type="text/javascript" src="'.TIMELINECODE.'"></script>';
+	
+	if(isset($event_type)) {
+		$output .= l("Reload",'timeline_for_tags/'.$story_id, array('query'=>array('event_type'=>$event_type, 'reload'=>'1')));//***here
+	}
+	else {
+		$output .= l("Reload",'timeline_for_tags/'.$story_id, array('query'=>array('reload'=>'1')));
+	}
+	
 	return $output;	
 }
 
@@ -609,7 +633,7 @@ function dec_timeline($m, $id = FALSE) {
 	else {
 		$attribute = FALSE;
 	}
-	//check for reload //***here
+	//check for reload
 	if(isset($_GET['reload'])) {
 		$reload = $_GET['reload'];
 		if($reload) {
