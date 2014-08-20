@@ -601,9 +601,32 @@ function dec_timeline($m, $id = FALSE) {
 	else {
 		return "No topic found";
 	}
-	$output = "";
+
+	//attribute
 	if(isset($_GET['attribute'])) {
 		$attribute = $_GET['attribute'];
+	}
+	else {
+		$attribute = FALSE;
+	}
+	//check for reload //***here
+	if(isset($_GET['reload'])) {
+		$reload = $_GET['reload'];
+		if($reload) {
+			//clear cache
+			if($attribute) {
+				$query = "delete from tag_timeline_data where tag = '".$topic."' AND attribute = '".$attribute."';";
+				db_query($query);
+			}
+			else {
+				$query = "delete from tag_timeline_data where tag = '".$topic."'AND attribute = 'no_attribute';";
+				db_query($query);
+			}
+		}
+	}
+	
+	$output = "";
+	if($attribute) {
 		if($attribute_title = get_attribute_reverse_title($attribute)) {
 			$name = get_topic_name($topic);
 			if($name) {
@@ -661,6 +684,13 @@ function dec_timeline($m, $id = FALSE) {
     $output .= '    }
     </script>
     <script type="text/javascript" src="'.TIMELINECODE.'"></script>';
+    
+    if($attribute) {
+    	$output .= l("Reload",'timeline'.$topic, array('query'=>array('attribute'=>$attribute, 'reload'=>'1')));//***here
+    }
+    else {
+    	$output .= l("Reload",'timeline'.$topic, array('query'=>array('reload'=>'1')));
+    }
 	return $output;
 }
 
@@ -4704,14 +4734,14 @@ GROUP BY result.value
 ORDER BY tags DESC, frequency DESC LIMIT ".$n." ;";
 	
 	$result = db_query($query, array(':story' => $story));
-	dpm($result);
+
 	$used_tags = array();
 	$output = array();
 	foreach ($result as $record) {
 		$output[] = $record;
 		$used_tags[] = $record->value;
 	}
-dpm($output);
+
 	$story_tags = get_tags_names_for_a_story($story);
 
 	foreach($story_tags as $story_tag) {
@@ -4734,7 +4764,7 @@ dpm($output);
 			}
 		}
 	}
-	dpm($output);
+
 	return $output;
 }
 
@@ -7103,7 +7133,7 @@ function new_event_space_of_a_topic($topic = "/m/01qwfk", $reload = FALSE) {
 		return array();
 	}
 	check_for_topic_name($topic);
-	check_for_topic_description($topic);
+	check_for_topic_description($topic, FALSE, $reload);
 	check_for_notable_types($topic);
 
 	if(check_for_calculated_tag($topic) && !$reload) {
@@ -7423,21 +7453,24 @@ function check_for_topic_name($topic = "/m/08tqtj") {
 
 //check for topic description
 //retrieve if not already stored
-function check_for_topic_description($topic = "/m/055rd2", $limit = FALSE) {
-	$query = "SELECT description FROM tag_description WHERE tag = :tag;";
-	$result = db_query($query, array(':tag' => $topic));
-	$found = $result->fetchObject();
-	if(isset($found->description)) {
-		if($limit && is_int($limit)) {
-			$description =  preg_replace('/\s+?(\S+)?$/', '', substr($found->description, 0, $limit));
-			if($limit < strlen($found->description)) {
-				$description .= '...';
-			}
-			return $description;
-		}
-		return $found->description;
-	}
+function check_for_topic_description($topic = "/m/055rd2", $limit = FALSE, $reload = FALSE) {
+	if(!$reload) {
+		$query = "SELECT description FROM tag_description WHERE tag = :tag;";
+		$result = db_query($query, array(':tag' => $topic));
+		$found = $result->fetchObject();
+		if(isset($found->description)) {
+			if($limit && is_int($limit)) {
+				$description =  preg_replace('/\s+?(\S+)?$/', '', substr($found->description, 0, $limit));
+				if($limit < strlen($found->description)) {
+					$description .= '...';
+				}
 
+				return $description;
+			}
+
+			return $found->description;
+		}
+	}
 	//get topic description
 	$service_url = 'https://www.googleapis.com/freebase/v1/topic';
 	$url = $service_url . $topic . '?filter=/common/topic/description'.'&key='.GOOGLEAPIKEY;
@@ -7451,7 +7484,7 @@ function check_for_topic_description($topic = "/m/055rd2", $limit = FALSE) {
 	if(isset($result["property"]["/common/topic/description"]["values"])) {
 		foreach($result["property"]["/common/topic/description"]["values"] as $value) {
 
-			if(isset($value["dataset"]) && $value["dataset"] == "/m/0kj4zz_") {
+			if(!isset($value["timestamp"])) {
 				$descriptions[0] = $value["value"];
 			}
 			else {
