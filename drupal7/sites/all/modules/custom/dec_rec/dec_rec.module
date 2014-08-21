@@ -1,6 +1,5 @@
 <?php
 define('GOOGLEAPIKEY', 'AIzaSyBYyj76m4jLMbI1ZQH06-OiSmfUwfwKz8k');
-define('ARC2FILEPATH',"/Applications/MAMP/htdocs/recommender/drupal7/sites/all/modules/contrib/rdf/vendor/arc/ARC2.php");
 // define('TIMELINECODE', 'http://cdn.knightlab.com/libs/timeline/latest/js/storyjs-embed.js');
 define('TIMELINECODE', 'http://localhost/build/js/storyjs-embed.js');
 
@@ -13,9 +12,8 @@ define('TIMELINECODE', 'http://localhost/build/js/storyjs-embed.js');
  *
  */
 
-
 /**
- * function menu items for the recommender
+ * Menu items for the recommender
  */
 function dec_rec_menu(){
 //      $items['admin/config/services/dec_rec'] = array(
@@ -27,111 +25,104 @@ function dec_rec_menu(){
 // 	 'access arguments' => array('administer site configuration'),
 //      );
       $items['timeline_for_tags/%'] = array(
-	 'title' => 'Timeline',
-	 'description' => 'Recommender service used by StoryScope.',
+	 'title' => 'Story timeline',
+	 'description' => 'Timeline for a list of tags.',
 	 'page callback' => 'dec_timeline_for_tags',
      'page arguments' => array(1),
 	'access callback' => TRUE,
      );
       $items['story/%'] = array(
-	 'title' => 'Timeline',
-	 'description' => 'Recommender service used by StoryScope.',
+	 'title' => 'Story',
+	 'description' => 'Display information for a story.',
 	 'page callback' => 'dec_story',
      'page arguments' => array(1),
 	'access callback' => TRUE,
      );
    	$items['timeline_for_setting'] = array(
 	 'title' => 'Timeline',
-	 'description' => 'Recommender service used by StoryScope.',
+	 'description' => 'Display timeline for a setting.',
 	 'page callback' => 'dec_timeline_for_setting',
 	'access callback' => TRUE,
      );
       $items['timeline/%/%'] = array(
 	 'title' => 'Timeline',
-	 'description' => 'Recommender service used by StoryScope.',
+	 'description' => 'Display timeline for a single freebase topic.',
 	 'page callback' => 'dec_timeline',
      'page arguments' => array(1,2),
 	'access callback' => TRUE,
      );
       $items['timeline/%'] = array(
 	 'title' => 'Timeline',
-	 'description' => 'Recommender service used by StoryScope.',
+	 'description' => 'Display timeline for a single tag that is not freebase topic, i.e. a timestamp.',
 	 'page callback' => 'dec_timeline',
      'page arguments' => array(1),
 	'access callback' => TRUE,
      );
-      $items['test'] = array(
-	 'title' => 'Test',
-	 'description' => 'Recommender service used by StoryScope.',
-	 'page callback' => 'dec_test',
+      $items['reset'] = array(
+	 'title' => 'Reset',
+	 'description' => 'Used for resetting the cached database of freebase data.',
+	 'page callback' => 'dec_reset',
 	'access callback' => TRUE,
      );
      $items['tag/%/%'] = array(
 	 'title' => 'Tag',
-	 'description' => 'Recommender service used by StoryScope.',
+	 'description' => 'Display data for a story tag.',
 	 'page callback' => 'dec_tag',
      'page arguments' => array(1,2),
 	'access callback' => TRUE,
      );
      $items['tag/%'] = array(
      'title' => 'Tag',
-     'description' => 'Recommender service used by StoryScope.',
+     'description' => 'Display data for a story tag that is not freebase topic, i.e. a timestamp.',
      'page callback' => 'dec_tag',
      'page arguments' => array(1),
      'access callback' => TRUE,
      );
-     $items['tagtimeline/%/%'] = array(
-	 'title' => 'Tag',
-	 'description' => 'Recommender service used by StoryScope.',
-	 'page callback' => 'dec_tag',
-     'page arguments' => array(1,2),
-	'access callback' => TRUE,
-     );
      $items['tagtimelinedata/%/%'] = array(
 	 'title' => 'Tag',
-	 'description' => 'Recommender service used by StoryScope.',
+	 'description' => 'Return JSON feed for timeline associated with a freebase topic.',
 	 'page callback' => 'tagtimelinedata',
      'page arguments' => array(1,2),
 	'access callback' => TRUE,
      );
      $items['tagtimelinedata/%'] = array(
 	 'title' => 'Tag',
-	 'description' => 'Recommender service used by StoryScope.',
+	 'description' => 'Return JSON feed for timeline associated with a tag that is not freebase topic, i.e. a timestamp.',
 	 'page callback' => 'tagtimelinedata',
      'page arguments' => array(1),
 	'access callback' => TRUE,
      );
      $items['tags'] = array(
 	 'title' => 'Tags',
-	 'description' => 'Recommender service used by StoryScope.',
+	 'description' => 'Display data for a set of tags.',
 	 'page callback' => 'dec_tags',
 	'access callback' => TRUE,
      );
      $items['tagstimelinedata/%'] = array(
 	 'title' => 'Tags',
-	 'description' => 'Recommender service used by StoryScope.',
+	 'description' => 'Return JSON feed for timeline associated with a set of tags.',
 	 'page callback' => 'tagstimelinedata',
      'page arguments' => array(1),
 	'access callback' => TRUE,
      );
      $items['settingtimelinedata'] = array(
 	 'title' => 'Setting',
-	 'description' => 'Recommender service used by StoryScope.',
+	 'description' => 'Return JSON feed for timeline associated with a setting.',
 	 'page callback' => 'settingtimelinedata',
 	'access callback' => TRUE,
      );
       $items['setting'] = array(
 	 'title' => 'Setting',
-	 'description' => 'Recommender service used by StoryScope.',
+	 'description' => 'Display data for a setting.',
 	 'page callback' => 'dec_setting',
 	'access callback' => TRUE,
      );
-
      return $items;
 }
 
-/*
- * pre-cache the name, description and image of a topic
+/**
+ * Check for the name, description and image of a topic
+ * Retrieve if not stored in the database
 */
 function check_topic_name_image_description($topic) {
 	check_freebase_saved_image($topic);
@@ -139,6 +130,9 @@ function check_topic_name_image_description($topic) {
 	check_for_topic_name($topic);
 }
 
+/**
+ * Retrieve and store locations that contain the current location either directly or via one other location
+ */
 function containing_locations_of_a_location($location_topic = "/m/0389fd") {
 	$contained_locations = contained_locations($location_topic);
 	if(empty($contained_locations)) {
@@ -157,6 +151,9 @@ function containing_locations_of_a_location($location_topic = "/m/0389fd") {
 	db_query($query);
 }
 
+/**
+ * Retrieve locations one level of containment up from the topic
+ */
 function contained_locations($topic = "/m/0389fd") {
 	$query = array(array(
 			"mid"=> $topic,
@@ -178,7 +175,9 @@ function contained_locations($topic = "/m/0389fd") {
 	return $output;
 }
 
-
+/**
+ * Retrieve locations two levels of containment up from the topic
+ */
 function contained_contained_locations($topic = "/m/0389fd") {
 	$query = array(array(
 			"mid"=> $topic,
@@ -202,6 +201,9 @@ function contained_contained_locations($topic = "/m/0389fd") {
 	return $output;
 }
 
+/**
+ * JSON data feed for the timeline of a single tag
+*/
 function tagtimelinedata($m, $id = FALSE) {
 	if($m == "m") {
 		$topic = "/".$m."/".$id;
@@ -237,13 +239,9 @@ function tagtimelinedata($m, $id = FALSE) {
  	
 }
 
-function my_json_output($data) {
-	// We are returning JSON, so tell the browser.
-	drupal_add_http_header('Content-Type', 'application/json');
-	
-	echo $data;
-}
-
+/**
+ * Check for cached timeline for a single tag
+*/
 function check_for_cached_topic_timeline($topic, $attribute = FALSE) {
 	if(!$attribute) {
 		$attribute = 'no_attribute';
@@ -261,6 +259,9 @@ function check_for_cached_topic_timeline($topic, $attribute = FALSE) {
 	return FALSE;
 }
 
+/**
+ * Save timeline for a single tag
+ */
 function save_topic_timelime($topic, $attribute = FALSE, $timeline_data) {
 	
 	$timeline_data = my_escape_string($timeline_data);
@@ -277,6 +278,9 @@ function save_topic_timelime($topic, $attribute = FALSE, $timeline_data) {
 	
 }
 
+/**
+ * Check for cached timeline for a story
+*/
 function check_for_cached_story_timeline($story, $event_type = FALSE) {
 	if($event_type) {
 		$query = "SELECT story_timeline_data.timeline_data
@@ -297,6 +301,9 @@ function check_for_cached_story_timeline($story, $event_type = FALSE) {
 	return FALSE;	
 }
 
+/**
+ * Check for cached timeline for a setting
+ */
 function check_for_cached_setting_timeline($location, $start, $end, $event_type = FALSE) {
 	if($event_type) {
 		$query = "SELECT setting_timeline_data.timeline_data
@@ -318,6 +325,9 @@ function check_for_cached_setting_timeline($location, $start, $end, $event_type 
 	return FALSE;
 }
 
+/**
+ * Cache the data for a setting timeline
+*/
 function save_setting_timelime($location, $start, $end, $event_type, $timeline_data) {
 	$timeline_data = my_escape_string($timeline_data);
 	if($event_type) {
@@ -330,6 +340,9 @@ function save_setting_timelime($location, $start, $end, $event_type, $timeline_d
 	}
 }
 
+/**
+ * Cache the data for a story timeline
+ */
 function save_story_timeline($story, $event_type = FALSE, $timeline_data) {
 	$timeline_data = my_escape_string($timeline_data);
 	
@@ -343,6 +356,9 @@ function save_story_timeline($story, $event_type = FALSE, $timeline_data) {
 	}
 }
 
+/**
+ * JSON data feed for the timeline of a setting
+*/
 function settingtimelinedata() {
 	$output = "";
 	if(isset($_GET['location']) && isset($_GET['time'])) {
@@ -389,6 +405,9 @@ function settingtimelinedata() {
  	return drupal_json_output(json_decode($timeline_data));
 }
 
+/**
+ * JSON data feed for the timeline of a story (i.e. set of tags)
+ */
 function tagstimelinedata($story_id) {
 	$story_id = (int) $story_id;
 
@@ -418,22 +437,9 @@ function tagstimelinedata($story_id) {
 
 }
 
-function tagtimeline() {
-	global $base_url;
-	
-	$output = '<div id="timeline-embed"></div>
-    <script type="text/javascript">
-        var timeline_config = {
-            width:              "100%",
-            height:             "600",
-            source:             "'.$base_url.'/tagtimelinedata/m/01qwfk"
-        }
-    </script>
-    <script type="text/javascript" src="'.TIMELINECODE.'"></script>';
-	return $output;
-}
-
-
+/**
+ * Display name for a freebase attribute
+*/
 function get_attribute_reverse_title($attribute = '/visual_art/artwork/artist') {
 	$query = "SELECT reverse_name FROM attribute_name WHERE attribute = :attribute;";
 	$result = db_query($query, array(':attribute' => $attribute));
@@ -446,7 +452,10 @@ function get_attribute_reverse_title($attribute = '/visual_art/artwork/artist') 
 	}	
 }
 
-function dec_timeline_for_setting() {//***here
+/**
+ * Timeline page for setting
+*/
+function dec_timeline_for_setting() {
 	global $base_url;
 	$output = "";
 
@@ -491,21 +500,18 @@ function dec_timeline_for_setting() {//***here
 		}
 	}
 
-	//check for reload //***here
+	//check for reload 
 	if(isset($_GET['reload'])) {
 		$reload = $_GET['reload'];
-		dpm($reload);
 		if($reload) {
 			//clear cache
 			if(isset($event_type)) {
 				$query = "delete from setting_timeline_data where location = '".$location."' AND start = '".$time."' AND end = '".$end."' AND event_type = '".$event_type."';";
 				db_query($query);
-				dpm($query);
 			}
 			else {
 				$query = "delete from setting_timeline_data where location = '".$location."' AND start = '".$time."' AND end = '".$end."' AND event_type = 'no_event_type';";
 				db_query($query);
-				dpm($query);
 			}
 		}
 	}
@@ -557,6 +563,9 @@ function dec_timeline_for_setting() {//***here
 	return $output;
 }
 
+/**
+ * Timeline page for story
+*/
 function dec_timeline_for_tags($story_id) {
 	global $base_url;
 	$story_id = (int) $story_id;
@@ -633,6 +642,9 @@ function dec_timeline_for_tags($story_id) {
 	return $output;	
 }
 
+/**
+ * Timeline page for single tag
+ */
 function dec_timeline($m, $id = FALSE) {
 	global $base_url;
 	if($m == "m") {
@@ -742,6 +754,9 @@ function dec_timeline($m, $id = FALSE) {
 	return $output;
 }
 
+/**
+ * Calculate timeline data for setting
+*/
 function dec_setting_timeline($location, $full_year, $full_end = 0, $year, $end = 0, $event_type = FALSE) {
 	$output = array();
 	if($event_type) {
@@ -769,6 +784,9 @@ function dec_setting_timeline($location, $full_year, $full_end = 0, $year, $end 
 	return $timeline_array;
 }
 
+/**
+ * Calculate timeline data for list of tags
+*/
 function dec_tags_timeline($story_id, $event_type = FALSE) {
 
 	$output = array();	
@@ -799,19 +817,9 @@ function dec_tags_timeline($story_id, $event_type = FALSE) {
 	return $timeline_array;
 }
 
-// function remove_spaces_from_reverse_names() {
-// 	$query = 'SELECT * FROM attribute_name;';
-// 	$result = db_query($query);
-// 	$output = array();
-// 	foreach ($result as $record) {
-		
-// 		$query = "INSERT INTO attribute_name (attribute, name, reverse_name) VALUES(:attribute, :name, :reverse_name) ON DUPLICATE KEY UPDATE attribute = VALUES(attribute), name = VALUES(name), reverse_name = VALUES(reverse_name);";
-// 		$result = db_query($query, array(':attribute'=>$record->attribute, ':name'=>$record->name, ':reverse_name'=>str_replace('_', ' ',$record->reverse_name)));
-// 		$output[] = array($record->attribute, $record->name, $record->reverse_name);
-// 	}
-// 	return $output;	
-// }
-
+/**
+ * Calculate timeline data for single tag
+ */
 function dec_tag_timeline($topic = '/m/01qwfk', $attribute = FALSE) {
 	$output = array();
 	$types = check_for_tag_types($topic);
@@ -829,10 +837,16 @@ function dec_tag_timeline($topic = '/m/01qwfk', $attribute = FALSE) {
 	return $timeline_array;
 }
 
+/**
+ * Translate time data for timeline display
+ */
 function translate_time_for_timeline($time) {
 	return str_replace('-',',',$time['0']);
 }
 
+/**
+ * Create header for setting timeline
+*/
 function create_timeline_setting_header($location, $year, $end = 0) {
 	global $base_url;
 
@@ -856,6 +870,9 @@ function create_timeline_setting_header($location, $year, $end = 0) {
 	return $header;
 }
 
+/**
+ * Create header for story timeline
+ */
 function create_timeline_story_header($story) {
 
 	$tag_array = get_tags_names_for_a_story($story);
@@ -905,6 +922,9 @@ function create_timeline_story_header($story) {
 	return $header;
 }
 
+/**
+ * Get image to display with a story tag list
+ */
 function get_image_from_tag_list($tag_array) {
 	foreach($tag_array as $tag) {
 		if($tag['1']) {
@@ -916,6 +936,9 @@ function get_image_from_tag_list($tag_array) {
 	return array();
 }
 
+/**
+ * Create header (i.e. intro page) for the timeline
+ */
 function create_timeline_header($topic) {
 	$header = array();
 	if(!get_topic_name($topic)) {
@@ -956,6 +979,9 @@ function create_timeline_header($topic) {
 	return $header;
 }
 
+/**
+ * Translate story event data for timeline display
+*/
 function translate_story_events_for_timeline($events, $header) {
 	$output = $header;
 	if(empty($events)) {
@@ -999,6 +1025,9 @@ function translate_story_events_for_timeline($events, $header) {
 	return $output;
 }
 
+/**
+ * Translate event data for timeline display
+ */
 function translate_events_for_timeline($events, $header) {
 
 	$output = $header;
@@ -1034,84 +1063,9 @@ function translate_events_for_timeline($events, $header) {
 	return $output;
 }
 
-function dec_tag_attribute_timeline($topic = '/m/01qwfk', $attribute = '/visual_art/artwork') {
-	$output = array();
-	$types = check_for_tag_types($topic);
-	$events = temporal_events_for_tag_attribute($topic, $attribute);
-	foreach($events as $event) {
-		$output[] = load_art_event_dec_tag($event, $types, TRUE);
-	}
-	return $output;
-}
-
-function temporal_events_for_story($story_id) {
-	$query = "SELECT DISTINCT event_table.event
-	FROM event_attribute_value as time_table, event_attribute_value as event_table, attribute_name, query_tag
-	WHERE query_tag.id = '".$story_id."' AND
-	event_table.value = query_tag.tag AND
-	event_table.event = time_table.event AND
-	time_table.attribute = attribute_name.attribute AND
-	(attribute_name.name = 'start_time' OR attribute_name.name = 'end_time');";
-
-	$result = db_query($query);
-	$output = array();
-	foreach ($result as $record) {
-		$output[] = $record->event;
-	}
-
-	//if tag is itself an event
-	$query = "
-SELECT DISTINCT event_table.event
-FROM query_tag, event_attribute_value as event_table, event_attribute_value as time_table, attribute_name
-WHERE query_tag.id = '".$story_id."' AND
-event_table.event = query_tag.tag AND
-event_table.event = time_table.event AND
-time_table.attribute = attribute_name.attribute AND
-(attribute_name.name = 'start_time' OR attribute_name.name = 'end_time');";
-	
-	$result = db_query($query);
-	foreach ($result as $record) {
-		$output[] = $record->event;
-	}
-	return $output;
-}
-
-function temporal_events_for_story_activity($story_id, $activity = 'object_creation') {
-	$query = "SELECT DISTINCT event_table.event
-FROM event_attribute_value as time_table, event_attribute_value as event_table, attribute_name, event_attribute_value as attribute_table, attribute_name as attribute_attribute_name, query_tag
-WHERE query_tag.id = '".$story_id."' AND 
-event_table.value = query_tag.tag AND
-time_table.event = event_table.event AND
-time_table.attribute = attribute_name.attribute AND
-event_table.event = attribute_table.event AND
-attribute_table.attribute = 'activity' AND
-attribute_table.value = '".$activity."' AND
-(attribute_name.name = 'start_time' OR attribute_name.name = 'end_time');";
-
-	$result = db_query($query);
-	$output = array();
-	foreach ($result as $record) {
-		$output[] = $record->event;
-	}
-
-	//if tag is itself an event
-	$query = "SELECT DISTINCT event_table.event
-FROM query_tag, event_attribute_value as event_table, event_attribute_value as time_table, attribute_name, event_attribute_value as attribute_table
-WHERE query_tag.id = '".$story_id."' AND
-event_table.event = query_tag.tag AND
-event_table.event = time_table.event AND
-event_table.event = attribute_table.event AND
-attribute_table.attribute = 'activity' AND
-attribute_table.value = '".$activity."' AND
-time_table.attribute = attribute_name.attribute AND
-(attribute_name.name = 'start_time' OR attribute_name.name = 'end_time');";
-	$result = db_query($query);
-	foreach ($result as $record) {
-		$output[] = $record->event;
-	}
-	return $output;
-}
-
+/**
+ * Get events for a tag that can be displayed on a timeline
+*/
 function temporal_events_for_tag($topic) {
 	if(is_time_stamp($topic)) {
 		$query = "SELECT events_start_end_time_table.event
@@ -1171,6 +1125,9 @@ time_table.attribute = attribute_name.attribute AND
 	return $output;
 }
 
+/**
+ * Get events for a tag and attribute that can be displayed on a timeline
+ */
 function temporal_events_for_tag_attribute($topic, $attribute = '/visual_art/artwork') {
 	if(is_time_stamp($topic)) {
 		$query = "SELECT events_start_end_time_table.event
@@ -1233,48 +1190,9 @@ attribute_name.name = 'start_time';";
 	return $output;
 }
 
-function thumbnail_image_html_for_a_freebase_topic($topic) {
-	$imageUrl = 'https://usercontent.googleapis.com/freebase/v1/image'.$topic;
-	return $imageUrl;
-}
-
-function check_for_cached_image($topic) {
-	$query = "SELECT tag FROM fb_saved_images WHERE tag = :tag;";
-	$result = db_query($query, array(':tag' => $topic));
-	$found = $result->fetchObject();
-	if($found) {
-		return TRUE;
-	}
-	else {
-		return FALSE;
-	}
-}
-
-
-function image_url_for_freebase_topic($topic, $thumbnail_url = FALSE) {
-	//check for cached image
-	$cache = check_for_cached_image($topic);
-	if(!$cache) {
-		save_fb_image($topic);
-	}
-
-	$id = substr($topic,3);
-	global $base_url;
-	if($thumbnail_url) {
-		return $base_url.'/fbimages/'.$id.'_sm.jpeg';		
-	}
-	else {
-		return $base_url.'/fbimages/'.$id.'.jpeg';			
-	}
-	
-}
-
-function image_html_for_a_freebase_topic($topic) {
-	$imageUrl = 'https://usercontent.googleapis.com/freebase/v1/image'.$topic.'?maxwidth=200&maxheight=200';
-	return $imageUrl;
-	return '<img src="'.$imageUrl.'">';
-}
-
+/**
+ * Save image file
+ */
 function dec_save_image($url, $filename) {
 	$ch = curl_init($url);
 
@@ -1290,7 +1208,9 @@ function dec_save_image($url, $filename) {
 	fclose($fp);	
 }
 
-
+/**
+ * Retrieve and save freebase image of a topic
+ */
 function save_fb_image($topic, $thumbnail_url = FALSE) {
 
 	$imageUrl = 'https://usercontent.googleapis.com/freebase/v1/image'.$topic.'?maxwidth=200&maxheight=200';
@@ -1306,18 +1226,18 @@ function save_fb_image($topic, $thumbnail_url = FALSE) {
 	return $id;
 }
 
-function getUrlMimeType($url) {
-	$buffer = file_get_contents($url);
-	$finfo = new finfo(FILEINFO_MIME_TYPE);
-	return $finfo->buffer($buffer);
-}
-
-function dec_test() {
+/**
+ * For reseting cached freebase data
+ */
+function dec_reset() {
+	//if the line below is uncommented then this function can reset local cached databases of freebase data
 // 	reset_recommender_databse();
 	return "databse reset";
 }
 
-//get topic name
+/**
+ * Get image id for a topic
+ */
 function get_topic_image_topic($topic = "/m/0hc9x6h") {
 	$query = "SELECT tag, image_tag FROM fb_saved_images WHERE tag = :tag;";
 	$result = db_query($query, array(':tag' => $topic));
@@ -1330,6 +1250,9 @@ function get_topic_image_topic($topic = "/m/0hc9x6h") {
 	}
 }
 
+/**
+ * Check for saved image associated with a topic
+ */
 function check_freebase_saved_image($topic = '/m/01qwfk', $thumbnail_url = FALSE, $reload = FALSE) {
 	global $base_url;
 	//check in local cache for image id
@@ -1391,13 +1314,10 @@ function check_freebase_saved_image($topic = '/m/01qwfk', $thumbnail_url = FALSE
 	return $local_url;	
 }
 
-function save_image_topic_reference($topic, $image_topic) {
-	$values_list = "VALUES ('".$topic."', '".$image_topic."')";
-	$query = "INSERT INTO fb_saved_images (tag, image_tag) ".$values_list." ON DUPLICATE KEY UPDATE image_tag = VALUES(image_tag);";
-	$result = db_query($query);
-}
-
 //this wipes all cached data on tags, events, etc.
+/**
+ * Reset local cache of freebase data
+ */
 function reset_recommender_databse() {
 	//this table lists the previously calculated tags
 	$query = "delete from calculated_tags WHERE 1;";
@@ -1469,6 +1389,9 @@ function reset_recommender_databse() {
 
 // ALTER TABLE tag_triple
 // ADD CONSTRAINT tav UNIQUE (tag,attribute,value);
+/**
+ * Retrieve fact triples for a topic
+ */
 function triples_of_a_tag($topic) {
 	$result = array("triples"=>array(),"names"=>array());
 // 	$result = array("events"=>array(),"names"=>array(), "links"=>array());
@@ -1491,7 +1414,7 @@ function triples_of_a_tag($topic) {
 
 	if(in_array("/visual_art/art_period_movement", $types)) {
 		//artist movement details
-		$result = fb_periods_movements_associated_artist_($topic, $result);
+		$result = fb_periods_movements_associated_artist($topic, $result);
 	}
 	
 	//saving
@@ -1499,11 +1422,17 @@ function triples_of_a_tag($topic) {
 	save_triples_to_db($result["triples"]);
 }
 
+/**
+ * Save topic and attibute to database
+ */
 function save_tag_attribute($topic, $attribute, $link) {
 	$query = "INSERT INTO tag_attribute (tag, attribute, link) VALUES(:tag, :attribute, :link) ON DUPLICATE KEY UPDATE tag = VALUES(tag), attribute = VALUES(attribute), link = VALUES(link);";
 	$result = db_query($query, array(':tag'=>$topic, ':attribute'=>$attribute, ':link'=>$link));
 }
 
+/**
+ * Check for facts of a topic
+ */
 function check_for_tag_in_tag_attribute($topic) {
 	$query = "SELECT id FROM tag_attribute WHERE tag = :tag;";
 	$result = db_query($query, array(':tag'=>$topic));
@@ -1516,6 +1445,9 @@ function check_for_tag_in_tag_attribute($topic) {
 	}	
 }
 
+/**
+ * Check for facts for topic and attribute
+ */
 function check_for_tag_attribute($topic, $attribute) {
 	$query = "SELECT id FROM tag_attribute WHERE tag = :tag AND attribute = :attribute;";
 	$result = db_query($query, array(':tag'=>$topic, ':attribute'=>$attribute));
@@ -1528,6 +1460,9 @@ function check_for_tag_attribute($topic, $attribute) {
 	}
 }
 
+/**
+ * Save topic facts to database
+ */
 function save_tag_attribute_id_values($id, $values) {
 	$values_list = "";	
 	foreach($values as $value) {
@@ -1544,6 +1479,9 @@ function save_tag_attribute_id_values($id, $values) {
 	$result = db_query($query);
 }
 
+/**
+ * Save a set of fact triples
+ */
 function save_triples_to_db($triples) {
 	foreach($triples as $triple) {
 		//save to tag_triple_table
@@ -1562,7 +1500,10 @@ function save_triples_to_db($triples) {
 	}
 }
 
-function fb_periods_movements_associated_artist_($topic = '/m/014wxs', $result = array("triples"=>array(),"names"=>array())) {
+/**
+ * Retrieve associated artist triples for an art movement
+*/
+function fb_periods_movements_associated_artist($topic = '/m/014wxs', $result = array("triples"=>array(),"names"=>array())) {
 	$triples = array();
 	$tag_names = array();
 	$query = array(array(
@@ -1584,6 +1525,9 @@ function fb_periods_movements_associated_artist_($topic = '/m/014wxs', $result =
 
 }
 
+/**
+ * Retrieve art movement triples for an artist topic
+*/
 function fb_artist_associated_periods_movements($topic = '/m/071k7_', $result = array("triples"=>array(),"names"=>array())) {
 	$triples = array();
 	$tag_names = array();
@@ -1606,6 +1550,9 @@ function fb_artist_associated_periods_movements($topic = '/m/071k7_', $result = 
 
 }
 
+/**
+ * Retrieve date of birth triple for a topic
+*/
 function fb_person_birth_date_location($topic = '/m/071k7_', $result = array("triples"=>array(),"names"=>array())) {
 	$triples = array();
 	$tag_names = array();
@@ -1633,6 +1580,9 @@ function fb_person_birth_date_location($topic = '/m/071k7_', $result = array("tr
 
 }
 
+/**
+ * Retrieve date of death triple for a topic
+ */
 function fb_deceased_person_death_date_location($topic = '/m/071k7_', $result = array("triples"=>array(),"names"=>array())) {
 	$triples = array();
 	$tag_names = array();
@@ -1659,7 +1609,9 @@ function fb_deceased_person_death_date_location($topic = '/m/071k7_', $result = 
 			"names"=>array_merge($tag_names, $result["names"]));	
 }
 
-
+/**
+ * Retrieve event space for a setting
+ */
 function event_space_of_a_setting($location, $year, $end = 0) {
 	if($end) {
 		$year_field = $year.":".$end;
@@ -1682,6 +1634,9 @@ function event_space_of_a_setting($location, $year, $end = 0) {
 
 }
 
+/**
+ * Check if tag is a timestamp, more accurately a datestamp
+ */
 function is_time_stamp($date) {
 	if(preg_match("/^\d{4}$/", $date)) {
 		return TRUE;
@@ -1695,6 +1650,9 @@ function is_time_stamp($date) {
 	return FALSE;
 }
 
+/**
+ * Complete timestamp. For use in time calculations
+ */
 function complete_time_stamp($date, $start_end = 'start') {
 	//if YYYY
 	if(preg_match("/^\d{4}$/", $date)) {
@@ -1721,6 +1679,9 @@ function complete_time_stamp($date, $start_end = 'start') {
 	return $date;
 }
 
+/**
+ * Produce output for a setting
+ */
 function dec_setting() {
 
 	$output = "";
@@ -1754,7 +1715,6 @@ function dec_setting() {
 	event_space_of_a_setting($location, $full_start_time, $full_end_time);
 	
 	//get events for a setting
-// 	$related_events = dec_get_events_for_setting($location, $year);
 	$all_events = get_all_events_for_setting($location, $full_start_time, $full_end_time);
 
 	//get themes for the events of a setting
@@ -1792,14 +1752,6 @@ function dec_setting() {
 		}
 	
 	}
-	
-// 	if(!empty($related_events)) {
-// 		$output .= '<div style="clear:both"><h2>Event space: </h2></div>';
-// 		foreach($related_events as $related_event) {
-// 			$output .= '<div style="float: left;  width: 200px;">'.output_event_table($related_event)."</div>";
-// 		}
-	
-// 	}	
 
 	if(!empty($all_events)) {
 		$output .= '<div style="clear:both"><h2>Event space: </h2></div>';
@@ -1827,9 +1779,11 @@ function dec_setting() {
 	
 }
 
+/**
+ * Themes of a setting
+ */
 function dec_get_themes_for_events_of_setting($location, $year, $end = 0) {
 	if($end) {
-		$end_date = $end;//.'-12-31';
 		$query = "SELECT * 
 FROM
 (SELECT event_attribute_value.value, COUNT(event_attribute_value.value) as frequency, tag_name.name
@@ -1856,8 +1810,8 @@ WHERE event_location2.attribute = location2_attribute_name.attribute AND
 	event_location2.event = event_end_time.event AND
 	event_end_time.attribute = end_time_attribute_name.attribute AND end_time_attribute_name.name = 'end_time') as end_location_result
 ON start_location_result.event = end_location_result.event) as start_end_location_result
-WHERE (start_end_location_result.start_time <= '".$end_date."' AND start_end_location_result.start_time >= '".$year."' AND start_end_location_result.end_time IS NULL) OR
-(start_end_location_result.start_time <= '".$end_date."' AND start_end_location_result.end_time >= '".$year."')
+WHERE (start_end_location_result.start_time <= '".$end."' AND start_end_location_result.start_time >= '".$year."' AND start_end_location_result.end_time IS NULL) OR
+(start_end_location_result.start_time <= '".$end."' AND start_end_location_result.end_time >= '".$year."')
 UNION
 SELECT setting_link_event_id.event_id AS event, event_attribute_value.value as activity FROM setting_link_event_id, event_attribute_value
      WHERE setting_link_event_id.location = '".$location."' AND
@@ -1917,38 +1871,10 @@ SELECT setting_link_event_id.event_id AS event, event_attribute_value.value as a
 	}
 	return $output;
 }
-		
-		
-function dec_get_themes_for_events_of_setting_old($location, $year) {
-	$query = "SELECT triples.value, COUNT(triples.value) as frequency, tag_name.name 
-FROM tag_name, 
-(SELECT eav.event, eav.attribute, eav.value 
-FROM event_attribute_value as eav, (
-SELECT DISTINCT event_location.event 
-FROM event_attribute_value AS event_location, event_attribute_value AS event_time
-WHERE event_location.attribute = 'location' AND 
-event_location.value = '".$location."' AND 
-event_location.event = event_time.event AND
-(event_time.attribute = 'start_time' OR event_time.attribute = 'end_time') AND 
-event_time.value LIKE '".$year."%') as res 
-where res.event = eav.event
-UNION
-SELECT eav.event, eav.attribute, eav.value 
-FROM event_attribute_value as eav, (
-SELECT DISTINCT setting_link_event_id.event_id AS event, setting_link_event_id.year AS year  FROM setting_link_event_id 
-WHERE setting_link_event_id.location = '".$location."' AND 
-setting_link_event_id.year = '".$year."') as res
-where res.event = eav.event) as triples 
-WHERE triples.value = tag_name.tag 
-group by triples.value ORDER BY frequency DESC LIMIT 5;";
-	$result = db_query($query);
-	$output = array();
-	foreach ($result as $record) {
-		$output[] = $record;
-	}
-	return $output;	
-}
 
+/**
+ * Retrieve events of a setting
+ */
 function dec_events_of_the_setting($location, $year, $end = 0, $previous_output = array("events"=>array(),"names"=>array(),"links"=>array())) {
 	if(!$end) {
 		$end = $year;
@@ -2009,6 +1935,9 @@ function dec_events_of_the_setting($location, $year, $end = 0, $previous_output 
 	);	
 }
 
+/**
+ * Retrieve events containing the setting
+*/
 function dec_containing_events_of_the_setting($location, $year, $end = 0, $previous_output = array("events"=>array(),"names"=>array(), "links"=>array())) {
 	if(!$end) {
 		$end = $year;
@@ -2068,6 +1997,9 @@ function dec_containing_events_of_the_setting($location, $year, $end = 0, $previ
 	"links"=>array_merge($setting_event_links, $previous_output["links"]));
 }
 
+/**
+ * Retrieve events two levels of containment above the setting
+*/
 function dec_containing_containing_events_of_the_setting($location, $year, $end = 0, $previous_output = array("events"=>array(),"names"=>array(), "links"=>array())) {
 	if(!$end) {
 		$end = $year;
@@ -2127,6 +2059,9 @@ function dec_containing_containing_events_of_the_setting($location, $year, $end 
 	"links"=>array_merge($setting_event_links, $previous_output["links"]));
 }
 
+/**
+ * Get tag list for a story
+ */
 function dec_story($story) {
 	$story = (int) $story;
 	
@@ -2146,6 +2081,9 @@ WHERE query_tag.id = '".$story."';";
 	return dec_list_of_tags($tag_array, $story);
 }
 
+/**
+ * Get tag list and save as a story id
+ */
 function dec_tags() {
 	
 	if(isset($_GET['list'])) {
@@ -2179,6 +2117,9 @@ function dec_tags() {
 	return dec_list_of_tags($tag_array, $max_value);
 }
 
+/**
+ * Produce output for a list of tags
+ */
 function dec_list_of_tags($tag_array, $max_value) {
 	$output = "";
 
@@ -2200,15 +2141,6 @@ function dec_list_of_tags($tag_array, $max_value) {
 	}
 	drupal_set_title(implode(", ",$tag_name_array));
 	
-	//calculate themes 
-// 	$themes = top_n_themes_of_story($max_value, 5);
-// 	if(!empty($themes)) {
-// 		$output .= '<div style="clear:both">Themes: </div>';
-// 		foreach($themes as $theme) {
-// 			$output .= l('<div style="float: left; white-space: nowrap; background-color: #ebebeb; margin: 5px;">'.$theme->name."</div>", "tag".$theme->value, array("html"=>TRUE));
-// 		}
-	
-// 	}
 	//do the calculations
 	$all_events = get_all_events_for_story2($max_value, $tag_array);
 	$event_list = flat_list_of_events($all_events);
@@ -2222,8 +2154,7 @@ function dec_list_of_tags($tag_array, $max_value) {
 	}
 	$overlapping_settings = get_n_matching_settings_for_a_story2($max_value, 5);	
 	
-	//matching themes
-// 	$matching_themes = top_n_matching_themes_of_story($max_value, 10);
+	//matching themes (i.e. the story tags)
 	if(!empty($matching_themes)) {
 		$output .= '<div style="clear:both"><h2>Tags: </h2></div>';
 		foreach($matching_themes as $theme) {
@@ -2239,8 +2170,7 @@ function dec_list_of_tags($tag_array, $max_value) {
 	
 	}
 	
-	//non-matching themes
-// 	$nonmatching_themes = top_n_nonmatching_themes_of_story($max_value, 10);
+	//non-matching themes (i.e. themes that are not story tags)
 	if(!empty($nonmatching_themes)) {
 		$output .= '<div style="clear:both"><h2>Themes: </h2></div>';
 		foreach($nonmatching_themes as $theme) {
@@ -2249,21 +2179,7 @@ function dec_list_of_tags($tag_array, $max_value) {
 	
 	}
 	
-	//settings that overlap with the tag_array
-// 	$overlapping_settings = get_n_matching_settings_for_a_story($max_value, $n = 5);
-// 	$overlapping_settings = get_n_matching_settings_for_a_story2($max_value, $n = 5);
-
-// 	if(!empty($overlapping_settings)) {
-// 		$output .= '<div style="clear:both"><h2>Settings that include a tag: </h2></div>';
-// 		foreach($overlapping_settings as $setting) {
-// 			$output .= '<div style="float: left; white-space: nowrap; background-color: #ebebeb; margin: 5px;">'.
-// 					l($setting->name." ".$setting->time,'setting',array('query' => array('location' => $setting->location, 'time' => $setting->time))).
-// 					"</div>";
-// 		}
-	
-// 	}
-
-	
+	//settings
 	if(!empty($overlapping_settings)) {
 	
 		$output .= '<div style="clear:both"><h2>Settings: </h2></div>';
@@ -2291,66 +2207,8 @@ function dec_list_of_tags($tag_array, $max_value) {
 		}
 	
 	}
-			
-	//settings that do not overlap with the tag_array
-// 	$non_overlapping_settings = get_n_nonmatching_settings_for_a_story($max_value, $n = 5);
-// 	$non_overlapping_settings = get_n_nonmatching_settings_for_a_story2($max_value, $n = 5);
-// 	dpm($non_overlapping_settings);
-// 	if(!empty($non_overlapping_settings)) {
-// 		$output .= '<div style="clear:both"><h2>Settings that do not include a tag: </h2></div>';
-// 		foreach($non_overlapping_settings as $setting) {
-// 			if($setting->end && $setting->start && $setting->start !== $setting->end) {
-// 				$output .= '<div style="float: left; white-space: nowrap; background-color: #ebebeb; margin: 5px;">'.
-// 						l($setting->name." ".$setting->start."-".$setting->end,'setting',array('query' => array('location' => $setting->location, 'time' => $setting->start, 'end' => $setting->end))).
-// 						"</div>";
-// 			}
-// 			elseif($setting->start && $setting->start == $setting->end) {
-// 				$output .= '<div style="float: left; white-space: nowrap; background-color: #ebebeb; margin: 5px;">'.
-// 					l($setting->name." ".$setting->start,'setting',array('query' => array('location' => $setting->location, 'time' => $setting->start))).
-// 					"</div>";
-// 			}
-// 			elseif($setting->start && !$setting->end) {
-// 				$output .= '<div style="float: left; white-space: nowrap; background-color: #ebebeb; margin: 5px;">'.
-// 						l($setting->name." ".$setting->start,'setting',array('query' => array('location' => $setting->location, 'time' => $setting->start))).
-// 						"</div>";
-// 			}
-// 			elseif($setting->end && !$setting->start) {
-// 				$output .= '<div style="float: left; white-space: nowrap; background-color: #ebebeb; margin: 5px;">'.
-// 						l($setting->name." ".$setting->end,'setting',array('query' => array('location' => $setting->location, 'time' => $setting->end))).
-// 						"</div>";
-// 			}	
-// // 			$output .= '<div style="float: left; white-space: nowrap; background-color: #ebebeb; margin: 5px;">'.
-// // 					l($setting->name." ".$setting->time,'setting',array('query' => array('location' => $setting->location, 'time' => $setting->time))).
-// // 					"</div>";
-// 		}
 	
-// 	}
-	
-	
-// 	if(!empty($non_overlapping_settings)) {
-// 		$output .= '<div style="clear:both"><h2>Settings that do not include a tag: </h2></div>';
-// 		foreach($non_overlapping_settings as $setting) {
-// 			if($setting->end && $setting->start !== $setting->end) {
-// 				$output .= '<div style="float: left; white-space: nowrap; background-color: #ebebeb; margin: 5px;">'.
-// 						l($setting->name." ".$setting->start."-".$setting->end,'setting',array('query' => array('location' => $setting->location, 'time' => $setting->start, 'end' => $setting->end))).
-// 						"</div>";
-// 			}
-// 			else {
-// 				$output .= '<div style="float: left; white-space: nowrap; background-color: #ebebeb; margin: 5px;">'.
-// 						l($setting->name." ".$setting->start,'setting',array('query' => array('location' => $setting->location, 'time' => $setting->start))).
-// 						"</div>";
-// 			}
-// 		}
-	
-// 	}		
 	//events
-	//combined events of the tag array via tag event link
-// 	$linked_events = get_link_events_for_story($max_value);
-// 	$related_events = get_related_events_for_story($max_value);
-
-	
-// 	$all_events = get_all_events_for_story($max_value);
-
 	if(!empty($all_events)) {
 		$output .= '<div style="clear:both"><h2>Event space: </h2></div>';
 		$output .= '<div style="clear:both"><div style="align:right; text-align:right">'.l('Timeline','timeline_for_tags/'.$max_value).'</div></div>';
@@ -2365,34 +2223,13 @@ function dec_list_of_tags($tag_array, $max_value) {
 			}
 		}
 	}
-	
-	
-// 	if(!empty($linked_events) || !empty($related_events)) {
-// 		$output .= '<div style="clear:both"><h2>Event space: </h2></div>';
-// 	}
-	
-// 	if(!empty($linked_events)) {
-// 		foreach($linked_events as $link=>$events) {
-// 			$output .= '<div style="clear:both">'.ucfirst($link).':</div>';
-// 			if(!empty($events)) {
-// 				foreach($events as $event) {
-// 					$output .= '<div style="float: left; width: 200px;">'.output_event_table($event)."</div>";
-// 				}	
-// 			}
-// 		}
-// 	}
-	
-// 	$related_events = get_related_events_for_story($max_value);
-// 	if(!empty($related_events)) {
-// 		$output .= '<div style="clear:both">Related events:</div>';
-// 		foreach($related_events as $related_event) {
-// 			$output .= '<div style="float: left;  width: 200px;">'.output_event_table($related_event)."</div>";
-// 		}
-// 	}
 		
 	return $output;
 }
 
+/**
+ * Flatten list of events of a story
+*/
 function flat_list_of_events($all_events) {
 	$event_list = array();
 	foreach($all_events as $event_set) {
@@ -2401,6 +2238,9 @@ function flat_list_of_events($all_events) {
 	return $event_list;
 }
 
+/**
+ * Flatten list of events of a tag
+ */
 function flat_list_of_single_tag_events($all_events) {
 	$event_list = array();
 	foreach($all_events as $event_set) {
@@ -2409,6 +2249,9 @@ function flat_list_of_single_tag_events($all_events) {
 	return $event_list;
 }
 
+/**
+ * Execute freebase MQL query
+ */
 function execute_mql_event_query($query) {
 	$jsonquerystr = urlencode(json_encode($query));
 	#run the query
@@ -2423,13 +2266,9 @@ function execute_mql_event_query($query) {
 	return $resultarray;
 }
 
-function execute_sparql_event_query($query) {
-	$config = array('remote_store_endpoint' => 'http://factforge.net/sparql.xml');
-	$store = ARC2::getRemoteStore($config);
-	$rows = $store->query($query, 'rows');
-	return $rows;
-}
-
+/**
+ * Get notable types of a tag
+ */
 function get_notable_tag_type_names($topic) {
 	$output = array();
 	$query = "SELECT * FROM tag_notable_types WHERE tag = :tag;";
@@ -2442,6 +2281,9 @@ function get_notable_tag_type_names($topic) {
 	return $output;
 }
 
+/**
+ * Produce output for a single tag
+ */
 function dec_tag($m, $id = FALSE) {
 	$output = "";
 	$x = arg(1);
@@ -2630,18 +2472,9 @@ function dec_tag($m, $id = FALSE) {
 	return $output;
 }
 
-function merge_event_arrays($linked_events, $related_events) {
-	foreach($related_events as $key=>$value) {
-		if(isset($linked_events[$key])) {
-			$linked_events[$key] = array_merge($linked_events[$key], $value);
-		}
-		else {
-			$linked_events[$key] = $value;
-		}
-	}
-	return $linked_events;
-}
-
+/**
+ * Output event table for timeline
+*/
 function produce_event_table_for_timeline($event) {
 
 	$output = '';
@@ -2668,6 +2501,9 @@ function produce_event_table_for_timeline($event) {
 	return $output;
 }
 
+/**
+ * Output event table
+ */
 function produce_event_table($event) {
 	$rows = array();
 	foreach($event as $key=>$elements) {
@@ -2679,7 +2515,7 @@ function produce_event_table($event) {
 				}
 				//comment this out to remove date links TODO
 				// 			elseif($key == 'start_time' || $key == 'end_time') {
-				// 				$value_string .= l($element, "tag/date/".$element)."</br> ";
+				// 				$value_string .= l($element, "tag/".$element)."</br> ";
 					// 			}
 					else {
 						$value_string .= $element."</br> ";
@@ -2691,35 +2527,18 @@ function produce_event_table($event) {
 		return theme('table', array('rows' => $rows, 'attributes' => array('width' => '50%')));
 }
 
+/**
+ * Output event table for topic
+ */
 function output_event_table_dec_tag($event_id, $topic_types) {
 	$event = load_art_event_dec_tag($event_id, $topic_types);
 
 	return produce_event_table($event);
 }
 
-function output_event_table_tags_timeline($event_id) {
-	$event = load_art_event_without_title_addition($event_id, TRUE);
-
-	$rows = array();
-	foreach($event as $key=>$elements) {
-		$value_string = "";
-		foreach($elements as $element) {
-			if(is_array($element)) {
-				$value_string .= l($element[1], "tag".$element[0])."</br> ";
-			}
-			//comment this out to remove date links TODO
-			// 			elseif($key == 'start_time' || $key == 'end_time') {
-			// 				$value_string .= l($element, "tag/date/".$element)."</br> ";
-			// 			}
-				else {
-					$value_string .= $element."</br> ";
-				}
-		}
-		$rows[] = array($key,$value_string);
-	}
-	return theme('table', array('rows' => $rows, 'attributes' => array('width' => '50%')));
-}
-
+/**
+ * Output event as table
+ */
 function output_event_table($event_id) {
 	$event = load_art_event_without_title_addition($event_id);
 
@@ -2743,6 +2562,9 @@ function output_event_table($event_id) {
 	return theme('table', array('rows' => $rows, 'attributes' => array('width' => '50%')));
 }
 
+/**
+ * Get event type
+ */
 function get_type_of_stored_event($event_id) {
 	$query = "SELECT event_attribute_value.value
 FROM event_attribute_value
@@ -2759,6 +2581,9 @@ event_attribute_value.attribute = 'activity';";
 	}
 }
 
+/**
+ * Get label for event attribute
+ */
 function get_event_label_with_event_attribute_name($event_id, $attribute) {
 	$query = "SELECT event_attribute_value.value, tag_name.name
 	FROM event_attribute_value, tag_name, attribute_name
@@ -2778,6 +2603,9 @@ event_attribute_value.attribute = attribute_name.attribute AND
 	}
 }
 
+/**
+ * get attribute value for event
+ */
 function get_event_value_with_event_attribute_name($event_id, $attribute) {
 	$query = "SELECT event_attribute_value.value, tag_name.name
 	FROM event_attribute_value, tag_name, attribute_name 
@@ -2799,6 +2627,9 @@ event_attribute_value.attribute = attribute_name.attribute AND
 	}
 }
 
+/**
+ * Get label for event
+ */
 function get_event_label($event_id, $attribute) {
 	$query = "SELECT event_attribute_value.value, tag_name.name
 	FROM event_attribute_value, tag_name
@@ -2817,6 +2648,9 @@ function get_event_label($event_id, $attribute) {
 	}
 }
 
+/**
+ * Get values for an event
+ */
 function get_event_value($event_id, $attribute) {
 	$query = "SELECT event_attribute_value.value, tag_name.name
 	FROM event_attribute_value, tag_name
@@ -2837,40 +2671,9 @@ function get_event_value($event_id, $attribute) {
 	}	
 }
 
-function add_event_title($event_id, $topic_types, $output) {
-
-	//try topic name
-	if($event_name = get_topic_name($event_id)) {
-		$output['title'][] = array($event_id,$event_name);
-		return $output;
-	}
-	
-	$event_type = get_type_of_stored_event($event_id);
-
-	//location for education, lived
-	if($event_type == 'Award nomination') {
-		$output['title'][] = get_event_value($event_id, 'award').' nomination';
-		return $output;
-	}
-	if($event_type == 'Award won') {
-		$output['title'][] = get_event_value($event_id, 'award').' win';
-		return $output;
-	}
-	//prize for awards and nominations
-	if($event_type == 'Education') {
-		$output['title'][] = 'Educated at '.get_event_value($event_id, 'location');
-		return $output;		
-	}
-	if($event_type == 'Place lived') {
-		$output['title'][] = 'Lived in '.get_event_value($event_id, 'location');
-		return $output;		
-	}
-
-	return FALSE;
-}
-
-
-
+/**
+ * Retrieve event data for display with added titles to discriminate events of a single tag
+*/
 function load_art_event_dec_tag($event_id, $topic_types = array(), $for_timeline = FALSE) {
 	$query = "SELECT events.name as attribute, events.value, tag_name.name FROM 
 (SELECT attribute_name.name, event_attribute_value.value FROM event_attribute_value, attribute_name
@@ -2998,6 +2801,9 @@ LEFT JOIN tag_name ON tag_name.tag = events.value;";
 	return $output;
 }
 
+/**
+ * Retrieve event data for display
+ */
 function load_art_event_without_title_addition($event_id, $for_timeline = FALSE) {
 	$query = "SELECT events.name as attribute, events.value, tag_name.name FROM
 (SELECT attribute_name.name, event_attribute_value.value FROM event_attribute_value, attribute_name
@@ -3092,44 +2898,10 @@ LEFT JOIN tag_name ON tag_name.tag = events.value;";
 		return $output;
 }
 
-function load_art_event($event_id) {
-	$query = "SELECT attribute, value, tag_name.name FROM event_attribute_value
-	LEFT JOIN tag_name ON event_attribute_value.value = tag_name.tag
-	WHERE event = '".$event_id."'";
-	$result = db_query($query);
-	$output = array();
-
-	//add event title if stored
-	if($event_name = get_topic_name($event_id)) {
-		$output['title'][] = array($event_id,$event_name);
-// 		$output['Title'][] = $event_name;
-	}
-// 	else {
-// 		dpm($event_id);
-// 	}
-	foreach ($result as $record) {
-		if(isset($output[$record->attribute])) {
-			if($record->name) {
-				$output[$record->attribute][] = array($record->value, $record->name);
-			}
-			else {
-				$output[$record->attribute][] = $record->value;
-			}
-		}
-		else {
-			if($record->name) {
-				$output[$record->attribute] = array(array($record->value, $record->name));
-			}
-			else {
-				$output[$record->attribute] = array($record->value);
-			}
-		}
-	}
-	return $output;
-}
-
-
-
+/**
+ * Get events associated with a tag
+ * Handles timestamps differently to retrieve events that span the timestamp
+ */
 function get_all_events_for_tag($topic) {
 	if(is_time_stamp($topic)) {
 		$query = "SELECT CONCAT('time of ', event_attribute_value.value) as reverse_name, event_attribute_value.value as attribute, GROUP_CONCAT(events_start_end_time_table.event) as events
@@ -3190,9 +2962,11 @@ GROUP BY attribute_name.reverse_name;";
 	return $output;
 }
 
+/**
+ * Get events for a setting and event type
+ */
 function get_all_events_for_setting_event_type($location, $year, $event_type, $end = 0) {
 	if($end) {
-		$end_date = $end;//.'-12-31';
 		$query = "SELECT GROUP_CONCAT(combined_result.event) as events, combined_result.activity
 FROM
 (SELECT start_end_location_result.event, start_end_location_result.activity
@@ -3218,8 +2992,8 @@ WHERE event_location2.attribute = location2_attribute_name.attribute AND
 	event_location2.event = event_end_time.event AND
 	event_end_time.attribute = end_time_attribute_name.attribute AND end_time_attribute_name.name = 'end_time') as end_location_result
 ON start_location_result.event = end_location_result.event) as start_end_location_result
-WHERE (start_end_location_result.start_time <= '".$end_date."' AND start_end_location_result.start_time >= '".$year."' AND start_end_location_result.end_time IS NULL) OR
-(start_end_location_result.start_time <= '".$end_date."' AND start_end_location_result.end_time >= '".$year."')
+WHERE (start_end_location_result.start_time <= '".$end."' AND start_end_location_result.start_time >= '".$year."' AND start_end_location_result.end_time IS NULL) OR
+(start_end_location_result.start_time <= '".$end."' AND start_end_location_result.end_time >= '".$year."')
 UNION
 SELECT setting_link_event_id.event_id AS event, event_attribute_value.value as activity FROM setting_link_event_id, event_attribute_value
      WHERE setting_link_event_id.location = '".$location."' AND
@@ -3276,88 +3050,9 @@ GROUP BY combined_result.activity;";
 	return $output;
 }
 
-function get_all_events_for_setting_event_type_old($location, $year, $event_type) {
-	$query = "SELECT GROUP_CONCAT(result_table.event) as events, result_table.value FROM
-	(SELECT setting_link_event_id.event_id AS event, event_attribute_value.value FROM setting_link_event_id, event_attribute_value
-	WHERE setting_link_event_id.location = '".$location."' AND
-	setting_link_event_id.year = '".$year."' AND
-	event_attribute_value.event = setting_link_event_id.event_id AND
-	event_attribute_value.attribute = 'activity' AND
-	event_attribute_value.value = '".$event_type."' UNION
-SELECT event_location.event, event_activity.value
-	FROM event_attribute_value AS event_location, event_attribute_value AS event_time, event_attribute_value AS event_activity, attribute_name as location_attribute_name, attribute_name as time_attribute_name
-	WHERE event_location.attribute = location_attribute_name.attribute AND
-	location_attribute_name.name = 'location' AND
-	event_location.value = '".$location."' AND
-	event_location.event = event_time.event AND
-	event_time.attribute = time_attribute_name.attribute AND
-	(time_attribute_name.name = 'start_time' OR time_attribute_name.name = 'end_time') AND
-	event_time.value LIKE '".$year."%' AND
-	event_activity.event = event_location.event AND
-	event_activity.attribute = 'activity' AND
-event_activity.value = '".$event_type."') as result_table
-	GROUP BY result_table.value;";
-	
-	$result = db_query($query);
-	
-	$output = array();
-	foreach ($result as $record) {
-		$output[$record->value] =  array_unique(explode(',',$record->events));
-	}
-	
-	return $output;	
-}
-
-function get_all_temporal_events_for_story_event_type2($story, $event_type = 'award_nomination') {
-	
-}
-
-function get_all_temporal_events_for_story_event_type($story, $event_type = 'award_nomination') {
-	$query = "SELECT GROUP_CONCAT(event_table.event) as events, event_table.value FROM event_attribute_value as value_table, event_attribute_value as event_table,query_tag, event_attribute_value as time_table, attribute_name, event_attribute_value as activity_table, tag_name WHERE
-	query_tag.id = '".$story."' AND
-	query_tag.tag = tag_name.tag AND
-	query_tag.tag = value_table.value AND
-	value_table.event = event_table.event AND
-	event_table.attribute = 'activity' AND
-activity_table.event = event_table.event AND 
-activity_table.attribute = 'activity' AND
-activity_table.value = '".$event_type."' AND
-time_table.event = event_table.event AND 
-time_table.attribute = attribute_name.attribute AND
-	(attribute_name.name = 'start_time' OR attribute_name.name = 'end_time')
-	GROUP BY event_table.value;";
-
-	$result = db_query($query);
-
-	$output = array();
-	foreach ($result as $record) {
-		$output[$record->value] =  array_unique(explode(',',$record->events));
-	}
-
-	//if tag is itself an event
-	$query = "SELECT DISTINCT event_table.event, attribute_table.value
-FROM query_tag, event_attribute_value as event_table, event_attribute_value as time_table, attribute_name, event_attribute_value as attribute_table
-WHERE query_tag.id = '".$story."' AND
-event_table.event = query_tag.tag AND
-event_table.event = time_table.event AND
-event_table.event = attribute_table.event AND
-attribute_table.attribute = 'activity' AND
-attribute_table.value = '".$event_type."' AND
-time_table.attribute = attribute_name.attribute AND
-(attribute_name.name = 'start_time' OR attribute_name.name = 'end_time');";
-	$result = db_query($query);
-	foreach ($result as $record) {
-		if(isset($output[$record->value])) {
-			$output[$record->value] = array_unique(array_merge($output[$record->value], array($record->event)));
-		}
-		else {
-			$output[$record->value] = array($record->event);
-		}
-	}
-	return $output;
-
-}
-
+/**
+ * Get events of a story that have time data and can therefore be placed on a timeline
+ */
 function get_all_temporal_events_for_story2($story, $event_type = FALSE) {
 	$tag_array = tags_of_a_story($story);
 	
@@ -3523,45 +3218,10 @@ time_table.attribute = attribute_name.attribute AND
 	
 	
 }
-function get_all_temporal_events_for_story($story) {
-	$query = "SELECT GROUP_CONCAT(event_table.event) as events, event_table.value FROM event_attribute_value as value_table, event_attribute_value as event_table,query_tag, event_attribute_value as time_table, attribute_name WHERE
-	query_tag.id = '".$story."' AND
-	query_tag.tag = value_table.value AND
-	value_table.event = event_table.event AND
-	event_table.attribute = 'activity' AND
-time_table.event = event_table.event AND 
-time_table.attribute = attribute_name.attribute AND
-	(attribute_name.name = 'start_time' OR attribute_name.name = 'end_time')
-	GROUP BY event_table.value;";
-	$result = db_query($query);
 
-	$output = array();
-	foreach ($result as $record) {
-		$output[$record->value] =  array_unique(explode(',',$record->events));
-	}
-
-	//if tag is itself an event
-	$query = "SELECT DISTINCT event_table.event, attribute_table.value
-FROM query_tag, event_attribute_value as event_table, event_attribute_value as time_table, attribute_name, event_attribute_value as attribute_table
-WHERE query_tag.id = '".$story."' AND
-event_table.event = query_tag.tag AND
-event_table.event = time_table.event AND
-event_table.event = attribute_table.event AND
-attribute_table.attribute = 'activity' AND
-time_table.attribute = attribute_name.attribute AND
-(attribute_name.name = 'start_time' OR attribute_name.name = 'end_time');";
-	$result = db_query($query);
-	foreach ($result as $record) {
-		if(isset($output[$record->value])) {
-			$output[$record->value] = array_unique(array_merge($output[$record->value], array($record->event)));
-		}
-		else {
-			$output[$record->value] = array($record->event);
-		}
-	}	
-	return $output;
-}
-
+/**
+ * Get the tags of a story
+ */
 function tags_of_a_story($story) {
 	$query = "SELECT query_tag.tag FROM query_tag
 WHERE query_tag.id = '".$story."';";
@@ -3575,6 +3235,9 @@ WHERE query_tag.id = '".$story."';";
 	return $output;
 }
 
+/**
+ * Get names of the tags/topics of a story
+ */
 function get_tags_names_for_a_story($story) {
 	$query = "SELECT query_tag.tag, tag_name.name FROM query_tag 
 LEFT JOIN tag_name ON query_tag.tag = tag_name.tag
@@ -3589,37 +3252,12 @@ WHERE query_tag.id = '".$story."';";
 	return $output;
 }
 
+/**
+ * Get events for a setting
+ * All settings should now have an end date and use the first query
+ */
 function get_all_events_for_setting($location, $year, $end = 0) {
 	if($end) {
-		$end_date = $end;//.'-12-31';
-		$query = "SELECT GROUP_CONCAT(combined_result.event) as events, combined_result.activity
-FROM
-(SELECT start_end_location_result.event, start_end_location_result.activity
-FROM
-(SELECT start_location_result.event, start_location_result.location, start_location_result.activity, start_location_result.start_time, end_location_result.end_time
-FROM 
-(SELECT event_location.event, event_location.value as location, event_start_time.value as start_time, event_activity.value as activity
-FROM location_container, event_attribute_value as event_start_time, event_attribute_value AS event_location, event_attribute_value AS event_activity, attribute_name as start_time_attribute_name, attribute_name as location_attribute_name
-WHERE event_location.attribute = location_attribute_name.attribute AND
-	location_attribute_name.name = 'location' AND
-	event_location.value = location_container.container AND location_container.location = '".$location."' AND
-	event_activity.event = event_location.event AND
-	event_activity.attribute = 'activity' AND
-	event_location.event = event_start_time.event AND
-	event_start_time.attribute = start_time_attribute_name.attribute AND start_time_attribute_name.name = 'start_time') as start_location_result
-LEFT JOIN 
-(SELECT event_location2.event, event_location2.value as location, event_end_time.value as end_time
-FROM location_container, event_attribute_value as event_end_time, event_attribute_value AS event_location2, attribute_name as end_time_attribute_name, attribute_name as location2_attribute_name
-WHERE event_location2.attribute = location2_attribute_name.attribute AND
-	location2_attribute_name.name = 'location' AND
-	event_location2.value = location_container.container AND location_container.location =  '".$location."' AND
-	event_location2.event = event_end_time.event AND
-	event_end_time.attribute = end_time_attribute_name.attribute AND end_time_attribute_name.name = 'end_time') as end_location_result
-ON start_location_result.event = end_location_result.event) as start_end_location_result
-WHERE (start_end_location_result.start_time <= '".$end_date."' AND start_end_location_result.start_time >= '".$year."' AND start_end_location_result.end_time IS NULL) OR
-(start_end_location_result.start_time <= '".$end_date."' AND start_end_location_result.end_time >= '".$year."')) as combined_result
-GROUP BY combined_result.activity;";
-
 		$query = "SELECT GROUP_CONCAT(combined_result.event) as events, combined_result.activity
 FROM
 (SELECT start_end_location_result.event, start_end_location_result.activity
@@ -3673,39 +3311,6 @@ GROUP BY combined_result.activity;";
 
 	}
 	else {
-// 		$query = "SELECT GROUP_CONCAT(combined_result.event) as events, combined_result.activity
-// FROM
-// (SELECT start_end_location_result.event, start_end_location_result.activity
-// FROM
-// (SELECT start_location_result.event, start_location_result.location, start_location_result.activity, start_location_result.start_time, end_location_result.end_time
-// FROM
-// (SELECT event_location.event, event_location.value as location, event_start_time.value as start_time, event_activity.value as activity
-// FROM event_attribute_value as event_start_time, event_attribute_value AS event_location, event_attribute_value AS event_activity, attribute_name as start_time_attribute_name, attribute_name as location_attribute_name
-// WHERE event_location.attribute = location_attribute_name.attribute AND
-//      location_attribute_name.name = 'location' AND
-//      event_location.value = '".$location."' AND
-//      event_location.event = event_start_time.event AND
-//      event_activity.event = event_location.event AND
-//      event_activity.attribute = 'activity' AND
-//      event_start_time.attribute = start_time_attribute_name.attribute AND start_time_attribute_name.name = 'start_time') as start_location_result
-// LEFT JOIN
-// (SELECT event_location2.event, event_location2.value as location, event_end_time.value as end_time
-// FROM event_attribute_value as event_end_time, event_attribute_value AS event_location2, attribute_name as end_time_attribute_name, attribute_name as location2_attribute_name
-// WHERE event_location2.attribute = location2_attribute_name.attribute AND
-//      location2_attribute_name.name = 'location' AND
-//      event_location2.value = '".$location."' AND
-//      event_location2.event = event_end_time.event AND
-//      event_end_time.attribute = end_time_attribute_name.attribute AND end_time_attribute_name.name = 'end_time') as end_location_result
-// ON start_location_result.event = end_location_result.event) as start_end_location_result
-// WHERE (SUBSTRING(start_end_location_result.start_time, 1, 4) = '".$year."' AND start_end_location_result.end_time IS NULL) OR
-// (SUBSTRING(start_end_location_result.start_time, 1, 4) <= '".$year."' AND SUBSTRING(start_end_location_result.end_time, 1, 4)  >= '".$year."')
-// UNION
-// SELECT setting_link_event_id.event_id AS event, event_attribute_value.value as activity FROM setting_link_event_id, event_attribute_value
-//      WHERE setting_link_event_id.location = '".$location."' AND
-//      setting_link_event_id.year = '".$year."' AND
-//      event_attribute_value.event = setting_link_event_id.event_id AND
-//      event_attribute_value.attribute = 'activity') as combined_result
-// GROUP BY combined_result.activity;";
 		$query = "SELECT GROUP_CONCAT(combined_result.event) as events, combined_result.activity
 FROM
 (SELECT start_end_location_result.event, start_end_location_result.activity
@@ -3768,43 +3373,9 @@ GROUP BY combined_result.activity;";
 	return $output;
 }
 
-function get_all_events_for_setting_old($location, $year, $end = 0) {
-	if($end) {
-		$year_field = $year."-".$end;
-	}
-	else {
-		$year_field = $year;
-	}
-	$query = "SELECT GROUP_CONCAT(result_table.event) as events, result_table.value FROM
-	(SELECT setting_link_event_id.event_id AS event, event_attribute_value.value FROM setting_link_event_id, event_attribute_value
-	WHERE setting_link_event_id.location = '".$location."' AND
-	setting_link_event_id.year = '".$year_field."' AND
-	event_attribute_value.event = setting_link_event_id.event_id AND
-	event_attribute_value.attribute = 'activity' UNION
-	SELECT event_location.event, event_activity.value
-	FROM event_attribute_value AS event_location, event_attribute_value AS event_time, event_attribute_value AS event_activity, attribute_name as location_attribute_name, attribute_name as time_attribute_name
-	WHERE event_location.attribute = location_attribute_name.attribute AND
-	location_attribute_name.name = 'location' AND
-	event_location.value = '".$location."' AND
-	event_location.event = event_time.event AND
-	event_time.attribute = time_attribute_name.attribute AND
-	(time_attribute_name.name = 'start_time' OR time_attribute_name.name = 'end_time') AND
-	event_time.value LIKE '".$year."%' AND
-	event_activity.event = event_location.event AND
-	event_activity.attribute = 'activity') as result_table
-	GROUP BY result_table.value;";
-
-	$result = db_query($query);
-	
-	$output = array();
-	foreach ($result as $record) {
-		$output[$record->value] =  array_unique(explode(',',$record->events));
-	}
-
-	return $output;	
-}
-
-
+/**
+ * Get events of a story and its tag list
+ */
 function get_all_events_for_story2($story, $tag_array) {
 	$dates = array();
 	$nondates = array();
@@ -3904,167 +3475,10 @@ time_table.attribute = attribute_name.attribute AND
 	return $output;	
 }
 
-
-function get_all_events_for_story($story) {
-	$query = "SELECT GROUP_CONCAT(event_table.event) as events, event_table.value FROM event_attribute_value as value_table, event_attribute_value as event_table,query_tag WHERE
-	query_tag.id = '".$story."' AND
-	query_tag.tag = value_table.value AND
-	value_table.event = event_table.event AND
-	event_table.attribute = 'activity'
-			GROUP BY event_table.value;";
-	
-	$query = "SELECT GROUP_CONCAT(event_table.event) as events, event_table.value FROM event_attribute_value as value_table, event_attribute_value as event_table,query_tag, tag_name WHERE
-	query_tag.id = '".$story."' AND
-	query_tag.tag = value_table.value AND
-	value_table.event = event_table.event AND
-	event_table.attribute = 'activity' AND
-	query_tag.tag = tag_name.tag
-	GROUP BY event_table.value;";
-
-	$result = db_query($query);
-	
-	$output = array();
-	foreach ($result as $record) {
-		$output[$record->value] =  array_unique(explode(',',$record->events));
-	}
-
-	//if tag is itself an event
-	$query = "SELECT DISTINCT event_table.event, attribute_table.value
-FROM query_tag, event_attribute_value as event_table, event_attribute_value as time_table, attribute_name, event_attribute_value as attribute_table
-WHERE query_tag.id = '".$story."' AND
-event_table.event = query_tag.tag AND
-event_table.event = time_table.event AND
-event_table.event = attribute_table.event AND
-attribute_table.attribute = 'activity' AND
-time_table.attribute = attribute_name.attribute AND
-(attribute_name.name = 'start_time' OR attribute_name.name = 'end_time');";
-	$result = db_query($query);
-	foreach ($result as $record) {
-		if(isset($output[$record->value])) {
- 			$output[$record->value] = array_unique(array_merge($output[$record->value], array($record->event)));
-		}
-		else {
- 			$output[$record->value] = array($record->event);
-		}
-	}
-
-	return $output;
-}
-
+/**
+ * Get settings for a story
+ */
 function get_n_matching_settings_for_a_story2($story, $n = 5) {
-// 	$query = "SELECT COUNT(DISTINCT event_location_start.tag) as tags, COUNT(DISTINCT event_location_start.event) as frequency, event_location_start.location, SUBSTRING(event_location_start.start,1,4) as start, SUBSTRING(event_end.end,1,4) as end, tag_name.name 
-// FROM query_tag as q, tag_name,
-// (			
-// SELECT query_tag.tag, event_attribute_value.event, location_table.value as location, start_table.value as start
-// FROM query_tag, event_attribute_value, event_attribute_value as location_table, event_attribute_value as start_table, attribute_name as location_attribute_name, attribute_name as time_attribute_name, tag_name
-// WHERE query_tag.id = '".$story."' AND 
-// query_tag.tag = tag_name.tag AND
-// (event_attribute_value.value = query_tag.tag OR event_attribute_value.event = query_tag.tag) AND 
-// event_attribute_value.event = location_table.event AND
-// event_attribute_value.event = start_table.event AND
-// location_table.attribute = location_attribute_name.attribute AND
-// location_attribute_name.name = 'location' AND
-// start_table.attribute = time_attribute_name.attribute AND 
-// time_attribute_name.name = 'start_time'	
-// ) as event_location_start
-// LEFT JOIN 
-// (SELECT event_attribute_value.event, end_table.value as end
-// FROM query_tag, event_attribute_value, event_attribute_value as end_table, attribute_name as time_attribute_name
-// WHERE query_tag.id = '".$story."' AND 
-// (event_attribute_value.value = query_tag.tag OR event_attribute_value.event = query_tag.tag) AND 
-// event_attribute_value.event = end_table.event AND
-// end_table.attribute = time_attribute_name.attribute AND 
-// time_attribute_name.name = 'end_time') as event_end ON event_location_start.event = event_end.event
-// WHERE q.id = '".$story."' AND 
-// (event_location_start.location = q.tag OR SUBSTRING(event_location_start.start,1,4) = q.tag OR SUBSTRING(event_end.end,1,4) = q.tag) AND
-// tag_name.tag = event_location_start.location
-// GROUP BY event_location_start.location, event_location_start.start, event_end.end
-// ORDER BY tags DESC, frequency DESC LIMIT ".$n.";";
-// 	$query = "SELECT COUNT(DISTINCT event_location_start.tag) as tags, COUNT(DISTINCT event_location_start.event) as frequency, event_location_start.location, SUBSTRING(event_location_start.start,1,4) as start, SUBSTRING(event_end.end,1,4) as end, tag_name.name
-// FROM query_tag as q, tag_name,
-// (
-// SELECT events_table.tag, events_table.event, events_table.location, event_start_table.start
-// FROM
-// (SELECT query_tag.tag, event_attribute_value.event, location_table.value as location 
-// FROM query_tag, event_attribute_value, event_attribute_value as location_table, event_attribute_value as start_table, attribute_name as location_attribute_name, attribute_name as time_attribute_name, tag_name
-// WHERE query_tag.id = '".$story."' AND 
-// query_tag.tag = tag_name.tag AND
-// (event_attribute_value.value = query_tag.tag OR event_attribute_value.event = query_tag.tag) AND 
-// event_attribute_value.event = location_table.event AND
-// event_attribute_value.event = start_table.event AND
-// location_table.attribute = location_attribute_name.attribute AND
-// location_attribute_name.name = 'location' AND
-// ((start_table.attribute = time_attribute_name.attribute AND 
-// time_attribute_name.name = 'start_time') OR 
-// (start_table.attribute = time_attribute_name.attribute AND 
-// time_attribute_name.name = 'end_time'))) as events_table
-// LEFT JOIN 
-// (SELECT query_tag.tag, event_attribute_value.event, location_table.value as location, start_table.value as start
-// FROM query_tag, event_attribute_value, event_attribute_value as location_table, event_attribute_value as start_table, attribute_name as location_attribute_name, attribute_name as time_attribute_name, tag_name
-// WHERE query_tag.id = '".$story."' AND 
-// query_tag.tag = tag_name.tag AND
-// (event_attribute_value.value = query_tag.tag OR event_attribute_value.event = query_tag.tag) AND 
-// event_attribute_value.event = location_table.event AND
-// event_attribute_value.event = start_table.event AND
-// location_table.attribute = location_attribute_name.attribute AND
-// location_attribute_name.name = 'location' AND
-// start_table.attribute = time_attribute_name.attribute AND 
-// time_attribute_name.name = 'start_time') as event_start_table ON event_start_table.event = events_table.event	
-// ) as event_location_start
-// LEFT JOIN
-// (SELECT event_attribute_value.event, end_table.value as end
-// FROM query_tag, event_attribute_value, event_attribute_value as end_table, attribute_name as time_attribute_name
-// WHERE query_tag.id = '".$story."' AND
-// (event_attribute_value.value = query_tag.tag OR event_attribute_value.event = query_tag.tag) AND
-// event_attribute_value.event = end_table.event AND
-// end_table.attribute = time_attribute_name.attribute AND
-// time_attribute_name.name = 'end_time') as event_end ON event_location_start.event = event_end.event
-// WHERE q.id = '".$story."' AND
-//  (event_location_start.location = q.tag OR SUBSTRING(event_location_start.start,1,4) = q.tag OR SUBSTRING(event_end.end,1,4) = q.tag) AND
-// tag_name.tag = event_location_start.location
-// GROUP BY event_location_start.location, event_location_start.start, event_end.end
-// ORDER BY tags DESC, frequency DESC LIMIT ".$n.";";
-// 	$query = "SELECT *
-// FROM
-// (SELECT COUNT(DISTINCT event_location_start.tag) as tags, COUNT(DISTINCT event_location_start.event) as frequency, event_location_start.location, event_location_start.start, event_end.end,1,4 
-// FROM 
-// (
-// SELECT events_table.tag, events_table.event, events_table.location, event_start_table.start
-// FROM
-// (SELECT query_tag.tag, event_attribute_value.event, location_table.value as location 
-// FROM query_tag, event_attribute_value, event_attribute_value as location_table, event_attribute_value as start_table, attribute_name as location_attribute_name, attribute_name as time_attribute_name
-// WHERE query_tag.id = '".$story."' AND 
-// (event_attribute_value.value = query_tag.tag OR event_attribute_value.event = query_tag.tag) AND 
-// event_attribute_value.event = location_table.event AND
-// event_attribute_value.event = start_table.event AND
-// location_table.attribute = location_attribute_name.attribute AND
-// location_attribute_name.name = 'location' AND
-// ((start_table.attribute = time_attribute_name.attribute AND 
-// time_attribute_name.name = 'start_time') OR 
-// (start_table.attribute = time_attribute_name.attribute AND 
-// time_attribute_name.name = 'end_time'))) as events_table
-// LEFT JOIN 
-// (SELECT query_tag.tag, event_attribute_value.event, location_table.value as location, start_table.value as start
-// FROM query_tag, event_attribute_value, event_attribute_value as location_table, event_attribute_value as start_table, attribute_name as location_attribute_name, attribute_name as time_attribute_name
-// WHERE query_tag.id = '".$story."' AND 
-// (event_attribute_value.value = query_tag.tag OR event_attribute_value.event = query_tag.tag) AND 
-// event_attribute_value.event = location_table.event AND
-// event_attribute_value.event = start_table.event AND
-// location_table.attribute = location_attribute_name.attribute AND
-// location_attribute_name.name = 'location' AND
-// start_table.attribute = time_attribute_name.attribute AND 
-// time_attribute_name.name = 'start_time') as event_start_table ON event_start_table.event = events_table.event	
-// ) as event_location_start
-// LEFT JOIN
-// (SELECT event_attribute_value.event, end_table.value as end
-// FROM query_tag, event_attribute_value, event_attribute_value as end_table, attribute_name as time_attribute_name
-// WHERE query_tag.id = '".$story."' AND
-// (event_attribute_value.value = query_tag.tag OR event_attribute_value.event = query_tag.tag) AND
-// event_attribute_value.event = end_table.event AND
-// end_table.attribute = time_attribute_name.attribute AND
-// time_attribute_name.name = 'end_time') as event_end ON event_location_start.event = event_end.event
-// GROUP BY event_location_start.location, event_location_start.start, event_end.end) as frequency_table
-// JOIN tag_name ON tag_name.tag = frequency_table.location ORDER BY tags DESC, frequency DESC LIMIT ".$n.";";
 	$query = "SELECT *
 FROM
 (SELECT COUNT(DISTINCT event_location_start.tag) as tags, COUNT(DISTINCT event_location_start.event) as frequency, event_location_start.location, event_location_start.start, event_end.end 
@@ -4120,175 +3534,9 @@ JOIN tag_name ON tag_name.tag = frequency_table.location ORDER BY tags DESC, fre
 	return $output;
 }
 
-function get_n_matching_settings_for_a_story($story, $n = 5) {
-	$query = "SELECT result.location, result.time, tag_name.name FROM tag_name, 
-(SELECT location_table.value as location, time_table.value as time, COUNT(*) as frequency
-FROM event_attribute_value, query_tag, event_attribute_value AS location_table, attribute_name as location_attribute_name, event_attribute_value AS time_table, attribute_name as time_attribute_name 
-WHERE query_tag.id = '".$story."' AND 
-event_attribute_value.value = query_tag.tag AND
-event_attribute_value.event = location_table.event AND
-location_table.attribute = location_attribute_name.attribute AND
-location_attribute_name.name = 'location' AND
-event_attribute_value.event = time_table.event AND 
-time_table.attribute = time_attribute_name.attribute AND 
-(time_attribute_name.name = 'start_time' OR time_attribute_name.name = 'end_time') AND EXISTS (SELECT query_tag.tag 
-	FROM query_tag 
-	WHERE query_tag.id = '".$story."' AND 
-	(location_table.value = query_tag.tag OR 
-	time_table.value = query_tag.tag))
-GROUP BY location_table.value, time_table.value 
-ORDER BY frequency DESC) as result 
-WHERE result.location = tag_name.tag LIMIT ".$n.";";
-
-	$result = db_query($query);
-	
-	$output = array();
-	foreach ($result as $record) {
-		$record->time = substr($record->time,0,4);
-		if(isset($output[$record->location.'-'.$record->time])) {
-			$prev = $output[$record->location.'-'.$record->time];
-			$record->count = $prev->count + 1;
-		}
-		else {
-			$record->count = 1;
-		}
-		$output[$record->location.'-'.$record->time] = $record;
-			
-	}
-
-	uasort($output, 'setting_frequency');
-	if(count($output) > $n) {
-		$output = array_slice($output, 0, $n);
-	}
-	
-	return $output;
-}
-
-function get_n_nonmatching_settings_for_a_story2($story, $n = 5) {
-	$query = "SELECT COUNT(DISTINCT event_location_start.tag) as tags, COUNT(DISTINCT event_location_start.event) as frequency, event_location_start.location, SUBSTRING(event_location_start.start,1,4) as start, SUBSTRING(event_end.end,1,4) as end, tag_name.name 
-FROM tag_name,			
-(		
-SELECT query_tag.tag, event_attribute_value.event, location_table.value as location, start_table.value as start
-FROM query_tag, event_attribute_value, event_attribute_value as location_table, event_attribute_value as start_table, attribute_name as location_attribute_name, attribute_name as time_attribute_name
-WHERE query_tag.id = '".$story."' AND 
-(event_attribute_value.value = query_tag.tag OR event_attribute_value.event = query_tag.tag) AND 
-event_attribute_value.event = location_table.event AND
-event_attribute_value.event = start_table.event AND
-location_table.attribute = location_attribute_name.attribute AND
-location_attribute_name.name = 'location' AND
-start_table.attribute = time_attribute_name.attribute AND 
-time_attribute_name.name = 'start_time'	
-	) as event_location_start
-LEFT JOIN 
-(SELECT event_attribute_value.event, end_table.value as end
-FROM query_tag, event_attribute_value, event_attribute_value as end_table, attribute_name as time_attribute_name
-WHERE query_tag.id = '".$story."' AND 
-(event_attribute_value.value = query_tag.tag OR event_attribute_value.event = query_tag.tag) AND 
-event_attribute_value.event = end_table.event AND
-end_table.attribute = time_attribute_name.attribute AND 
-time_attribute_name.name = 'end_time') as event_end ON event_location_start.event = event_end.event
-WHERE event_location_start.location = tag_name.tag AND NOT EXISTS (SELECT q.tag FROM  query_tag as q WHERE
-q.id = '".$story."' AND 
-(event_location_start.location = q.tag OR SUBSTRING(event_location_start.start,1,4) = q.tag OR SUBSTRING(event_end.end,1,4) = q.tag))
-GROUP BY event_location_start.location, event_location_start.start, event_end.end
-ORDER BY tags DESC, frequency DESC LIMIT ".$n.";";
-	$query = "SELECT COUNT(DISTINCT event_location_start.tag) as tags, COUNT(DISTINCT event_location_start.event) as frequency, event_location_start.location, SUBSTRING(event_location_start.start,1,4) as start, SUBSTRING(event_end.end,1,4) as end, tag_name.name 
-FROM tag_name,			
-(
-SELECT events_table.tag, events_table.event, events_table.location, event_start_table.start
-FROM
-(SELECT query_tag.tag, event_attribute_value.event, location_table.value as location 
-FROM query_tag, event_attribute_value, event_attribute_value as location_table, event_attribute_value as start_table, attribute_name as location_attribute_name, attribute_name as time_attribute_name, tag_name
-WHERE query_tag.id = '".$story."' AND 
-query_tag.tag = tag_name.tag AND
-(event_attribute_value.value = query_tag.tag OR event_attribute_value.event = query_tag.tag) AND 
-event_attribute_value.event = location_table.event AND
-event_attribute_value.event = start_table.event AND
-location_table.attribute = location_attribute_name.attribute AND
-location_attribute_name.name = 'location' AND
-((start_table.attribute = time_attribute_name.attribute AND 
-time_attribute_name.name = 'start_time') OR 
-(start_table.attribute = time_attribute_name.attribute AND 
-time_attribute_name.name = 'end_time'))) as events_table
-LEFT JOIN 
-(SELECT query_tag.tag, event_attribute_value.event, location_table.value as location, start_table.value as start
-FROM query_tag, event_attribute_value, event_attribute_value as location_table, event_attribute_value as start_table, attribute_name as location_attribute_name, attribute_name as time_attribute_name, tag_name
-WHERE query_tag.id = '".$story."' AND 
-query_tag.tag = tag_name.tag AND
-(event_attribute_value.value = query_tag.tag OR event_attribute_value.event = query_tag.tag) AND 
-event_attribute_value.event = location_table.event AND
-event_attribute_value.event = start_table.event AND
-location_table.attribute = location_attribute_name.attribute AND
-location_attribute_name.name = 'location' AND
-start_table.attribute = time_attribute_name.attribute AND 
-time_attribute_name.name = 'start_time') as event_start_table ON event_start_table.event = events_table.event
-) as event_location_start
-LEFT JOIN 
-(SELECT event_attribute_value.event, end_table.value as end
-FROM query_tag, event_attribute_value, event_attribute_value as end_table, attribute_name as time_attribute_name
-WHERE query_tag.id = '".$story."' AND 
-(event_attribute_value.value = query_tag.tag OR event_attribute_value.event = query_tag.tag) AND 
-event_attribute_value.event = end_table.event AND
-end_table.attribute = time_attribute_name.attribute AND 
-time_attribute_name.name = 'end_time') as event_end ON event_location_start.event = event_end.event
-WHERE event_location_start.location = tag_name.tag AND NOT EXISTS (SELECT q.tag FROM  query_tag as q WHERE
-q.id = '".$story."' AND 
-(event_location_start.location = q.tag OR SUBSTRING(event_location_start.start,1,4) = q.tag OR SUBSTRING(event_end.end,1,4) = q.tag))
-GROUP BY event_location_start.location, event_location_start.start, event_end.end
-ORDER BY tags DESC, frequency DESC LIMIT ".$n.";";
-
-	$output = array();
-	$result = db_query($query);
-	foreach ($result as $record) {
-		$output[] = $record;
-	}
-	return $output;	
-}
-
-function get_n_nonmatching_settings_for_a_story($story, $n = 5) {
-	$query = "SELECT result.location, result.time, tag_name.name FROM tag_name, 
-(SELECT location_table.value as location, time_table.value as time, COUNT(*) as frequency
-FROM event_attribute_value, query_tag, event_attribute_value AS location_table, attribute_name as location_attribute_name, event_attribute_value AS time_table, attribute_name as time_attribute_name 
-WHERE query_tag.id = '".$story."' AND 
-event_attribute_value.value = query_tag.tag AND
-event_attribute_value.event = location_table.event AND
-location_table.attribute = location_attribute_name.attribute AND
-location_attribute_name.name = 'location' AND
-event_attribute_value.event = time_table.event AND 
-time_table.attribute = time_attribute_name.attribute AND 
-(time_attribute_name.name = 'start_time' OR time_attribute_name.name = 'end_time') AND NOT EXISTS (SELECT query_tag.tag 
-	FROM query_tag 
-	WHERE query_tag.id = '".$story."' AND 
-	(location_table.value = query_tag.tag OR 
-	time_table.value = query_tag.tag))
-GROUP BY location_table.value, time_table.value 
-ORDER BY frequency DESC) as result 
-WHERE result.location = tag_name.tag LIMIT ".$n.";";
-
-	$result = db_query($query);
-	
-	$output = array();
-	foreach ($result as $record) {
-		$record->time = substr($record->time,0,4);
-		if(isset($output[$record->location.'-'.$record->time])) {
-			$prev = $output[$record->location.'-'.$record->time];
-			$record->count = $prev->count + 1;
-		}
-		else {
-			$record->count = 1;
-		}
-		$output[$record->location.'-'.$record->time] = $record;
-			
-	}
-	
-	uasort($output, 'setting_frequency');
-	if(count($output) > $n) {
-		$output = array_slice($output, 0, $n);
-	}
-	
-	return $output;
-}
-
+/**
+ * Calculate settings for a tag
+ */
 function get_n_settings_for_a_tag($topic, $n = 5) {
 	$query = "SELECT result_list.location, result_list.name, result_list.start_time, result_list.end_time, COUNT(*) as frequency
 FROM
@@ -4340,140 +3588,10 @@ ORDER BY frequency DESC LIMIT ".$n.";";
 
 	return $output;
 }
-function get_n_settings_for_a_tag2($topic, $n = 5) {
 
-// 	$query = "SELECT result.location, result.time, tag_name.name FROM tag_name, 
-// (SELECT location_table.value as location, time_table.value as time, COUNT(*) as frequency
-// FROM event_attribute_value, event_attribute_value AS location_table, attribute_name as location_attribute_name, event_attribute_value AS time_table, attribute_name as time_attribute_name 
-// WHERE event_attribute_value.value = '".$topic."' AND
-// event_attribute_value.event = location_table.event AND
-// location_table.attribute = location_attribute_name.attribute AND
-// location_attribute_name.name = 'location' AND
-// event_attribute_value.event = time_table.event AND 
-// time_table.attribute = time_attribute_name.attribute AND 
-// (time_attribute_name.name = 'start_time' OR time_attribute_name.name = 'end_time') 
-// GROUP BY location_table.value, time_table.value 
-// ORDER BY frequency DESC) as result 
-// WHERE result.location = tag_name.tag; LIMIT ".$n.";";
-	
-	$query = "SELECT event_name_start_table.event, event_name_start_table.location, event_name_start_table.name, event_name_start_table.start_time, event_end_table.end_time
-FROM
-(SELECT events_name_table.event, events_name_table.location, events_name_table.name, event_start_table.start_time
-FROM
-(SELECT events_table.event, events_table.location, tag_name.name
-FROM
-(SELECT DISTINCT event_value.event, event_location.value as location
-FROM event_attribute_value as event_value, event_attribute_value as event_location, event_attribute_value as event_time, attribute_name as location_attribute_name, attribute_name as time_attribute_name
-WHERE (event_value.value = '".$topic."' OR event_value.event = '".$topic."') AND 
-event_value.event = event_location.event AND
-event_location.attribute = location_attribute_name.attribute AND
-location_attribute_name.name = 'location' AND
-event_value.event = event_time.event AND
-((event_time.attribute = time_attribute_name.attribute AND
-time_attribute_name.name = 'start_time') OR (event_time.attribute = time_attribute_name.attribute AND
-time_attribute_name.name = 'end_time'))) as events_table
-LEFT JOIN tag_name ON events_table.location = tag_name.tag) as events_name_table
-LEFT JOIN
-(SELECT event_value.event, event_time.value as start_time
-FROM event_attribute_value as event_value, event_attribute_value as event_location, event_attribute_value as event_time, attribute_name as location_attribute_name, attribute_name as time_attribute_name
-WHERE (event_value.value = '".$topic."' OR event_value.event = '".$topic."') AND 
-event_value.event = event_location.event AND
-event_location.attribute = location_attribute_name.attribute AND
-location_attribute_name.name = 'location' AND
-event_value.event = event_time.event AND
-event_time.attribute = time_attribute_name.attribute AND
-time_attribute_name.name = 'start_time') as event_start_table ON event_start_table.event = events_name_table.event) as event_name_start_table
-LEFT JOIN
-(SELECT event_value.event, event_time.value as end_time
-FROM event_attribute_value as event_value, event_attribute_value as event_location, event_attribute_value as event_time, attribute_name as location_attribute_name, attribute_name as time_attribute_name
-WHERE (event_value.value = '".$topic."' OR event_value.event = '".$topic."') AND 
-event_value.event = event_location.event AND
-event_location.attribute = location_attribute_name.attribute AND
-location_attribute_name.name = 'location' AND
-event_value.event = event_time.event AND
-event_time.attribute = time_attribute_name.attribute AND
-time_attribute_name.name = 'end_time') as event_end_table ON event_end_table.event = event_name_start_table.event;";
-
-	$result = db_query($query);
-
-	$output = array();
-	foreach ($result as $record) {
-		if($record->start_time && $record->end_time) {
-			$record->start_time = substr($record->start_time,0,4);
-			$record->end_time = substr($record->end_time,0,4);
-			if(isset($output[$record->location.'-'.$record->start_time.'-'.$record->end_time]['count'])) {
-				$output[$record->location.'-'.$record->start_time.'-'.$record->end_time]['count'] = $output[$record->location.'-'.$record->start_time.'-'.$record->end_time]['count'] +1;
-			}
-			else {
-				$output[$record->location.'-'.$record->start_time.'-'.$record->end_time]['count'] = 1;
-				$output[$record->location.'-'.$record->start_time.'-'.$record->end_time]['start_time'] = $record->start_time;
-				$output[$record->location.'-'.$record->start_time.'-'.$record->end_time]['end_time'] = $record->end_time;
-				$output[$record->location.'-'.$record->start_time.'-'.$record->end_time]['location'] = $record->location;
-				$output[$record->location.'-'.$record->start_time.'-'.$record->end_time]['name'] = $record->name;
-			}
-		}
-		elseif($record->start_time) {
-			$record->start_time = substr($record->start_time,0,4);
-			if(isset($output[$record->location.'-'.$record->start_time]['count'])) {
-				$record->start_time = substr($record->start_time,0,4);
-				$output[$record->location.'-'.$record->start_time]['count'] = $output[$record->location.'-'.$record->start_time]['count'] +1;
-			}
-			else {
-				$output[$record->location.'-'.$record->start_time]['count'] = 1;
-				$output[$record->location.'-'.$record->start_time]['start_time'] = $record->start_time;
-				$output[$record->location.'-'.$record->start_time]['location'] = $record->location;
-				$output[$record->location.'-'.$record->start_time]['name'] = $record->name;
-			}			
-		}
-		elseif($record->end_time) {
-			$record->end_time = substr($record->end_time,0,4);
-			if(isset($output[$record->location.'-'.$record->end_time]['count'])) {
-				$record->end_time = substr($record->end_time,0,4);
-				$output[$record->location.'-'.$record->end_time]['count'] = $output[$record->location.'-'.$record->end_time]['count'] +1;
-			}
-			else {
-				$output[$record->location.'-'.$record->end_time]['count'] = 1;
-				$output[$record->location.'-'.$record->end_time]['start_time'] = $record->end_time;
-				$output[$record->location.'-'.$record->end_time]['location'] = $record->location;
-				$output[$record->location.'-'.$record->end_time]['name'] = $record->name;
-			}			
-		}
-	}
-
-// 		$record->time = substr($record->time,0,4);
-// 		if(isset($output[$record->location.'-'.$record->time])) {
-// 			$prev = $output[$record->location.'-'.$record->time];
-// 			$record->count = $prev->count + 1;
-// 		}
-// 		else {
-// 			$record->count = 1;
-// 		}
-// 		$output[$record->location.'-'.$record->time] = $record;
-			
-// 	}
-
-	uasort($output, 'setting_count_frequency');
-	if(count($output) > $n) {
-		$output = array_slice($output, 0, $n);
-	}
-
-	return $output;		
-}
-
-function setting_count_frequency($a, $b) {
-	if($a['count'] == $b['count']) {
-		return 0;
-	}
-	return ($a['count'] > $b['count']) ? -1 : 1;
-}
-
-function setting_frequency($a, $b) {
-	if($a->count == $b->count) {
-		return 0;
-	}
-	return ($a->count > $b->count) ? -1 : 1;
-}
-
+/**
+ * Get the direct triples associated with an attribute tag (such as date of birth or artists of a movement)
+*/
 function get_tag_attribute_id_values($tag_attribute_id) {
 	$query = "SELECT * FROM tag_attribute_id_value WHERE tag_attribute_id = '".$tag_attribute_id."';";
 	$result = db_query($query);
@@ -4485,6 +3603,9 @@ function get_tag_attribute_id_values($tag_attribute_id) {
 	return $output;	
 }
 
+/**
+ * Get the direct triples associated with a tag
+ */
 function get_triple_ids_of_a_tag($topic) {
 	$query = "SELECT * FROM tag_attribute WHERE tag = '".$topic."';";
 	$result = db_query($query);
@@ -4496,56 +3617,31 @@ function get_triple_ids_of_a_tag($topic) {
 	return $output;
 }
 
-function get_triples_of_a_tag($topic) {
-	$query = "SELECT * FROM tag_triple WHERE tag = '".$topic."';";
-	$result = db_query($query);
-	
-	$output = array();
-	foreach ($result as $record) {
-		$output[] = $record;
-	}
-	return $output;
-}
-
-function top_n_themes($n = 5) {
-	$n = (int) $n;
-	if($n == 0) {
-		$n = 5;
-	}
-	$query = "SELECT event_attribute_value.value, COUNT(event_attribute_value.value) as frequency, tag_name.name 
-			 FROM event_attribute_value, tag_name WHERE event_attribute_value.value = tag_name.tag group by value 
-			ORDER BY frequency DESC LIMIT ".$n.";";
-
-	$result = db_query($query);
-	
-	$output = array();
-	foreach ($result as $record) {
-		$output[] = $record;
-	}
-}
-
+/**
+ * Calculation of themes for an individual story tag
+ */
 function top_n_themes_of_tag($tag = '/m/01qwfk', $n = 5) {
 	$n = (int) $n;
 	if($n == 0) {
 		$n = 5;
 	}	
 	//query based on value in events and direct properties of the tag//***here
-	$query = "SELECT * FROM (SELECT result.tag as value, COUNT(result.tag) as frequency, result.name
-FROM tag_name as result,
-(SELECT tag_name.tag
-FROM tag_attribute, tag_attribute_id_value, tag_name 
-WHERE tag_name.tag = tag_name.tag AND tag_attribute.tag = :tag AND 
-tag_attribute.id = tag_attribute_id_value.tag_attribute_id and
-tag_name.tag = tag_attribute_id_value.value
-UNION ALL 
-SELECT tag_name.tag 
-FROM event_attribute_value as event_table, event_attribute_value as value_table, tag_name  
-WHERE event_table.value = :tag AND event_table.event = value_table.event AND
-tag_name.tag = value_table.value) as data
-WHERE result.tag = data.tag AND NOT(result.tag = :tag)
-GROUP BY result.tag
-ORDER BY frequency DESC) as frequency
-WHERE frequency > 1 LIMIT ".$n." ;";
+// 	$query = "SELECT * FROM (SELECT result.tag as value, COUNT(result.tag) as frequency, result.name
+// FROM tag_name as result,
+// (SELECT tag_name.tag
+// FROM tag_attribute, tag_attribute_id_value, tag_name 
+// WHERE tag_name.tag = tag_name.tag AND tag_attribute.tag = :tag AND 
+// tag_attribute.id = tag_attribute_id_value.tag_attribute_id and
+// tag_name.tag = tag_attribute_id_value.value
+// UNION ALL 
+// SELECT tag_name.tag 
+// FROM event_attribute_value as event_table, event_attribute_value as value_table, tag_name  
+// WHERE event_table.value = :tag AND event_table.event = value_table.event AND
+// tag_name.tag = value_table.value) as data
+// WHERE result.tag = data.tag AND NOT(result.tag = :tag)
+// GROUP BY result.tag
+// ORDER BY frequency DESC) as frequency
+// WHERE frequency > 1 LIMIT ".$n." ;";
 	//this version of the query excludes locations
 	$query = "SELECT * FROM (SELECT result.tag as value, COUNT(result.tag) as frequency, result.name
 FROM tag_name as result,
@@ -4572,70 +3668,9 @@ WHERE frequency > 1 LIMIT ".$n." ;";
 	return $output;	
 }
 
-function top_n_matching_themes_of_story($story = 9, $n = 5) {
-	$n = (int) $n;
-	if($n == 0) {
-		$n = 5;
-	}
-	$n = (int) $n;
-	if($n == 0) {
-		$n = 9;
-	}
-	
-	$query = "SELECT COUNT(DISTINCT result.tag) as tags, COUNT(DISTINCT result.event) as frequency, result.value, tag_name.name
-FROM  
-(SELECT query_tag.tag, value_table.value, value_table.event   
-FROM query_tag, event_attribute_value as query_table, event_attribute_value as value_table
-WHERE query_tag.id = :story AND
-query_tag.tag = query_table.value AND
-query_table.event = value_table.event
-UNION ALL
-SELECT  query_tag.tag, tag_attribute_id_value.value, query_tag.tag as event
-FROM tag_attribute, tag_attribute_id_value, query_tag
-WHERE query_tag.id = :story AND
-tag_attribute.tag = query_tag.tag AND
-tag_attribute.id = tag_attribute_id_value.tag_attribute_id) as result
-LEFT JOIN tag_name ON  tag_name.tag = result.value
-WHERE 
- EXISTS (SELECT qt.tag FROM query_tag as qt WHERE qt.id = :story AND qt.tag = result.value)
-GROUP BY result.value
-ORDER BY tags DESC, frequency DESC LIMIT ".$n." ;";
-	
-	$result = db_query($query, array(':story' => $story));
-
-	$used_tags = array();
-	$output = array();
-	foreach ($result as $record) {
-		$output[] = $record;
-		$used_tags[] = $record->value;
-	}
-
-	$story_tags = get_tags_names_for_a_story($story);
-
-	foreach($story_tags as $story_tag) {
-		if(!in_array($story_tag['0'], $used_tags)) {
-			if($story_tag['1']) {
-				$out = new stdClass();
-	    		$out->value = $story_tag['0'];
-	    		$out->frequency = 0;
-	    		$out->tags = 0;
-	    		$out->name = $story_tag['1'];
-	    		$output[] = $out;
-			}
-			else {
-				$out = new stdClass();
-				$out->value = FALSE;
-				$out->frequency = 0;
-				$out->tags = 0;
-				$out->name = $story_tag['0'];
-				$output[] = $out;				
-			}
-		}
-	}
-
-	return $output;
-}
-
+/**
+ * Ordering of the story tags according to theme ranking
+ */
 function top_n_matching_themes_of_story2($event_list, $max_value, $n = 5) {//****here
 	$n = (int) $n;
 	if($n == 0) {
@@ -4662,21 +3697,25 @@ ORDER BY tags DESC, frequency DESC LIMIT ".$n.";";
 	return $output;
 }
 
-function top_n_nonmatching_themes_of_story2($event_list, $max_value, $n = 5) {//****here
+/**
+ * Calculate story themes exlcuding those that appear in the story tag list
+ */
+function top_n_nonmatching_themes_of_story2($event_list, $max_value, $n = 5) {
 	$n = (int) $n;
 	if($n == 0) {
 		$n = 5;
 	}
 	$query_list = "('".implode("','",$event_list)."')";
-	$query = "SELECT COUNT(DISTINCT result.value) as tags, COUNT(DISTINCT result.event) as frequency, result.value, result.name
-FROM
-(SELECT *
-FROM event_attribute_value, tag_name
-WHERE event_attribute_value.event IN ".$query_list." AND tag_name.tag = event_attribute_value.value) as result
-WHERE
- NOT EXISTS (SELECT qt.tag FROM query_tag as qt WHERE qt.id = '".$max_value."' AND qt.tag = result.value)
-GROUP BY result.value
-ORDER BY tags DESC, frequency DESC LIMIT ".$n.";";
+	//this version keeps locations in the theme list
+// 	$query = "SELECT COUNT(DISTINCT result.value) as tags, COUNT(DISTINCT result.event) as frequency, result.value, result.name
+// FROM
+// (SELECT *
+// FROM event_attribute_value, tag_name
+// WHERE event_attribute_value.event IN ".$query_list." AND tag_name.tag = event_attribute_value.value) as result
+// WHERE
+//  NOT EXISTS (SELECT qt.tag FROM query_tag as qt WHERE qt.id = '".$max_value."' AND qt.tag = result.value)
+// GROUP BY result.value
+// ORDER BY tags DESC, frequency DESC LIMIT ".$n.";";
 	//this version of the query excludes locations
 	$query = "SELECT COUNT(DISTINCT result.value) as tags, COUNT(DISTINCT result.event) as frequency, result.value, result.name
 FROM
@@ -4700,44 +3739,12 @@ ORDER BY tags DESC, frequency DESC LIMIT ".$n.";";
 	return $output;
 }
 
-function top_n_nonmatching_themes_of_story($story = 9, $n = 5) {
-	$n = (int) $n;
-	if($n == 0) {
-		$n = 5;
-	}
-	$n = (int) $n;
-
-	$query = "SELECT COUNT(DISTINCT result.tag) as tags, COUNT(DISTINCT result.event) as frequency, result.value, tag_name.name
-FROM  
-(SELECT query_tag.tag, value_table.value, value_table.event   
-FROM query_tag, event_attribute_value as query_table, event_attribute_value as value_table
-WHERE query_tag.id = :story AND
-query_tag.tag = query_table.value AND
-query_table.event = value_table.event
-UNION ALL
-SELECT  query_tag.tag, tag_attribute_id_value.value, query_tag.tag as event
-FROM tag_attribute, tag_attribute_id_value, query_tag
-WHERE query_tag.id = :story AND
-tag_attribute.tag = query_tag.tag AND
-tag_attribute.id = tag_attribute_id_value.tag_attribute_id) as result
-INNER JOIN tag_name ON  tag_name.tag = result.value
-WHERE NOT 
- EXISTS (SELECT qt.tag FROM query_tag as qt WHERE qt.id = :story AND qt.tag = result.value)
-GROUP BY result.value
-ORDER BY tags DESC, frequency DESC LIMIT ".$n." ;";
-	
-	$result = db_query($query, array(':story' => $story));
-	
-	$output = array();
-	foreach ($result as $record) {
-		$output[] = $record;
-	}
-
-	return $output;
-}
-
 //tag_event_id
-function save_tag_event_results($tag, $event_array) {//***here
+/**
+ * Save list of events currently associated with a tag
+ * Used to calculate the settings of a story
+ */
+function save_tag_event_results($tag, $event_array) {
 	$del_query = "delete from tag_event_id where tag = '".$tag."';";
 	db_query($del_query);
 	//save to tag - event_id table
@@ -4754,6 +3761,9 @@ function save_tag_event_results($tag, $event_array) {//***here
 
 // ALTER TABLE tag_notable_types
 // ADD CONSTRAINT tt UNIQUE (tag, type);
+/**
+ * Check for notable types of a topic and locally and retrieve and store from freebase if not found
+ */
 function check_for_tag_types($topic = "/m/055rd2", $reload = FALSE) {
 	if(!$reload) {
 		$types = array();
@@ -4783,7 +3793,7 @@ function check_for_tag_types($topic = "/m/055rd2", $reload = FALSE) {
 	return $types;
 }
 
-/*
+/**
  * Get stored notable types for a freebase topic
 */
 function get_tag_types($topic) {
@@ -4798,7 +3808,7 @@ function get_tag_types($topic) {
 	return $output;
 }
 
-/*
+/**
  * Retrieve from freebase notable types for a freebase topic
  */
 function find_fb_types_of_topic($topic = "/m/050_704") {
@@ -4816,7 +3826,7 @@ function find_fb_types_of_topic($topic = "/m/050_704") {
 	}
 }
 
-/*
+/**
  * Retrieve tpic name pairs from freebase data
  * get_topic_name_pairs(array('/education/education/student','/education/education/institution','/education/education/degree','/education/education/specialization','/education/education/minor'),$result);
  */function get_topic_name_pairs($key_array,$result,$previous = array()) {
@@ -4839,7 +3849,7 @@ function find_fb_types_of_topic($topic = "/m/050_704") {
 	return array_merge($topic_name_pairs,$previous);
 }
 
-/*
+/**
  * Add the topic itself and its freebase name to the list of results
  */
 function add_top_level_pair($result, $topic_name_pairs) {
@@ -4849,7 +3859,7 @@ function add_top_level_pair($result, $topic_name_pairs) {
 	return $topic_name_pairs;
 }
 
-/*
+/**
  * Retrieve studying history of a person
  */
 function fb_person_studying($topic, $previous_output = array("events"=>array(),"names"=>array(), "links"=>array())) {
@@ -4933,7 +3943,7 @@ function fb_person_studying($topic, $previous_output = array("events"=>array(),"
 			"links"=>array_merge($topic_event_links, $previous_output["links"]));
 }
 
-/*
+/**
  * Retrieve places lived history of a person
  */
 function fb_person_living_at_location($topic, $previous_output = array("events"=>array(),"names"=>array(), "links"=>array())) {
@@ -4981,7 +3991,7 @@ function fb_person_living_at_location($topic, $previous_output = array("events"=
 			"links"=>array_merge($topic_event_links, $previous_output["links"]));
 }
 
-/*
+/**
  * Retrieve object creation history of a creator
  */
 function fb_topic_creating_object($topic, $previous_output = array("events"=>array(),"names"=>array(), "links"=>array())) {
@@ -5095,7 +4105,7 @@ function fb_topic_creating_object($topic, $previous_output = array("events"=>arr
 			"links"=>array_merge($topic_event_links, $previous_output["links"]));
 }
 
-/*
+/**
  * Retrieve publication history of a publisher
  */
 function fb_topic_publishing($topic, $previous_output = array("events"=>array(),"names"=>array(), "links"=>array())) {
@@ -5176,7 +4186,7 @@ function fb_topic_publishing($topic, $previous_output = array("events"=>array(),
 			"links"=>array_merge($topic_event_links, $previous_output["links"]));	
 }
 
-/*
+/**
  * Retrieve memebership data of an organisation member
  */
 function fb_topic_organization_member($topic, $previous_output = array("events"=>array(),"names"=>array(), "links"=>array())) {
@@ -5224,7 +4234,7 @@ function fb_topic_organization_member($topic, $previous_output = array("events"=
 			"links"=>array_merge($topic_event_links, $previous_output["links"]));
 }
 
-/*
+/**
  * Retrieve exhibition data of an exhibition producer
  */
 function fb_topic_exhibition_producer($topic, $previous_output = array("events"=>array(),"names"=>array(), "links"=>array())) {
@@ -5300,7 +4310,7 @@ function fb_topic_exhibition_producer($topic, $previous_output = array("events"=
 			"links"=>array_merge($topic_event_links, $previous_output["links"]));
 }
 
-/*
+/**
  * Retrieve exhibition data of an exhibition curator
  */
 function fb_topic_exhibition_curator($topic, $previous_output = array("events"=>array(),"names"=>array(), "links"=>array())) {
@@ -5377,7 +4387,7 @@ function fb_topic_exhibition_curator($topic, $previous_output = array("events"=>
 			"links"=>array_merge($topic_event_links, $previous_output["links"]));
 }
 
-/*
+/**
  * Retrieve exhibition data of an exhibition subject
  */
 function fb_topic_exhibition_subject($topic, $previous_output = array("events"=>array(),"names"=>array(), "links"=>array())) {
@@ -5454,7 +4464,7 @@ function fb_topic_exhibition_subject($topic, $previous_output = array("events"=>
 			"links"=>array_merge($topic_event_links, $previous_output["links"]));
 }
 
-/*
+/**
  * Retrieve ownsership history of an art owner
  */
 function fb_topic_art_owner($topic, $previous_output = array("events"=>array(),"names"=>array(), "links"=>array())) {
@@ -5506,7 +4516,7 @@ function fb_topic_art_owner($topic, $previous_output = array("events"=>array(),"
 			"links"=>array_merge($topic_event_links, $previous_output["links"]));
 }
 
-/*
+/**
  * Retrieve award history of an award winner
  */
 function fb_topic_award_winner($topic, $previous_output = array("events"=>array(),"names"=>array(), "links"=>array())) {
@@ -5570,7 +4580,7 @@ function fb_topic_award_winner($topic, $previous_output = array("events"=>array(
 			"links"=>array_merge($topic_event_links, $previous_output["links"]));
 }
 
-/*
+/**
  * Retrieve nomination history of a nominee
  */
 function fb_topic_award_nominee($topic, $previous_output = array("events"=>array(),"names"=>array(), "links"=>array())) {
@@ -5628,7 +4638,7 @@ function fb_topic_award_nominee($topic, $previous_output = array("events"=>array
 			"links"=>array_merge($topic_event_links, $previous_output["links"]));
 }
 
-/*
+/**
  * retrieve creation data of an object
  */
 function fb_artwork_created($topic, $previous_output = array("events"=>array(),"names"=>array(), "links"=>array())) {
@@ -5738,7 +4748,7 @@ function fb_artwork_created($topic, $previous_output = array("events"=>array(),"
 	
 }
 
-/*
+/**
  * Retrieve location history of an object
  */
 function fb_artwork_located($topic, $previous_output = array("events"=>array(),"names"=>array(), "links"=>array())) {
@@ -5785,7 +4795,7 @@ function fb_artwork_located($topic, $previous_output = array("events"=>array(),"
 
 }
 
-/*
+/**
  * Retrieve ownership history of an object
  */
 function fb_object_owned($topic, $previous_output = array("events"=>array(),"names"=>array(), "links"=>array())) {
@@ -5836,7 +4846,7 @@ function fb_object_owned($topic, $previous_output = array("events"=>array(),"nam
 			"links"=>array_merge($topic_event_links, $previous_output["links"]));
 }
 
-/*
+/**
  * Retrieve nomination history of an object
  */
 function fb_object_award_nominated_work($topic, $previous_output = array("events"=>array(),"names"=>array(), "links"=>array())) {
@@ -5894,7 +4904,7 @@ function fb_object_award_nominated_work($topic, $previous_output = array("events
 			"links"=>array_merge($topic_event_links, $previous_output["links"]));
 }
 
-/*
+/**
  * Retrieve award history of an object
  */
 function fb_object_award_winning_work($topic, $previous_output = array("events"=>array(),"names"=>array(), "links"=>array())) {
@@ -5959,7 +4969,7 @@ function fb_object_award_winning_work($topic, $previous_output = array("events"=
 			"links"=>array_merge($topic_event_links, $previous_output["links"]));
 }
 
-/*
+/**
  * Retrieve exhibition history of an object
  */
 function fb_object_exhibited($topic, $previous_output = array("events"=>array(),"names"=>array(), "links"=>array())) {
@@ -6035,7 +5045,7 @@ function fb_object_exhibited($topic, $previous_output = array("events"=>array(),
 			"links"=>array_merge($topic_event_links, $previous_output["links"]));
 }
 
-/*
+/**
  * Retrieve exhibition data for topic that is an exhibition
 */
 function fb_exhibition_production_of_the_exhibition($topic, $previous_output = array("events"=>array(),"names"=>array(), "links"=>array())) {
@@ -6106,7 +5116,7 @@ function fb_exhibition_production_of_the_exhibition($topic, $previous_output = a
 		
 }
 
-/*
+/**
  * Retrieve exhibition run data for topic that is an exhibition
 */
 function fb_exhibition_held_at_venue($topic, $previous_output = array("events"=>array(),"names"=>array(), "links"=>array())) {
@@ -6156,7 +5166,7 @@ function fb_exhibition_held_at_venue($topic, $previous_output = array("events"=>
 			"links"=>array_merge($topic_event_links, $previous_output["links"]));
 }
 
-/*
+/**
  * Retrieve object creation data for topic that is an exhibition
 */
 function fb_exhibition_creation_of_object($topic, $previous_output = array("events"=>array(),"names"=>array(), "links"=>array())) {
@@ -6270,7 +5280,7 @@ function fb_exhibition_creation_of_object($topic, $previous_output = array("even
 			"links"=>array_merge($topic_event_links, $previous_output["links"]));
 }
 
-/*
+/**
  * Retrieve exhibition data for topic that is an exhibition venue
 */
 function fb_venue_of_exhibitions($topic, $previous_output = array("events"=>array(),"names"=>array(), "links"=>array())) {
@@ -6319,7 +5329,7 @@ function fb_venue_of_exhibitions($topic, $previous_output = array("events"=>arra
 			"links"=>array_merge($topic_event_links, $previous_output["links"]));
 }
 
-/*
+/**
  * Retrieve winner data for topic that is an award
 */
 function fb_award_having_prize_winner($topic, $previous_output = array("events"=>array(),"names"=>array(), "links"=>array())) {
@@ -6387,7 +5397,7 @@ function fb_award_having_prize_winner($topic, $previous_output = array("events"=
 			"links"=>array_merge($topic_event_links, $previous_output["links"]));
 }
 
-/*
+/**
  * Retrieve nominee data for topic that is an award
 */
 function fb_award_having_nominee($topic, $previous_output = array("events"=>array(),"names"=>array(), "links"=>array())) {
@@ -6446,7 +5456,7 @@ function fb_award_having_nominee($topic, $previous_output = array("events"=>arra
 			"links"=>array_merge($topic_event_links, $previous_output["links"]));
 }
 
-/*
+/**
  * Retrieve graduation data for topic that is an educational institution
 */
 function fb_institution_having_graduates($topic, $previous_output = array("events"=>array(),"names"=>array(), "links"=>array())) {
@@ -6523,7 +5533,7 @@ function fb_institution_having_graduates($topic, $previous_output = array("event
 	
 }
 
-/*
+/**
  * Retrieve membership data for topic that is an organisation
 */
 function fb_organisation_having_members($topic, $previous_output = array("events"=>array(),"names"=>array(), "links"=>array())) {
@@ -6577,7 +5587,7 @@ function fb_organisation_having_members($topic, $previous_output = array("events
 	
 }
 
-/*
+/**
  * Retrieve object creation data for topic that is an art period or movement
 */
 function fb_topic_artwork_subject($topic, $previous_output = array("events"=>array(),"names"=>array(), "links"=>array())) {
@@ -6690,7 +5700,7 @@ function fb_topic_artwork_subject($topic, $previous_output = array("events"=>arr
 			"links"=>array_merge($topic_event_links, $previous_output["links"]));
 }
 
-/*
+/**
  * Retrieve object creation data for topic that is an art period or movement
 */
 function fb_period_movement_creating_object($topic, $previous_output = array("events"=>array(),"names"=>array(), "links"=>array())) {
@@ -6803,7 +5813,7 @@ function fb_period_movement_creating_object($topic, $previous_output = array("ev
 			"links"=>array_merge($topic_event_links, $previous_output["links"]));	
 }
 
-/*
+/**
  * Retrieve data for topic that is an event
  */
 function fb_event_happening_of_the_event($topic = '/m/03fyn', $previous_output = array("events"=>array(),"names"=>array(), "links"=>array())) {
@@ -6856,7 +5866,7 @@ return array("events"=>array_merge($output, $previous_output["events"]),
 		"links"=>array_merge($topic_event_links, $previous_output["links"]));	
 }
 
-/*
+/**
  * Check array is returned in freebase results
  */
 function check_array_is_returned($item) {
@@ -6871,14 +5881,14 @@ function check_array_is_returned($item) {
 	}
 }
 
-/*
+/**
  * Check whether value string has the form of a freebase mid, i.e. /m/something
  */
 function is_freebase_topic_id($topic) {
 	return preg_match('/^\/m\//',$topic);
 }
 
-/*
+/**
  * Calculate the event space for a topic
  */
 function new_event_space_of_a_topic($topic = "/m/01qwfk", $reload = FALSE) {
@@ -6896,8 +5906,8 @@ function new_event_space_of_a_topic($topic = "/m/01qwfk", $reload = FALSE) {
 	
 	//add container location relations
 	containing_locations_of_a_location($topic);
-
-// 	//person
+//  tests
+// 	person
 // 	$topic = "/m/060_7"; //pablo picasso
 // 	$topic = "/m/01qwfk"; //damien hirst (author)
 // 	$topic = "/m/09_xn"; //salvador dali
@@ -6906,24 +5916,24 @@ function new_event_space_of_a_topic($topic = "/m/01qwfk", $reload = FALSE) {
 // 	$topic = "/m/0f896_"; //Les XX (exhibition producer)
 // 	$topic = "/m/055rd2"; //Michael Craig-Martin (org member)
 // 	$topic = "/m/0c9h4"; //robert peel (art owner)
-// 	//object
+// 	object
 // 	$topic = "/m/050_704"; //mother and child divided (nom)
 // 	$topic = "/m/0jbg2"; //mona lisa
 // 	$topic = "/m/06l_7n"; //fountain
 // 	$topic = "/m/0hc9x6h"; //The Bodmer Oak (location, own)
 // 	$topic = "/m/04xswj"; //ophelia (created, location)
-// 	//exhibition
+// 	exhibition
 // 	$topic = "/m/052tvg1"; //figure studies
 // 	$topic = "/m/04d11nr"; //turner prize retrospective
-// 	//gallery	
+// 	gallery	
 // 	$topic = "/m/0136mc"; //Tate
-// 	//prize	
+// 	prize	
 // 	$topic = "/m/0133rf"; //Turner prize
-// 	//educational institution	
+// 	educational institution	
 // 	$topic = "/m/015wy_"; //goldsmiths college
-// 	//membership organisation				
+// 	membership organisation				
 // 	$topic = "/m/015g1w"; //royal academy					
-// 	//art subject			
+// 	art subject			
 // 	$topic = "/m/034rd"; //George Washington
 	
 	
@@ -7139,7 +6149,7 @@ function new_event_space_of_a_topic($topic = "/m/01qwfk", $reload = FALSE) {
 	return $types;
 }
 
-/*
+/**
  * Get topic name from local database
  */
 function get_topic_name($topic = "/m/0hc9x6h") {
@@ -7154,7 +6164,7 @@ function get_topic_name($topic = "/m/0hc9x6h") {
 	}
 }
 
-/*
+/**
  * Get topic description from local database
  */
 function get_topic_description($topic = "/m/0hc9x6h", $limit = FALSE) {
@@ -7176,7 +6186,7 @@ function get_topic_description($topic = "/m/0hc9x6h", $limit = FALSE) {
 	}
 }
 
-/*
+/**
  * Check description field of a freebase topic and retrieve if not already saved
 */
 function check_for_topic_name($topic = "/m/08tqtj") {
@@ -7197,8 +6207,6 @@ function check_for_topic_name($topic = "/m/08tqtj") {
 
 	if(isset($resultarray["result"][0]["name"])) {
 		$name = $resultarray["result"][0]["name"];
-// 		$name = preg_replace('/[^A-Za-z0-9\/\- ]/', '', $name);
-//		$name = my_escape_string($name);
 
 		$values_list = "VALUES ('".$topic."', '".my_escape_string($name)."')";
 		$query = "INSERT INTO tag_name (tag, name) ".$values_list." ON DUPLICATE KEY UPDATE name = VALUES(name);";
@@ -7209,7 +6217,7 @@ function check_for_topic_name($topic = "/m/08tqtj") {
 
 //check for topic description
 //retrieve if not already stored
-/*
+/**
  * Check description field of a freebase topic and retrieve if not already saved
 */
 function check_for_topic_description($topic = "/m/055rd2", $limit = FALSE, $reload = FALSE) {
@@ -7271,7 +6279,7 @@ function check_for_topic_description($topic = "/m/055rd2", $limit = FALSE, $relo
 
 // ALTER TABLE tag_notable_types
 // ADD CONSTRAINT tnt UNIQUE (tag, notable_type);
-/*
+/**
  * Check notable types of a freebase topic and retrieve if not already saved
  */
 function check_for_notable_types($topic = "/m/055rd2") {
@@ -7280,11 +6288,6 @@ function check_for_notable_types($topic = "/m/055rd2") {
 	if(!empty($notable_types)) {
 		return $notable_types;
 	}
-// 	$query = "SELECT tag FROM tag_notable_types WHERE tag = :tag;";
-// 	$result = db_query($query, array(':tag' => $topic));
-// 	foreach ($result as $record) {
-// 		return TRUE;
-// 	}
 	
 	//get notable type
 	$service_url = 'https://www.googleapis.com/freebase/v1/topic';
@@ -7321,7 +6324,7 @@ function check_for_notable_types($topic = "/m/055rd2") {
 	return $notable_types;
 }
 
-/*
+/**
  * Handle escape characters in string to be saved to database
  */
 function my_escape_string($string) {
@@ -7331,7 +6334,7 @@ function my_escape_string($string) {
 	return $description;
 }
 
-/*
+/**
  * Save flag to indicate that data for setting has already been retrieved
  */
 function save_calculated_setting($location, $year) {	
@@ -7339,7 +6342,7 @@ function save_calculated_setting($location, $year) {
 	$result = db_query($query, array(':location'=>$location, ':year'=>$year));
 }
 
-/*
+/**
  * Check whether additional data associated with a setting has already been retrieved from freebase
  */
 function check_for_calculated_setting($location, $year) {
@@ -7354,7 +6357,7 @@ function check_for_calculated_setting($location, $year) {
 	}	
 }
 
-/*
+/**
  * Save flag to indicate that freebase topic has been retrieved
  * Have to use db_query in order to avoid duplicate enties for key
  */
@@ -7364,7 +6367,7 @@ function save_calculated_tag($topic) {
 
 }
 
-/*
+/**
  * Check whether data for freebase topic has already been retrieved
  */
 function check_for_calculated_tag($topic) {
@@ -7379,7 +6382,7 @@ function check_for_calculated_tag($topic) {
 	}
 }
 
-/*
+/**
  * Save names of retrieved freebase topics to database
  */
 function save_tag_names_to_db($result) {
@@ -7387,7 +6390,6 @@ function save_tag_names_to_db($result) {
 	$values_list = "";
 	if(!empty($result)) {
 		foreach($result as $id=>$name) {
-	// 		$name = preg_replace('/[^A-Za-z0-9\/\- ]/', '', $name);
 			$name = my_escape_string($name);
 			$values_list .=", ('".$id."', '".$name."')";
 		}
@@ -7449,7 +6451,7 @@ function save_event_links_to_db($result) {
 
 // ALTER TABLE event_attribute_value
 // ADD CONSTRAINT triple UNIQUE (event,attribute,value);
-/*
+/**
  * Save retreived freebase data as events
  */
 function save_events_to_db($result) {
@@ -7464,7 +6466,6 @@ function save_events_to_db($result) {
 			if(is_array($values)) {
 				foreach($values as $value) {
 					if($value) {
-// 						$value = preg_replace('/[^A-Za-z0-9\/\- ]/', '', $value);
 						$value = my_escape_string($value);
 						$values_list .=", ('".$event_id."', '".$attribute."', '".$value."')";
 					}
@@ -7472,7 +6473,6 @@ function save_events_to_db($result) {
 			}
 			else {
 				if($values) {
-// 					$values = preg_replace('/[^A-Za-z0-9\/\- ]/', '', $values);
 					$values = my_escape_string($values);
 					$values_list .=", ('".$event_id."', '".$attribute."', '".$values."')";
 				}
@@ -7486,7 +6486,7 @@ function save_events_to_db($result) {
 	$result = db_query($query);	
 }
 
-/*
+/**
  * Get values from a freebase results array
  */
 function get_values($elements) {
@@ -7523,14 +6523,5 @@ function dec_debug_message($var_to_dump) {
   	var_dump($var_to_dump);
   	drupal_set_message('<pre>' . check_plain(ob_get_clean()) . '</pre>');
 }
-  
 
-  	 
-  
-  
-  
-  
-  
-  
-  
  
