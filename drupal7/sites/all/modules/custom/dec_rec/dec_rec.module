@@ -165,7 +165,7 @@ function contained_locations($topic = "/m/0389fd") {
 	));
 	$output = array();
 	$resultarray = execute_mql_event_query($query);
-	
+
 	if(isset($resultarray['result']['0']['/location/location/containedby'])) {
 		$contain_list = $resultarray['result']['0']['/location/location/containedby'];
 		foreach($contain_list as $container) {
@@ -191,13 +191,16 @@ function contained_contained_locations($topic = "/m/0389fd") {
 	));
 	$output = array();
 	$resultarray = execute_mql_event_query($query);
-	
-	if(isset($resultarray['result']['0']['/location/location/containedby']['0']['/location/location/containedby'])) {
-		$contain_list = $resultarray['result']['0']['/location/location/containedby']['0']['/location/location/containedby'];
-		foreach($contain_list as $container) {
-			$output[] = $container['mid'];
+
+	if(is_array($resultarray['result']['0']['/location/location/containedby'])) {
+		foreach($resultarray['result']['0']['/location/location/containedby'] as $container_array) {
+			$locations = $container_array['/location/location/containedby'];
+			foreach($locations as $location) {
+				$output[] = $location['mid'];
+			}
 		}
 	}
+	$output = array_unique($output);
 	return $output;
 }
 
@@ -1327,10 +1330,6 @@ function reset_recommender_databse() {
 	$query = "delete from tag_name WHERE 1;";
 	db_query($query);
 	
-	//this table defines the link type between a tag and each of its events
-// 	$query = "DELETE from tag_link_event_id WHERE 1;";
-// 	db_query($query);
-	
 	//this table defines the triples of each event
 	$query = "delete from event_attribute_value WHERE 1;";
 	$result = db_query($query);
@@ -1363,13 +1362,11 @@ function reset_recommender_databse() {
 	$query = "DELETE FROM tag_attribute WHERE 1;";
 	db_query($query);
 	
+	//this table lists notable types of freebase topics
 	$query = "delete from tag_notable_types where 1;";
 	db_query($query);
 	
-	$query = "delete from setting_link_event_id where 1;";
-	db_query($query);
-	
-	//list of cahced freebase images
+	//list of cached freebase images
 	$query = "delete from fb_saved_images where 1;";
 	db_query($query);
 	
@@ -1630,7 +1627,6 @@ function event_space_of_a_setting($location, $year, $end = 0) {
 	save_events_to_db($result["events"]);
 	save_tag_names_to_db($result["names"]);
 	save_calculated_setting($location, $year);
-	save_setting_links_to_db($result["links"]);
 
 }
 
@@ -1782,87 +1778,58 @@ function dec_setting() {
 /**
  * Themes of a setting
  */
-function dec_get_themes_for_events_of_setting($location, $year, $end = 0) {
-	if($end) {
-		$query = "SELECT * 
+function dec_get_themes_for_events_of_setting($location, $year, $end = 0) {//****here
+
+	$query = "SELECT * 
 FROM
 (SELECT event_attribute_value.value, COUNT(event_attribute_value.value) as frequency, tag_name.name
 FROM event_attribute_value, tag_name,
 (SELECT start_end_location_result.event, start_end_location_result.activity
 FROM
 (SELECT start_location_result.event, start_location_result.location, start_location_result.activity, start_location_result.start_time, end_location_result.end_time
+FROM
+(
+SELECT events_table.event, events_table.location, event_start_table.start_time, events_table.activity
 FROM 
-(SELECT event_location.event, event_location.value as location, event_start_time.value as start_time, event_activity.value as activity
-FROM event_attribute_value as event_start_time, event_attribute_value AS event_location, event_attribute_value AS event_activity, attribute_name as start_time_attribute_name, attribute_name as location_attribute_name
+(SELECT DISTINCT event_location.event, event_location.value as location, event_activity.value as activity
+FROM location_container, event_attribute_value as event_time, event_attribute_value AS event_location, event_attribute_value AS event_activity, attribute_name as time_attribute_name, attribute_name as location_attribute_name
 WHERE event_location.attribute = location_attribute_name.attribute AND
-	location_attribute_name.name = 'location' AND
-	event_location.value = '".$location."' AND
-	event_activity.event = event_location.event AND
-	event_activity.attribute = 'activity' AND
-	event_location.event = event_start_time.event AND
-	event_start_time.attribute = start_time_attribute_name.attribute AND start_time_attribute_name.name = 'start_time') as start_location_result
+     location_attribute_name.name = 'location' AND
+     event_location.value = location_container.container AND location_container.location = '".$location."' AND
+     event_location.event = event_time.event AND
+     event_activity.event = event_location.event AND
+     event_activity.attribute = 'activity' AND 
+     ((event_time.attribute = time_attribute_name.attribute AND
+time_attribute_name.name = 'start_time') OR (event_time.attribute = time_attribute_name.attribute AND
+time_attribute_name.name = 'end_time'))) events_table
 LEFT JOIN 
+(SELECT event_location.event, event_location.value as location, event_start_time.value as start_time, event_activity.value as activity
+FROM location_container, event_attribute_value as event_start_time, event_attribute_value AS event_location, event_attribute_value AS event_activity, attribute_name as start_time_attribute_name, attribute_name as location_attribute_name
+WHERE event_location.attribute = location_attribute_name.attribute AND
+     location_attribute_name.name = 'location' AND
+     event_location.value = location_container.container AND location_container.location = '".$location."' AND 
+     event_location.event = event_start_time.event AND
+     event_activity.event = event_location.event AND
+     event_activity.attribute = 'activity' AND
+     event_start_time.attribute = start_time_attribute_name.attribute AND start_time_attribute_name.name = 'start_time')
+as event_start_table ON event_start_table.event = events_table.event) as start_location_result
+LEFT JOIN
 (SELECT event_location2.event, event_location2.value as location, event_end_time.value as end_time
-FROM event_attribute_value as event_end_time, event_attribute_value AS event_location2, attribute_name as end_time_attribute_name, attribute_name as location2_attribute_name
+FROM location_container, event_attribute_value as event_end_time, event_attribute_value AS event_location2, attribute_name as end_time_attribute_name, attribute_name as location2_attribute_name
 WHERE event_location2.attribute = location2_attribute_name.attribute AND
 	location2_attribute_name.name = 'location' AND
-	event_location2.value = '".$location."' AND
+	event_location2.value = location_container.container AND location_container.location = '".$location."' AND 
 	event_location2.event = event_end_time.event AND
 	event_end_time.attribute = end_time_attribute_name.attribute AND end_time_attribute_name.name = 'end_time') as end_location_result
 ON start_location_result.event = end_location_result.event) as start_end_location_result
 WHERE (start_end_location_result.start_time <= '".$end."' AND start_end_location_result.start_time >= '".$year."' AND start_end_location_result.end_time IS NULL) OR
+		(start_end_location_result.end_time <= '".$end."' AND start_end_location_result.end_time >= '".$year."' AND start_end_location_result.start_time IS NULL) OR
 (start_end_location_result.start_time <= '".$end."' AND start_end_location_result.end_time >= '".$year."')
-UNION
-SELECT setting_link_event_id.event_id AS event, event_attribute_value.value as activity FROM setting_link_event_id, event_attribute_value
-     WHERE setting_link_event_id.location = '".$location."' AND
-     setting_link_event_id.year = '".$year."-".$end."' AND
-     event_attribute_value.event = setting_link_event_id.event_id AND
-     event_attribute_value.attribute = 'activity') as combined_result
+) as combined_result
           WHERE combined_result.event = event_attribute_value.event AND
      event_attribute_value.value = tag_name.tag AND NOT EXISTS (SELECT attribute_name.name FROM attribute_name WHERE event_attribute_value.attribute = attribute_name.attribute AND attribute_name.name = 'location')
      group by event_attribute_value.value ORDER BY frequency DESC) as frequency_result
      WHERE frequency > 1 LIMIT 5;";//excludes location by AND NOT EXISTS (SELECT attribute_name.name FROM attribute_name WHERE event_attribute_value.attribute = attribute_name.attribute AND attribute_name.name = 'location')
-	}
-	else {
-		$query = "SELECT * 
-FROM
-(SELECT event_attribute_value.value, COUNT(event_attribute_value.value) as frequency, tag_name.name
-FROM event_attribute_value, tag_name,
-(SELECT start_end_location_result.event, start_end_location_result.activity
-FROM
-(SELECT start_location_result.event, start_location_result.location, start_location_result.activity, start_location_result.start_time, end_location_result.end_time
-FROM
-(SELECT event_location.event, event_location.value as location, event_start_time.value as start_time, event_activity.value as activity
-FROM event_attribute_value as event_start_time, event_attribute_value AS event_location, event_attribute_value AS event_activity, attribute_name as start_time_attribute_name, attribute_name as location_attribute_name
-WHERE event_location.attribute = location_attribute_name.attribute AND
-     location_attribute_name.name = 'location' AND
-     event_location.value = '".$location."' AND
-     event_location.event = event_start_time.event AND
-     event_activity.event = event_location.event AND
-     event_activity.attribute = 'activity' AND
-     event_start_time.attribute = start_time_attribute_name.attribute AND start_time_attribute_name.name = 'start_time') as start_location_result
-LEFT JOIN
-(SELECT event_location2.event, event_location2.value as location, event_end_time.value as end_time
-FROM event_attribute_value as event_end_time, event_attribute_value AS event_location2, attribute_name as end_time_attribute_name, attribute_name as location2_attribute_name
-WHERE event_location2.attribute = location2_attribute_name.attribute AND
-     location2_attribute_name.name = 'location' AND
-     event_location2.value = '".$location."' AND
-     event_location2.event = event_end_time.event AND
-     event_end_time.attribute = end_time_attribute_name.attribute AND end_time_attribute_name.name = 'end_time') as end_location_result
-ON start_location_result.event = end_location_result.event) as start_end_location_result
-WHERE (start_end_location_result.start_time = '".$year."' AND start_end_location_result.end_time IS NULL) OR
-(start_end_location_result.start_time <= '".$year."' AND start_end_location_result.end_time  >= '".$year."')
-UNION
-SELECT setting_link_event_id.event_id AS event, event_attribute_value.value as activity FROM setting_link_event_id, event_attribute_value
-     WHERE setting_link_event_id.location = '".$location."' AND
-     setting_link_event_id.year = '".$year."' AND
-     event_attribute_value.event = setting_link_event_id.event_id AND
-     event_attribute_value.attribute = 'activity') as combined_result
-     WHERE combined_result.event = event_attribute_value.event AND
-     event_attribute_value.value = tag_name.tag
-     group by event_attribute_value.value ORDER BY frequency DESC) as frequency_result
-     WHERE frequency > 1 LIMIT 5;";
-	}
 
 	$result = db_query($query);
 	$output = array();
@@ -2965,81 +2932,53 @@ GROUP BY attribute_name.reverse_name;";
 /**
  * Get events for a setting and event type
  */
-function get_all_events_for_setting_event_type($location, $year, $event_type, $end = 0) {
-	if($end) {
+function get_all_events_for_setting_event_type($location, $year, $event_type, $end) {
 		$query = "SELECT GROUP_CONCAT(combined_result.event) as events, combined_result.activity
 FROM
 (SELECT start_end_location_result.event, start_end_location_result.activity
 FROM
 (SELECT start_location_result.event, start_location_result.location, start_location_result.activity, start_location_result.start_time, end_location_result.end_time
 FROM
-(SELECT event_location.event, event_location.value as location, event_start_time.value as start_time, event_activity.value as activity
-FROM event_attribute_value as event_start_time, event_attribute_value AS event_location, event_attribute_value AS event_activity, attribute_name as start_time_attribute_name, attribute_name as location_attribute_name
+(
+SELECT events_table.event, events_table.location, event_start_table.start_time, events_table.activity
+FROM
+(SELECT DISTINCT event_location.event, event_location.value as location, event_activity.value as activity
+FROM location_container, event_attribute_value as event_time, event_attribute_value AS event_location, event_attribute_value AS event_activity, attribute_name as time_attribute_name, attribute_name as location_attribute_name
 WHERE event_location.attribute = location_attribute_name.attribute AND
-	location_attribute_name.name = 'location' AND
-	event_location.value = '".$location."' AND
-	event_activity.event = event_location.event AND
-	event_activity.attribute = 'activity' AND 
-	event_activity.value = '".$event_type."' AND
-	event_location.event = event_start_time.event AND
-	event_start_time.attribute = start_time_attribute_name.attribute AND start_time_attribute_name.name = 'start_time') as start_location_result
+     location_attribute_name.name = 'location' AND
+     event_location.value = location_container.container AND location_container.location = '".$location."' AND
+     event_location.event = event_time.event AND
+     event_activity.event = event_location.event AND
+     event_activity.attribute = 'activity' AND
+     event_activity.value = '".$event_type."' AND
+     ((event_time.attribute = time_attribute_name.attribute AND
+time_attribute_name.name = 'start_time') OR (event_time.attribute = time_attribute_name.attribute AND
+time_attribute_name.name = 'end_time'))) events_table
+LEFT JOIN
+(SELECT event_location.event, event_location.value as location, event_start_time.value as start_time, event_activity.value as activity
+FROM location_container, event_attribute_value as event_start_time, event_attribute_value AS event_location, event_attribute_value AS event_activity, attribute_name as start_time_attribute_name, attribute_name as location_attribute_name
+WHERE event_location.attribute = location_attribute_name.attribute AND
+     location_attribute_name.name = 'location' AND
+     event_location.value = location_container.container AND location_container.location = '".$location."' AND
+     event_location.event = event_start_time.event AND
+     event_activity.event = event_location.event AND
+     event_activity.attribute = 'activity' AND
+     event_start_time.attribute = start_time_attribute_name.attribute AND start_time_attribute_name.name = 'start_time')
+as event_start_table ON event_start_table.event = events_table.event) as start_location_result
 LEFT JOIN
 (SELECT event_location2.event, event_location2.value as location, event_end_time.value as end_time
-FROM event_attribute_value as event_end_time, event_attribute_value AS event_location2, attribute_name as end_time_attribute_name, attribute_name as location2_attribute_name
+FROM location_container, event_attribute_value as event_end_time, event_attribute_value AS event_location2, attribute_name as end_time_attribute_name, attribute_name as location2_attribute_name
 WHERE event_location2.attribute = location2_attribute_name.attribute AND
 	location2_attribute_name.name = 'location' AND
-	event_location2.value = '".$location."' AND
+	event_location2.value = location_container.container AND location_container.location = '".$location."' AND
 	event_location2.event = event_end_time.event AND
 	event_end_time.attribute = end_time_attribute_name.attribute AND end_time_attribute_name.name = 'end_time') as end_location_result
 ON start_location_result.event = end_location_result.event) as start_end_location_result
 WHERE (start_end_location_result.start_time <= '".$end."' AND start_end_location_result.start_time >= '".$year."' AND start_end_location_result.end_time IS NULL) OR
+		(start_end_location_result.end_time <= '".$end."' AND start_end_location_result.end_time >= '".$year."' AND start_end_location_result.start_time IS NULL) OR
 (start_end_location_result.start_time <= '".$end."' AND start_end_location_result.end_time >= '".$year."')
-UNION
-SELECT setting_link_event_id.event_id AS event, event_attribute_value.value as activity FROM setting_link_event_id, event_attribute_value
-     WHERE setting_link_event_id.location = '".$location."' AND
-     setting_link_event_id.year = '".$year."-".$end."' AND
-     event_attribute_value.event = setting_link_event_id.event_id AND
-     event_attribute_value.attribute = 'activity' AND
-	 event_attribute_value.value = '".$event_type."') as combined_result
+) as combined_result
 GROUP BY combined_result.activity;";
-	}
-	else {
-		$query = "SELECT GROUP_CONCAT(combined_result.event) as events, combined_result.activity
-FROM
-(SELECT start_end_location_result.event, start_end_location_result.activity
-FROM
-(SELECT start_location_result.event, start_location_result.location, start_location_result.activity, start_location_result.start_time, end_location_result.end_time
-FROM
-(SELECT event_location.event, event_location.value as location, event_start_time.value as start_time, event_activity.value as activity
-FROM event_attribute_value as event_start_time, event_attribute_value AS event_location, event_attribute_value AS event_activity, attribute_name as start_time_attribute_name, attribute_name as location_attribute_name
-WHERE event_location.attribute = location_attribute_name.attribute AND
-     location_attribute_name.name = 'location' AND
-     event_location.value = '".$location."' AND
-     event_location.event = event_start_time.event AND
-     event_activity.event = event_location.event AND
-     event_activity.attribute = 'activity' AND
-     event_activity.value = '".$event_type."' AND
-     event_start_time.attribute = start_time_attribute_name.attribute AND start_time_attribute_name.name = 'start_time') as start_location_result
-LEFT JOIN
-(SELECT event_location2.event, event_location2.value as location, event_end_time.value as end_time
-FROM event_attribute_value as event_end_time, event_attribute_value AS event_location2, attribute_name as end_time_attribute_name, attribute_name as location2_attribute_name
-WHERE event_location2.attribute = location2_attribute_name.attribute AND
-     location2_attribute_name.name = 'location' AND
-     event_location2.value = '".$location."' AND
-     event_location2.event = event_end_time.event AND
-     event_end_time.attribute = end_time_attribute_name.attribute AND end_time_attribute_name.name = 'end_time') as end_location_result
-ON start_location_result.event = end_location_result.event) as start_end_location_result
-WHERE (start_end_location_result.start_time = '".$year."' AND start_end_location_result.end_time IS NULL) OR
-(start_end_location_result.start_time <= '".$year."' AND start_end_location_result.end_time  >= '".$year."')
-UNION
-SELECT setting_link_event_id.event_id AS event, event_attribute_value.value as activity FROM setting_link_event_id, event_attribute_value
-     WHERE setting_link_event_id.location = '".$location."' AND
-     setting_link_event_id.year = '".$year."' AND
-     event_attribute_value.event = setting_link_event_id.event_id AND
-     event_attribute_value.attribute = 'activity' AND
-	event_attribute_value.value = '".$event_type."') as combined_result
-GROUP BY combined_result.activity;";
-	}
 
 	$result = db_query($query);
 	
@@ -3256,9 +3195,9 @@ WHERE query_tag.id = '".$story."';";
  * Get events for a setting
  * All settings should now have an end date and use the first query
  */
-function get_all_events_for_setting($location, $year, $end = 0) {
-	if($end) {
-		$query = "SELECT GROUP_CONCAT(combined_result.event) as events, combined_result.activity
+function get_all_events_for_setting($location, $year, $end) {
+
+	$query = "SELECT GROUP_CONCAT(combined_result.event) as events, combined_result.activity
 FROM
 (SELECT start_end_location_result.event, start_end_location_result.activity
 FROM
@@ -3271,7 +3210,7 @@ FROM
 FROM location_container, event_attribute_value as event_time, event_attribute_value AS event_location, event_attribute_value AS event_activity, attribute_name as time_attribute_name, attribute_name as location_attribute_name
 WHERE event_location.attribute = location_attribute_name.attribute AND
      location_attribute_name.name = 'location' AND
-     event_location.value = location_container.location AND location_container.container = '".$location."' AND
+     event_location.value = location_container.container AND location_container.location = '".$location."' AND
      event_location.event = event_time.event AND
      event_activity.event = event_location.event AND
      event_activity.attribute = 'activity' AND 
@@ -3283,7 +3222,7 @@ LEFT JOIN
 FROM location_container, event_attribute_value as event_start_time, event_attribute_value AS event_location, event_attribute_value AS event_activity, attribute_name as start_time_attribute_name, attribute_name as location_attribute_name
 WHERE event_location.attribute = location_attribute_name.attribute AND
      location_attribute_name.name = 'location' AND
-     event_location.value = location_container.location AND location_container.container = '".$location."' AND 
+     event_location.value = location_container.container AND location_container.location = '".$location."' AND 
      event_location.event = event_start_time.event AND
      event_activity.event = event_location.event AND
      event_activity.attribute = 'activity' AND
@@ -3291,77 +3230,27 @@ WHERE event_location.attribute = location_attribute_name.attribute AND
 as event_start_table ON event_start_table.event = events_table.event) as start_location_result
 LEFT JOIN
 (SELECT event_location2.event, event_location2.value as location, event_end_time.value as end_time
-FROM event_attribute_value as event_end_time, event_attribute_value AS event_location2, attribute_name as end_time_attribute_name, attribute_name as location2_attribute_name
+FROM location_container, event_attribute_value as event_end_time, event_attribute_value AS event_location2, attribute_name as end_time_attribute_name, attribute_name as location2_attribute_name
 WHERE event_location2.attribute = location2_attribute_name.attribute AND
 	location2_attribute_name.name = 'location' AND
-	event_location2.value = '".$location."' AND
+	event_location2.value = location_container.container AND location_container.location = '".$location."' AND 
 	event_location2.event = event_end_time.event AND
 	event_end_time.attribute = end_time_attribute_name.attribute AND end_time_attribute_name.name = 'end_time') as end_location_result
 ON start_location_result.event = end_location_result.event) as start_end_location_result
-WHERE (start_end_location_result.start_time <= '".$year."' AND start_end_location_result.start_time >= '".$year."' AND start_end_location_result.end_time IS NULL) OR
-		(start_end_location_result.end_time <= '".$year."' AND start_end_location_result.end_time >= '".$year."' AND start_end_location_result.start_time IS NULL) OR
-(start_end_location_result.start_time <= '".$year."' AND start_end_location_result.end_time >= '".$year."')
-UNION
+WHERE (start_end_location_result.start_time <= '".$end."' AND start_end_location_result.start_time >= '".$year."' AND start_end_location_result.end_time IS NULL) OR
+		(start_end_location_result.end_time <= '".$end."' AND start_end_location_result.end_time >= '".$year."' AND start_end_location_result.start_time IS NULL) OR
+(start_end_location_result.start_time <= '".$end."' AND start_end_location_result.end_time >= '".$year."')
+) as combined_result
+GROUP BY combined_result.activity;";
+	dd($query);
+/*removed setting link
+ * UNION
 SELECT setting_link_event_id.event_id AS event, event_attribute_value.value as activity FROM setting_link_event_id, event_attribute_value
      WHERE setting_link_event_id.location = '".$location."' AND
      setting_link_event_id.year = '".$year."-".$end."' AND
      event_attribute_value.event = setting_link_event_id.event_id AND
-     event_attribute_value.attribute = 'activity') as combined_result
-GROUP BY combined_result.activity;";
-
-	}
-	else {
-		$query = "SELECT GROUP_CONCAT(combined_result.event) as events, combined_result.activity
-FROM
-(SELECT start_end_location_result.event, start_end_location_result.activity
-FROM
-(SELECT start_location_result.event, start_location_result.location, start_location_result.activity, start_location_result.start_time, end_location_result.end_time
-FROM (			
-SELECT events_table.event, events_table.location, event_start_table.start_time, events_table.activity
-FROM 
-(SELECT DISTINCT event_location.event, event_location.value as location, event_activity.value as activity
-FROM event_attribute_value as event_time, event_attribute_value AS event_location, event_attribute_value AS event_activity, attribute_name as time_attribute_name, attribute_name as location_attribute_name
-WHERE event_location.attribute = location_attribute_name.attribute AND
-     location_attribute_name.name = 'location' AND
-     event_location.value = '".$location."' AND
-     event_location.event = event_time.event AND
-     event_activity.event = event_location.event AND
-     event_activity.attribute = 'activity' AND 
-     ((event_time.attribute = time_attribute_name.attribute AND
-time_attribute_name.name = 'start_time') OR (event_time.attribute = time_attribute_name.attribute AND
-time_attribute_name.name = 'end_time'))) events_table
-LEFT JOIN 
-(SELECT event_location.event, event_location.value as location, event_start_time.value as start_time, event_activity.value as activity
-FROM event_attribute_value as event_start_time, event_attribute_value AS event_location, event_attribute_value AS event_activity, attribute_name as start_time_attribute_name, attribute_name as location_attribute_name
-WHERE event_location.attribute = location_attribute_name.attribute AND
-     location_attribute_name.name = 'location' AND
-     event_location.value = '".$location."' AND
-     event_location.event = event_start_time.event AND
-     event_activity.event = event_location.event AND
-     event_activity.attribute = 'activity' AND
-     event_start_time.attribute = start_time_attribute_name.attribute AND start_time_attribute_name.name = 'start_time')
-as event_start_table ON event_start_table.event = events_table.event) as start_location_result
-LEFT JOIN
-(SELECT event_location2.event, event_location2.value as location, event_end_time.value as end_time
-FROM event_attribute_value as event_end_time, event_attribute_value AS event_location2, attribute_name as end_time_attribute_name, attribute_name as location2_attribute_name
-WHERE event_location2.attribute = location2_attribute_name.attribute AND
-     location2_attribute_name.name = 'location' AND
-     event_location2.value = '".$location."' AND
-     event_location2.event = event_end_time.event AND
-     event_end_time.attribute = end_time_attribute_name.attribute AND end_time_attribute_name.name = 'end_time') as end_location_result
-ON start_location_result.event = end_location_result.event) as start_end_location_result
-WHERE (SUBSTRING(start_end_location_result.start_time, 1, 4) = '".$year."' AND start_end_location_result.end_time IS NULL) OR
-		(SUBSTRING(start_end_location_result.end_time, 1, 4) = '".$year."' AND start_end_location_result.start_time IS NULL) OR
-(SUBSTRING(start_end_location_result.start_time, 1, 4) <= '".$year."' AND SUBSTRING(start_end_location_result.end_time, 1, 4)  >= '".$year."')
-UNION
-SELECT setting_link_event_id.event_id AS event, event_attribute_value.value as activity FROM setting_link_event_id, event_attribute_value
-     WHERE setting_link_event_id.location = '".$location."' AND
-     setting_link_event_id.year = '".$year."' AND
-     event_attribute_value.event = setting_link_event_id.event_id AND
-     event_attribute_value.attribute = 'activity') as combined_result
-GROUP BY combined_result.activity;";
-		
-	}
+     event_attribute_value.attribute = 'activity'
+ */
 
 	$result = db_query($query);
 	
@@ -3625,7 +3514,7 @@ function top_n_themes_of_tag($tag = '/m/01qwfk', $n = 5) {
 	if($n == 0) {
 		$n = 5;
 	}	
-	//query based on value in events and direct properties of the tag//***here
+	//query based on value in events and direct properties of the tag
 // 	$query = "SELECT * FROM (SELECT result.tag as value, COUNT(result.tag) as frequency, result.name
 // FROM tag_name as result,
 // (SELECT tag_name.tag
@@ -3671,7 +3560,7 @@ WHERE frequency > 1 LIMIT ".$n." ;";
 /**
  * Ordering of the story tags according to theme ranking
  */
-function top_n_matching_themes_of_story2($event_list, $max_value, $n = 5) {//****here
+function top_n_matching_themes_of_story2($event_list, $max_value, $n = 5) {
 	$n = (int) $n;
 	if($n == 0) {
 		$n = 5;
@@ -5906,6 +5795,7 @@ function new_event_space_of_a_topic($topic = "/m/01qwfk", $reload = FALSE) {
 	
 	//add container location relations
 	containing_locations_of_a_location($topic);
+	
 //  tests
 // 	person
 // 	$topic = "/m/060_7"; //pablo picasso
@@ -5935,7 +5825,6 @@ function new_event_space_of_a_topic($topic = "/m/01qwfk", $reload = FALSE) {
 // 	$topic = "/m/015g1w"; //royal academy					
 // 	art subject			
 // 	$topic = "/m/034rd"; //George Washington
-	
 	
 	$res = array();
 	$result = array("events"=>array(),"names"=>array(), "links"=>array());
@@ -6143,7 +6032,6 @@ function new_event_space_of_a_topic($topic = "/m/01qwfk", $reload = FALSE) {
 
 	save_events_to_db($result["events"]);
 	save_tag_names_to_db($result["names"]);
-// 	save_event_links_to_db($result["links"]);
 	save_calculated_tag($topic);
 	
 	return $types;
@@ -6402,51 +6290,6 @@ function save_tag_names_to_db($result) {
 	
 		$result = db_query($query);
 	}
-}
-
-// ALTER TABLE setting_link_event_id
-// ADD CONSTRAINT lye UNIQUE (location,year,event_id);
-// think this now redundant
-function save_setting_links_to_db($result) {
-	$values_list = "";
-	if(empty($result)) {
-		return;
-	}
-	foreach($result as $triple) {
-		if($triple[2]) {
-			$values_list .=", ('".$triple[0]."', '".$triple[1]."-".$triple[2]."', '".$triple[3]."')";
-		}
-		else {
-			$values_list .=", ('".$triple[0]."', '".$triple[1]."', '".$triple[3]."')";
-		}
-	}
-	if($values_list == "") {
-		return array();
-	}
-	$values_list = "VALUES".substr($values_list, 1)." ";
-
-	$query = "INSERT INTO setting_link_event_id (location,year,event_id) ".$values_list." ON DUPLICATE KEY UPDATE location = VALUES(location), year = VALUES(year), event_id = VALUES(event_id);";
-
-	$result = db_query($query);
-}
-
-// ALTER TABLE tag_link_event_id
-// ADD CONSTRAINT tle UNIQUE (tag,link,event_id);
-// think this now reduntant
-function save_event_links_to_db($result) {
-	$values_list = "";
-
-	foreach($result as $triple) {
-		$values_list .=", ('".$triple[0]."', '".$triple[1]."', '".$triple[2]."')";
-	}
-	if($values_list == "") {
-		return array();
-	}
-	$values_list = "VALUES".substr($values_list, 1)." ";
-
-	$query = "INSERT INTO tag_link_event_id (tag,link,event_id) ".$values_list." ON DUPLICATE KEY UPDATE tag = VALUES(tag), link = VALUES(link), event_id = VALUES(event_id);";
-
-	$result = db_query($query);	
 }
 
 // ALTER TABLE event_attribute_value
