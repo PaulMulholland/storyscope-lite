@@ -1380,6 +1380,18 @@ function reset_recommender_database() {
 	//This table stores cached timeline data for a setting.
 	$query = "delete from setting_timeline_data WHERE 1;";
 	db_query($query);
+
+	//Represents locations (freebase topics) that contain a specified location.
+	$query = "delete from location_container WHERE 1;";
+	db_query($query);
+
+	//Stores mapping between tags and their associated set of events
+	$query = "delete from tag_event_id WHERE 1;";
+	db_query($query);
+
+	//Stores mapping between tags and their full set of freebase types
+	$query = "delete from tag_types WHERE 1;";
+	db_query($query);
 }
 
 
@@ -3650,7 +3662,7 @@ function save_tag_event_results($tag, $event_array) {
 // ALTER TABLE tag_notable_types
 // ADD CONSTRAINT tt UNIQUE (tag, type);
 /**
- * Check for notable types of a topic and locally and retrieve and store from freebase if not found
+ * Check for all types of a topic and locally and retrieve and store from freebase if not found
  */
 function check_for_tag_types($topic = "/m/055rd2", $reload = FALSE) {
 	if(!$reload) {
@@ -3682,7 +3694,7 @@ function check_for_tag_types($topic = "/m/055rd2", $reload = FALSE) {
 }
 
 /**
- * Get stored notable types for a freebase topic
+ * Get stored types for a freebase topic
 */
 function get_tag_types($topic) {
 	$output = array();
@@ -3717,7 +3729,8 @@ function find_fb_types_of_topic($topic = "/m/050_704") {
 /**
  * Retrieve tpic name pairs from freebase data
  * get_topic_name_pairs(array('/education/education/student','/education/education/institution','/education/education/degree','/education/education/specialization','/education/education/minor'),$result);
- */function get_topic_name_pairs($key_array,$result,$previous = array()) {
+ */
+ function get_topic_name_pairs($key_array,$result,$previous = array()) {
 	$topic_name_pairs = array();
 	foreach($key_array as $key) {
 		if(isset($result[$key])) {
