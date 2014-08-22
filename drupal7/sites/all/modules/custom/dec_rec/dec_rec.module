@@ -1234,7 +1234,7 @@ function save_fb_image($topic, $thumbnail_url = FALSE) {
  */
 function dec_reset() {
 	//if the line below is uncommented then this function can reset local cached databases of freebase data
-// 	reset_recommender_databse();
+// 	reset_recommender_database();
 	return "databse reset";
 }
 
@@ -1317,68 +1317,67 @@ function check_freebase_saved_image($topic = '/m/01qwfk', $thumbnail_url = FALSE
 	return $local_url;	
 }
 
-//this wipes all cached data on tags, events, etc.
 /**
- * Reset local cache of freebase data
+ * Reset local cache of freebase data. Wipes all cached data on tags, events, etc.
  */
-function reset_recommender_databse() {
-	//this table lists the previously calculated tags
+function reset_recommender_database() {
+	//This table lists the previously calculated tags.
 	$query = "delete from calculated_tags WHERE 1;";
 	db_query($query);
 	
-	//this table lists the name (title) of each tag
+	//This table lists the name (title) of each tag.
 	$query = "delete from tag_name WHERE 1;";
 	db_query($query);
 	
-	//this table defines the triples of each event
+	//This table defines the triples of each event.
 	$query = "delete from event_attribute_value WHERE 1;";
 	$result = db_query($query);
 	
-	//this table records an id for each multi-tag query
+	//This table records an id for each multi-tag query. This is the story id.
 	$query = "delete from query_id WHERE 1;";
 	db_query($query);
 
-	//this table records the tags of each query id
+	//This table records the tags of each query id, i.e. of each story.
 	$query = "delete from query_tag WHERE 1;";
 	db_query($query);
 
-	//this table records the description of each tag
+	//This table records the description of each tag.
 	$query = "delete FROM tag_description WHERE 1;";
 	db_query($query);
 	
-	//this table lists the previously calculated settings
+	//This table lists the previously calculated settings.
 	$query = "delete from calculated_settings WHERE 1;";
 	db_query($query);
 	
-	//this table lists direct triples (non-events) of a topic
+	//This table lists direct triples (non-events) of a topic.
 	$query = "delete from tag_triple WHERE 1;";
 	db_query($query);	
 	
-	//this table lists values of topic attribute pairs
+	//This table lists values of topic attribute pairs.
  	$query = "DELETE FROM tag_attribute_id_value WHERE 1;";
  	db_query($query);
  
-	//this table lists topic attribute pairs
+	//This table lists topic attribute pairs.
 	$query = "DELETE FROM tag_attribute WHERE 1;";
 	db_query($query);
 	
-	//this table lists notable types of freebase topics
+	//This table lists notable types of freebase topics.
 	$query = "delete from tag_notable_types where 1;";
 	db_query($query);
 	
-	//list of cached freebase images
+	//This table lists cached freebase images.
 	$query = "delete from fb_saved_images where 1;";
 	db_query($query);
 	
-	//cached timeline data for a tag
+	//This table stores cached timeline data for a tag.
 	$query = "delete from tag_timeline_data WHERE 1;";
 	db_query($query);
 	
-	//cached timeline data for a story
+	//This table stores cached timeline data for a story.
 	$query = "delete from story_timeline_data WHERE 1;";
 	db_query($query);
 	
-	//cached timeline data for a setting
+	//This table stores cached timeline data for a setting.
 	$query = "delete from setting_timeline_data WHERE 1;";
 	db_query($query);
 }
