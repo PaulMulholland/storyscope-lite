@@ -1349,10 +1349,6 @@ function reset_recommender_database() {
 	$query = "delete from calculated_settings WHERE 1;";
 	db_query($query);
 	
-	//This table lists direct triples (non-events) of a topic.
-	$query = "delete from tag_triple WHERE 1;";
-	db_query($query);	
-	
 	//This table lists values of topic attribute pairs.
  	$query = "DELETE FROM tag_attribute_id_value WHERE 1;";
  	db_query($query);
@@ -1394,9 +1390,6 @@ function reset_recommender_database() {
 	db_query($query);
 }
 
-
-// ALTER TABLE tag_triple
-// ADD CONSTRAINT tav UNIQUE (tag,attribute,value);
 /**
  * Retrieve fact triples for a topic
  */
@@ -1492,7 +1485,7 @@ function save_tag_attribute_id_values($id, $values) {
  */
 function save_triples_to_db($triples) {
 	foreach($triples as $triple) {
-		//save to tag_triple_table
+		//save fact triples of the tag
 		$topic = $triple["0"];
 		$attribute = $triple["1"];
 		$values = $triple["2"];
@@ -1503,7 +1496,6 @@ function save_triples_to_db($triples) {
 		$id = check_for_tag_attribute($topic, $attribute);
 		
 		//save to tag triple value table
-
  		save_tag_attribute_id_values($id, $values);
 	}
 }
