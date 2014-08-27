@@ -3249,7 +3249,6 @@ WHERE (start_end_location_result.start_time <= '".$end."' AND start_end_location
 (start_end_location_result.start_time <= '".$end."' AND start_end_location_result.end_time >= '".$year."')
 ) as combined_result
 GROUP BY combined_result.activity;";
-	dd($query);
 /*removed setting link
  * UNION
 SELECT setting_link_event_id.event_id AS event, event_attribute_value.value as activity FROM setting_link_event_id, event_attribute_value
