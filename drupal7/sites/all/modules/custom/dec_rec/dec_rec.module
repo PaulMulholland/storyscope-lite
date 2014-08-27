@@ -1388,6 +1388,10 @@ function reset_recommender_database() {
 	//Stores mapping between tags and their full set of freebase types
 	$query = "delete from tag_types WHERE 1;";
 	db_query($query);
+
+	//Stores mapping between tags and their names used in event slots and event groups associated with a tag
+	$query = "delete from attribute_name WHERE 1;";
+	db_query($query);
 }
 
 /**
@@ -6371,4 +6375,4 @@ function dec_debug_message($var_to_dump) {
   	drupal_set_message('<pre>' . check_plain(ob_get_clean()) . '</pre>');
 }
 
- 
+
