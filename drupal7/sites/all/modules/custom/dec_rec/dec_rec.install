@@ -1,15 +1,356 @@
 <?php
 
-/* dec_rec.install
- *
- * Set the dec_semrecommender_address variable
+/** dec_rec.install
  * 
  */
 
-function dec_rec_install() {
-//   variable_set('dec_semrecommender_address', 'http://knot09.fit.vutbr.cz:8080/SemRecommender');
+function dec_rec_schema() {
+	$schema['calculated_tags'] = array(
+		'description' => t('Tags (topics) for which data has been retrieved from Freebase.'),
+	    'fields' => array(
+			'tag' => array(
+				'description' => t('Freebase mid'),
+				'type' => 'varchar',
+				'length' => 45,
+				'not null' => TRUE),
+		),
+		'primary key' => array('tag'),
+   	);
+	$schema['tag_name'] = array(
+	    'description' => t('Tag and its freebase name'),
+	    'fields' => array(
+			'tag' => array(
+				'description' => t('Freebase mid'),
+				'type' => 'varchar',
+				'length' => 45,
+				'not null' => TRUE,
+			),
+			'name' => array(
+				'description' => t('Name of the tag'),
+				'type' => 'varchar',
+				'length' => 256,
+			),
+		),
+		'primary key' => array('tag'),
+	);
+	$schema['event_attribute_value'] = array(
+	    'description' => t('Event attribute and value'),
+	    'fields' => array(
+			'event' => array(
+				'description' => t('Freebase mid of event'),
+				'type' => 'varchar',
+				'length' => 45,
+			),
+			'attribute' => array(
+				'description' => t('Freebase attribute'),
+				'type' => 'varchar',
+				'length' => 128,
+			),
+			'value' => array(
+				'description' => t('Freebase mid or numerical/date value'),
+				'type' => 'varchar',
+				'length' => 64,
+			),
+		),
+  	    'unique keys' => array(
+      		'triple'     => array('event', 'attribute', 'value')
+		),
+ 	);
+	$schema['query_id'] = array(
+	    'description' => t('New story ids'),
+	    'field' => array(
+			'id' => array(
+				'description' => t('Story id'),
+				'type' => 'serial',
+				'not null' => TRUE),
+		),
+  	    'primary key' => array('id'),
+  	);
+	$schema['query_tag'] = array(
+	    'description' => t('Tags associated with each query id'),
+	    'fields' => array(
+			'id' => array(
+				'description' => t('Story id'),
+				'type' => 'integer',
+				'length' => 11,
+			),
+			'tag' => array(
+				'description' => t('Tag'),
+				'type' => 'varchar',
+				'length' => 45,
+			),
+		),
+  	);
+	$schema['tag_description'] = array(
+	    'description' => t('Tag and its displayed description'),
+	    'fields' => array(
+			'tag' => array(
+				'description' => t('Freebase mid'),
+				'type' => 'varchar',
+				'length' => 45,
+				'not null' => TRUE,
+			),
+			'description' => array(
+				'description' => t('Description'),
+				'type' => 'text',
+			),
+		),
+		'primary key' => array('tag'),
+  	);
+	$schema['calculated_settings'] = array(
+	    'description' => t('Settings with retrieved freebase data'),
+	    'fields' => array(
+			'location' => array(
+				'description' => t('Location freebase mid'),
+				'type' => 'varchar',
+				'length' => 45,
+			),
+			'year' => array(
+				'description' => t('Date stamp YYYY, YYYY-MM, YYYY-MM-DD'),
+				'type' => 'varchar',
+				'length' => 45,
+			),
+	    ),
+  	    'unique keys' => array(
+      		'location_year'     => array('location', 'year')
+		),
+	);
+	$schema['tag_attribute_id_value'] = array(
+	    'description' => t('Associates one or more values with an attribute of a tag'),
+	    'fields' => array(
+			'tag_attribute_id' => array(
+				'description' => t('Id for a tag attribute pairing'),
+				'type' => 'integer',
+				'length' => 11,
+			),
+			'value' => array(
+				'description' => t('Value for the topic-attribute e.g. another topic, date, integer'),
+				'type' => 'varchar',
+				'length' => 45,
+			),
+	    ),
+  	    'unique keys' => array(
+      		'tv'     => array('tag_attribute_id', 'value')
+		),
+  	);
+	$schema['tag_attribute'] = array(
+			'description' => t('A tag attribute pair with which values are associated'),
+			'fields' => array(
+				'id' => array(
+						'description' => t('Topic-attribute id'),
+						'type' => 'serial',
+						'not null' => TRUE,
+				),
+				'tag' => array(
+						'description' => t('Freebase topic'),
+						'type' => 'varchar',
+						'length' => 45,
+				),
+				'attribute' => array(
+						'description' => t('Freebase attribute'),
+						'type' => 'varchar',
+						'length' => 45,
+				),
+				'link' => array(
+						'description' => t('1 if values are objects (i.e. topics) and 0 if data values'),
+						'type' => 'integer',
+						'length' => 2,
+						'not null' => TRUE,
+				),
+			),
+			'primary key' => array('id'),
+  	    	'unique keys' => array(
+      			'ta'     => array('tag', 'attribute')
+			),
+  	);
+	$schema['tag_notable_types'] = array(
+			'description' => t('Notable types of a freebase topic'),
+			'fields' => array(
+				'tag' => array(
+						'description' => t('Freebase topic'),
+						'type' => 'varchar',
+						'length' => 45,
+				),
+				'notable_type' => array(
+						'description' => t('Id of notable type'),
+						'type' => 'varchar',
+						'length' => 45,
+				),
+				'notable_type_name' => array(
+						'description' => t('Name of notable type'),
+						'type' => 'varchar',
+						'length' => 125,
+				),
+			),
+	  	    'unique keys' => array(
+	      		'tnt'     => array('tag', 'notable_type')
+			),
+  	);
+	$schema['fb_saved_images'] = array(
+			'description' => t('The image id of a topic id'),
+			'fields' => array(
+				'tag' => array(
+						'description' => t('Freebase topic'),
+						'type' => 'varchar',
+						'length' => 45,
+						'not null' => TRUE,
+				),
+				'image_tag' => array(
+						'description' => t('Id of the image'),
+						'type' => 'varchar',
+						'length' => 45,
+				),
+			),
+			'primary key' => array('tag'),
+	);
+	$schema['tag_timeline_data'] = array(
+			'description' => t('Cached timeline data for a topic'),
+			'fields' => array(
+				'tag' => array(
+						'description' => t('Freebase topic'),
+						'type' => 'varchar',
+						'length' => 45,
+						'not null' => TRUE,
+				),
+				'attribute' => array(
+						'description' => t('Freebase attribute'),
+						'type' => 'varchar',
+						'length' => 124,
+						'default' => 'no_attribute',
+				),
+				'timeline_data' => array(
+						'description' => t('Cached timeline data in JSON format'),
+						'type' => 'text',
+						'size' => 'medium',
+						'not null' => TRUE,
+				),
+			),
+			'unique keys' => array(
+					'data_key'     => array('tag', 'attribute')
+			),
+	);
+	$schema['story_timeline_data'] = array(
+			'description' => t('Cached timeline data for a story'),
+			'fields' => array(
+				'story' => array(
+						'description' => t('Story id'),
+						'type' => 'integer',
+						'length' => 11,
+						'not null' => TRUE,
+				),
+				'event_type' => array(
+						'description' => t('Event type, i.e. activity of the event'),
+						'type' => 'varchar',
+						'length' => 124,
+				),
+				'timeline_data' => array(
+						'description' => t('Cached timeline data in JSON format'),
+						'type' => 'text',
+						'size' => 'medium',
+						'not null' => TRUE,
+				),
+			),
+			'unique keys' => array(
+					'data_key'     => array('story', 'event_type')
+			),
+	);
+	$schema['setting_timeline_data'] = array(
+			'description' => t('Cached timeline data for a setting'),
+			'fields' => array(
+				'location' => array(
+						'description' => t('Location topic'),
+						'type' => 'varchar',
+						'length' => 45,
+				),
+				'start' => array(
+						'description' => t('Start time datestamp'),
+						'type' => 'varchar',
+						'length' => 45,
+				),
+				'end' => array(
+						'description' => t('End time datestamp'),
+						'type' => 'varchar',
+						'length' => 45,
+						'default' => '0',
+				),
+				'event_type' => array(
+						'description' => t('Event type, i.e. activity of the event'),
+						'type' => 'varchar',
+						'length' => 124,
+				),
+				'timeline_data' => array(
+						'description' => t('Cached timeline data in JSON format'),
+						'type' => 'text',
+						'size' => 'medium',
+						'not null' => TRUE,
+				),
+			),
+			'unique keys' => array(
+					'data_key'     => array('location', 'start', 'end', 'event_type')
+			),
+	);
+	$schema['location_container'] = array(
+			'description' => t('Associates a location with locations that contain it. Works to two freebase levels of containment. A location contains itself'),
+			'fields' => array(
+				'location' => array(
+						'description' => t('Location topic'),
+						'type' => 'varchar',
+						'length' => 45,
+				),
+				'container' => array(
+						'description' => t('Location topic'),
+						'type' => 'varchar',
+						'length' => 45,
+				),
+			),
+			'unique keys' => array(
+					'location_pair'     => array('location', 'container')
+			),
+	);
+	$schema['tag_event_id'] = array(
+			'description' => t('Associates a story tag with its events. Used to calculate setting and theme of the story.'),
+			'fields' => array(
+				'tag' => array(
+						'description' => t('Freebase topic or value'),
+						'type' => 'varchar',
+						'length' => 45,
+				),
+				'event_id' => array(
+						'description' => t('Id of event associated with the tag'),
+						'type' => 'varchar',
+						'length' => 45,
+				),
+			),
+			'unique keys' => array(
+					'tag_event_pair'     => array('tag', 'event_id')
+			),
+	);
+	$schema['tag_types'] = array(
+			'description' => t('Full type list of a freebase topic'),
+			'fields' => array(
+				'tag' => array(
+						'description' => t('Freebase tag'),
+						'type' => 'varchar',
+						'length' => 45,
+				),
+				'type' => array(
+						'description' => t('Type of the tag'),
+						'type' => 'varchar',
+						'length' => 128,
+				),
+			),
+			'unique keys' => array(
+					'tt'     => array('tag', 'type')
+			),
+	);
 }
 
-function dec_rec_uninstall() {
-//  variable_del('dec_semrecommender_address');
+function dec_rec_install() {
+	// Create my tables.
+	drupal_install_schema('dec_rec');
 }
+function dec_rec_uninstall() {
+	// Drop my tables.
+	drupal_uninstall_schema('dec_rec');
+}
+
