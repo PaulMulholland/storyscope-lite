@@ -58,7 +58,7 @@ function dec_rec_schema() {
  	);
 	$schema['query_id'] = array(
 	    'description' => t('New story ids'),
-	    'field' => array(
+	    'fields' => array(
 			'id' => array(
 				'description' => t('Story id'),
 				'type' => 'serial',
@@ -71,7 +71,7 @@ function dec_rec_schema() {
 	    'fields' => array(
 			'id' => array(
 				'description' => t('Story id'),
-				'type' => 'integer',
+				'type' => 'int',
 				'length' => 11,
 			),
 			'tag' => array(
@@ -120,11 +120,11 @@ function dec_rec_schema() {
 	    'fields' => array(
 			'tag_attribute_id' => array(
 				'description' => t('Id for a tag attribute pairing'),
-				'type' => 'integer',
+				'type' => 'int',
 				'length' => 11,
 			),
 			'value' => array(
-				'description' => t('Value for the topic-attribute e.g. another topic, date, integer'),
+				'description' => t('Value for the topic-attribute e.g. another topic, date, int'),
 				'type' => 'varchar',
 				'length' => 45,
 			),
@@ -153,7 +153,7 @@ function dec_rec_schema() {
 				),
 				'link' => array(
 						'description' => t('1 if values are objects (i.e. topics) and 0 if data values'),
-						'type' => 'integer',
+						'type' => 'int',
 						'length' => 2,
 						'not null' => TRUE,
 				),
@@ -234,7 +234,7 @@ function dec_rec_schema() {
 			'fields' => array(
 				'story' => array(
 						'description' => t('Story id'),
-						'type' => 'integer',
+						'type' => 'int',
 						'length' => 11,
 						'not null' => TRUE,
 				),
@@ -343,14 +343,110 @@ function dec_rec_schema() {
 					'tt'     => array('tag', 'type')
 			),
 	);
+	$schema['attribute_name'] = array(
+			'description' => t('Names of atttributes used in event slots and event groups associated with a tag'),
+			'fields' => array(
+				'attribute' => array(
+						'description' => t('Freebase attribute'),
+						'type' => 'varchar',
+						'length' => 64,
+				),
+				'name' => array(
+						'description' => t('Name of attribute'),
+						'type' => 'varchar',
+						'length' => 64,
+				),
+				'reverse_name' => array(
+						'description' => t('Reverse name of attribute used for group of events related to a tag'),
+						'type' => 'varchar',
+						'length' => 64,
+				),
+			),
+			'unique keys' => array(
+					'attribute_UNIQUE'     => array('attribute')
+			),
+	);	
+	return $schema;
 }
 
+
 function dec_rec_install() {
-	// Create my tables.
-	drupal_install_schema('dec_rec');
-}
-function dec_rec_uninstall() {
-	// Drop my tables.
-	drupal_uninstall_schema('dec_rec');
+  	// Populate the attribute names
+	$values = array(
+		array('attribute'=>'activity', 'name'=>'activity', 'reverse_name'=>'activity'),
+		array('attribute'=>'/education/education/student', 'name'=>'agent', 'reverse_name'=>'education history'),
+		array('attribute'=>'/education/education/institution', 'name'=>'location', 'reverse_name'=>'students'),
+		array('attribute'=>'/education/education/start_date', 'name'=>'start_time', 'reverse_name'=>'start of education'),
+		array('attribute'=>'/education/education/end_date', 'name'=>'end_time', 'reverse_name'=>'end of education'),
+		array('attribute'=>'/education/education/degree', 'name'=>'tag', 'reverse_name'=>'degree awarded'),
+		array('attribute'=>'/education/education/specialization', 'name'=>'tag', 'reverse_name'=>'sepcialization of degree'),
+		array('attribute'=>'/education/education/minor', 'name'=>'tag', 'reverse_name'=>'minor of degree'),
+		array('attribute'=>'/people/place_lived/location', 'name'=>'location', 'reverse_name'=>'residents'),
+		array('attribute'=>'/people/place_lived/person', 'name'=>'agent', 'reverse_name'=>'places lived'),
+		array('attribute'=>'/people/place_lived/start_date', 'name'=>'start_time', 'reverse_name'=>'start of residence'),
+		array('attribute'=>'/people/place_lived/end_date', 'name'=>'end_time', 'reverse_name'=>'end of residence'),
+		array('attribute'=>'/visual_art/artwork/artist', 'name'=>'agent', 'reverse_name'=>'artworks created'),
+		array('attribute'=>'/visual_art/artwork/date_begun', 'name'=>'start_time', 'reverse_name'=>'start of artwork creation'),
+		array('attribute'=>'/visual_art/artwork/date_completed', 'name'=>'end_time', 'reverse_name'=>'end of artwork creation'),
+		array('attribute'=>'/visual_art/artwork/art_subject', 'name'=>'tag', 'reverse_name'=>'subject of artwork'),
+		array('attribute'=>'/visual_art/artwork/art_genre', 'name'=>'tag', 'reverse_name'=>'genre of artwork'),
+		array('attribute'=>'/visual_art/artwork/media', 'name'=>'tag', 'reverse_name'=>'media of artwork'),
+		array('attribute'=>'/visual_art/artwork/support', 'name'=>'tag', 'reverse_name'=>'support of artwork'),
+		array('attribute'=>'/visual_art/artwork/editions', 'name'=>'tag', 'reverse_name'=>'edition of artwork'),
+		array('attribute'=>'/visual_art/artwork/edition_of', 'name'=>'tag', 'reverse_name'=>'artwork edition'),
+		array('attribute'=>'/visual_art/artwork', 'name'=>'tag', 'reverse_name'=>'artwork creation details'),
+		array('attribute'=>'/visual_art/artwork/period_or_movement', 'name'=>'tag', 'reverse_name'=>'movement of artwork'),
+		array('attribute'=>'/visual_art/artwork/belongs_to_series', 'name'=>'tag', 'reverse_name'=>'series of artwork'),
+		array('attribute'=>'/book/written_work/author', 'name'=>'agent', 'reverse_name'=>'books authored'),
+		array('attribute'=>'/book/written_work/editor', 'name'=>'agent', 'reverse_name'=>'books edited'),
+		array('attribute'=>'/book/written_work/date_of_first_publication', 'name'=>'start_time', 'reverse_name'=>'date of publication'),
+		array('attribute'=>'/book/written_work/school_or_movement', 'name'=>'tag', 'reverse_name'=>'movement of work'),
+		array('attribute'=>'/book/written_work/part_of_series', 'name'=>'tag', 'reverse_name'=>'series of work'),
+		array('attribute'=>'/book/written_work/previous_in_series', 'name'=>'tag', 'reverse_name'=>'precedes in series'),
+		array('attribute'=>'/book/written_work/next_in_series', 'name'=>'tag', 'reverse_name'=>'follows in series'),
+		array('attribute'=>'/book/written_work', 'name'=>'tag', 'reverse_name'=>'book authorship details'),
+		array('attribute'=>'/organization/organization_membership/member', 'name'=>'agent', 'reverse_name'=>'organisations joined'),
+		array('attribute'=>'/organization/organization_membership/organization', 'name'=>'agent', 'reverse_name'=>'membership'),
+		array('attribute'=>'/organization/organization_membership/from', 'name'=>'start_time', 'reverse_name'=>'start time of membership'),
+		array('attribute'=>'/organization/organization_membership/to', 'name'=>'end_time', 'reverse_name'=>'start time of membership'),
+		array('attribute'=>'/exhibitions/exhibition/produced_by', 'name'=>'agent', 'reverse_name'=>'exhibition produced'),
+		array('attribute'=>'/exhibitions/exhibition/curators', 'name'=>'agent', 'reverse_name'=>'exhibition curated'),
+		array('attribute'=>'/exhibitions/exhibition/exhibition_types', 'name'=>'tag', 'reverse_name'=>'type of exhibition'),
+		array('attribute'=>'/exhibitions/exhibition/exhibits', 'name'=>'tag', 'reverse_name'=>'exhibition history'),
+		array('attribute'=>'/exhibitions/exhibition/subjects', 'name'=>'tag', 'reverse_name'=>'subject of exhibition'),
+		array('attribute'=>'/exhibitions/exhibition', 'name'=>'tag', 'reverse_name'=>'exhibition creation details'),
+		array('attribute'=>'/visual_art/artwork_owner_relationship/owner', 'name'=>'agent', 'reverse_name'=>'owner of work'),
+		array('attribute'=>'/visual_art/artwork_owner_relationship/date_acquired', 'name'=>'start_time', 'reverse_name'=>'start time of ownership'),
+		array('attribute'=>'/visual_art/artwork_owner_relationship/last_date_owned', 'name'=>'end_time', 'reverse_name'=>'end time of ownership'),
+		array('attribute'=>'/visual_art/artwork_owner_relationship/artwork', 'name'=>'tag', 'reverse_name'=>'ownership history'),
+		array('attribute'=>'/award/award_honor/award_winner', 'name'=>'agent', 'reverse_name'=>'winner of award'),
+		array('attribute'=>'/award/award_honor/year', 'name'=>'start_time', 'reverse_name'=>'time of award win'),
+		array('attribute'=>'/award/award_honor/award', 'name'=>'tag', 'reverse_name'=>'award won'),
+		array('attribute'=>'/award/award_honor/honored_for', 'name'=>'tag', 'reverse_name'=>'honored for award'),
+		array('attribute'=>'/award/award_honor/ceremony', 'name'=>'tag', 'reverse_name'=>'ceremony of award'),
+		array('attribute'=>'/award/award_honor/achievement_level', 'name'=>'tag', 'reverse_name'=>'achievement level of award'),
+		array('attribute'=>'/award/award_nomination/award_nominee', 'name'=>'agent', 'reverse_name'=>'nominee of award'),
+		array('attribute'=>'/award/award_nomination/year', 'name'=>'start_time', 'reverse_name'=>'time of nomination'),
+		array('attribute'=>'/award/award_nomination/award', 'name'=>'tag', 'reverse_name'=>'award nomination'),
+		array('attribute'=>'/award/award_nomination/nominated_for', 'name'=>'tag', 'reverse_name'=>'work nominated for'),
+		array('attribute'=>'/award/award_nomination/ceremony', 'name'=>'tag', 'reverse_name'=>'ceremony of award'),
+		array('attribute'=>'/visual_art/artwork_location_relationship/location', 'name'=>'location', 'reverse_name'=>'location of artwork'),
+		array('attribute'=>'/visual_art/artwork_location_relationship/from', 'name'=>'start_time', 'reverse_name'=>'start time of artwork location'),
+		array('attribute'=>'/visual_art/artwork_location_relationship/to', 'name'=>'end_time', 'reverse_name'=>'end time of artwork location'),
+		array('attribute'=>'/visual_art/artwork_location_relationship/artwork', 'name'=>'tag', 'reverse_name'=>'artwork location history'),
+		array('attribute'=>'/exhibitions/exhibition_run/opened_on', 'name'=>'start_time', 'reverse_name'=>'start time of exhibition run'),
+		array('attribute'=>'/exhibitions/exhibition_run/closed_on', 'name'=>'end_time', 'reverse_name'=>'end time of exhibition run'),
+		array('attribute'=>'/exhibitions/exhibition_run/venue', 'name'=>'location', 'reverse_name'=>'venue of exhibition run'),
+		array('attribute'=>'/exhibitions/exhibition_run/exhibition', 'name'=>'tag', 'reverse_name'=>'exhibition run details'),
+		array('attribute'=>'/time/event/people_involved', 'name'=>'agent', 'reverse_name'=>'person of event'),
+		array('attribute'=>'/time/event/start_date', 'name'=>'start_time', 'reverse_name'=>'start time of event'),
+		array('attribute'=>'/time/event/end_date', 'name'=>'end_time', 'reverse_name'=>'end time of event'),
+		array('attribute'=>'/time/event/locations', 'name'=>'location', 'reverse_name'=>'location of event')
+	);  	
+	$query = db_insert('attribute_name')->fields(array('attribute', 'name', 'reverse_name'));
+	foreach($values as $value) {
+		$query->values($value);
+	}
+	$query->execute();
 }
 
