@@ -193,17 +193,22 @@ function check_topic_name_image_description($topic) {
  * Retrieve and store locations that contain the current location either directly or via one other location
  */
 function containing_locations_of_a_location($location_topic = "/m/0389fd") {
+
 	$contained_locations = contained_locations($location_topic);
-	if(empty($contained_locations)) {
-		return;
+
+	if(!empty($contained_locations)) {
+		$contained_contained_locations = contained_contained_locations($location_topic);
 	}
-	$location_array = array_unique(array_merge(array($location_topic), $contained_locations, contained_contained_locations($location_topic)));
+	else {
+		$contained_contained_locations = array();
+	}
+	$location_array = array_unique(array_merge(array($location_topic), $contained_locations, $contained_contained_locations));
 	$location_topic = my_escape_string($location_topic);
 	$value_array = array();
 	foreach($location_array as $container) {
 		$value_array[] = "('".$location_topic."', '".$container."')";
 	}
-	
+
 	//save to database (including a location containing itself)
 	$values = 'VALUES '.implode(', ',$value_array);
 	$query = "INSERT INTO location_container (location, container) ".$values." ON DUPLICATE KEY UPDATE location = VALUES(location), container = VALUES(container);";
@@ -3335,6 +3340,7 @@ WHERE (start_end_location_result.start_time <= '".$end."' AND start_end_location
 (start_end_location_result.start_time <= '".$end."' AND start_end_location_result.end_time >= '".$year."')
 ) as combined_result
 GROUP BY combined_result.activity;";
+
 /*removed setting link
  * UNION
 SELECT setting_link_event_id.event_id AS event, event_attribute_value.value as activity FROM setting_link_event_id, event_attribute_value
