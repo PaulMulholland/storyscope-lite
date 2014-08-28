@@ -1,7 +1,4 @@
 <?php
-define('GOOGLEAPIKEY', 'AIzaSyBYyj76m4jLMbI1ZQH06-OiSmfUwfwKz8k');
-// define('TIMELINECODE', 'http://cdn.knightlab.com/libs/timeline/latest/js/storyjs-embed.js');
-define('TIMELINECODE', 'http://localhost/build/js/storyjs-embed.js');
 
 /**
  * file: dec_rec.module
@@ -11,6 +8,60 @@ define('TIMELINECODE', 'http://localhost/build/js/storyjs-embed.js');
  * Paul Mulholland <p.mulholland@open.ac.uk>
  *
  */
+
+
+/**
+ * Admin settings for the module
+ */
+function dec_rec_admin() {
+	$form = array();
+	$form['dec_rec_key'] = array(
+			'#type' => 'textfield',
+			'#title' => t('Google API Key'),
+			'#default_value' => variable_get('dec_rec_key', ''),
+			'#size' => 60,
+			'#maxlength' => 100,
+			'#description' => t("Google API key to be used to retrieve Freebase data."),
+			'#required' => TRUE,
+	);
+	$form['dec_rec_timeline'] = array(
+			'#type' => 'textfield',
+			'#title' => t('Location of timeline code'),
+			'#default_value' => variable_get('dec_rec_timeline', ''),
+			'#size' => 60,
+			'#maxlength' => 100,
+			'#description' => t("Location of timeline file. If you have not installed it elsewhere then use http://cdn.knightlab.com/libs/timeline/latest/js/storyjs-embed.js"),
+			'#required' => TRUE,
+	);
+	return system_settings_form($form);
+}
+
+/**
+ * Retrieve API key from configuration variable and build URL variable
+ */
+function get_google_api_key_path() {
+	$googleapikey = variable_get("dec_rec_key", "");
+	if($googleapikey == "") {
+		return "";
+	}
+	else {
+		return "&key=".$googleapikey;
+	}
+}
+
+/**
+ * Retrieve location of timeline code
+ */
+function get_timeline_path() {
+	$timelinepath = variable_get("dec_rec_timeline", "");
+	if($timelinepath == "") {
+		return "http://cdn.knightlab.com/libs/timeline/latest/js/storyjs-embed.js";
+	}
+	else {
+		return $timelinepath;
+	}
+}
+
 
 /**
  * Menu items for the recommender
@@ -24,7 +75,15 @@ function dec_rec_menu(){
 // 	 'access callback' => 'user_access',
 // 	 'access arguments' => array('administer site configuration'),
 //      );
-      $items['timeline_for_tags/%'] = array(
+   $items['admin/settings/dec_rec'] = array(
+    'title' => 'Recommender module settings',
+    'description' => 'Description of Recommender module settings page',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('dec_rec_admin'),
+    'access arguments' => array('administer dec_rec settings'),
+    'type' => MENU_NORMAL_ITEM,
+   );
+    $items['timeline_for_tags/%'] = array(
 	 'title' => 'Story timeline',
 	 'description' => 'Timeline for a list of tags.',
 	 'page callback' => 'dec_timeline_for_tags',
@@ -544,7 +603,7 @@ function dec_timeline_for_setting() {
 	
 	$output .= '    }
     </script>
-    <script type="text/javascript" src="'.TIMELINECODE.'"></script>';
+    <script type="text/javascript" src="'.get_timeline_path().'"></script>';
 
 	if(isset($event_type)) {
 		if($end) {
@@ -633,7 +692,7 @@ function dec_timeline_for_tags($story_id) {
 	
 	$output .= '    }
     </script>
-    <script type="text/javascript" src="'.TIMELINECODE.'"></script>';
+    <script type="text/javascript" src="'.get_timeline_path().'"></script>';
 	
 	if(isset($event_type)) {
 		$output .= l("Reload",'timeline_for_tags/'.$story_id, array('query'=>array('event_type'=>$event_type, 'reload'=>'1')));
@@ -741,7 +800,7 @@ function dec_timeline($m, $id = FALSE) {
 
     $output .= '    }
     </script>
-    <script type="text/javascript" src="'.TIMELINECODE.'"></script>';
+    <script type="text/javascript" src="'.get_timeline_path().'"></script>';
     if(is_freebase_topic_id($topic)) {
     	$topic_path = $topic;
     }
@@ -1277,7 +1336,8 @@ function check_freebase_saved_image($topic = '/m/01qwfk', $thumbnail_url = FALSE
 	}
 	
 	//retrieve topic id for image
-	$image_query = 'https://www.googleapis.com/freebase/v1/topic'.$topic.'?filter=/common/topic/image&limit=1'.'&key='.GOOGLEAPIKEY;
+	$googleapikey = get_google_api_key_path();
+	$image_query = 'https://www.googleapis.com/freebase/v1/topic'.$topic.'?filter=/common/topic/image&limit=1'.$googleapikey;
 	$result = drupal_http_request($image_query);
 
 	if(isset($result->data)) {
@@ -2229,7 +2289,9 @@ function flat_list_of_single_tag_events($all_events) {
 function execute_mql_event_query($query) {
 	$jsonquerystr = urlencode(json_encode($query));
 	#run the query
-	$queryurl='https://www.googleapis.com/freebase/v1/mqlread?query='.$jsonquerystr.'&key='.GOOGLEAPIKEY;
+	$googleapikey = get_google_api_key_path();
+	
+	$queryurl='https://www.googleapis.com/freebase/v1/mqlread?query='.$jsonquerystr.$googleapikey;
 	$ch = curl_init();
 	curl_setopt($ch, CURLOPT_URL, $queryurl);
 	curl_setopt($ch, CURLOPT_HEADER, 0);
@@ -6135,7 +6197,8 @@ function check_for_topic_description($topic = "/m/055rd2", $limit = FALSE, $relo
 	}
 	//get topic description
 	$service_url = 'https://www.googleapis.com/freebase/v1/topic';
-	$url = $service_url . $topic . '?filter=/common/topic/description'.'&key='.GOOGLEAPIKEY;
+	$googleapikey = get_google_api_key_path();
+	$url = $service_url . $topic . '?filter=/common/topic/description'.$googleapikey;
 	$ch = curl_init();
 	curl_setopt($ch, CURLOPT_URL, $url);
 	curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
@@ -6186,7 +6249,8 @@ function check_for_notable_types($topic = "/m/055rd2") {
 	
 	//get notable type
 	$service_url = 'https://www.googleapis.com/freebase/v1/topic';
-	$url = $service_url . $topic . '?filter=/common/topic/notable_types'.'&key='.GOOGLEAPIKEY;
+	$googleapikey = get_google_api_key_path();
+	$url = $service_url . $topic . '?filter=/common/topic/notable_types'.$googleapikey;
 	$ch = curl_init();
 	curl_setopt($ch, CURLOPT_URL, $url);
 	curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
