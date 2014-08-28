@@ -1,5 +1,5 @@
 <?php
-
+define('GOOGLEAPIKEY', 'AIzaSyBYyj76m4jLMbI1ZQH06-OiSmfUwfwKz8k');
 /**
  * file: dec_rec.module
  *
@@ -1625,12 +1625,12 @@ function fb_person_birth_date_location($topic = '/m/071k7_', $result = array("tr
   "/people/person/date_of_birth"=> null,
   "/people/person/place_of_birth"=> array(
     "mid"=> null,
-    "name"=> null
+    "name"=> null,
+  	"optional"=>"optional"
   )
 ));
 
 	$resultarray = execute_mql_event_query($query);
-	
 	if(isset($resultarray["result"]["0"]["/people/person/place_of_birth"]["mid"]) && isset($resultarray["result"]["0"]["/people/person/place_of_birth"]["name"])) {
 		$triples[] = array($topic, "Place of birth", array($resultarray["result"]["0"]["/people/person/place_of_birth"]["mid"]), 1);
 		$tag_names[$resultarray["result"]["0"]["/people/person/place_of_birth"]["mid"]] = $resultarray["result"]["0"]["/people/person/place_of_birth"]["name"];
@@ -2290,7 +2290,6 @@ function execute_mql_event_query($query) {
 	$jsonquerystr = urlencode(json_encode($query));
 	#run the query
 	$googleapikey = get_google_api_key_path();
-	
 	$queryurl='https://www.googleapis.com/freebase/v1/mqlread?query='.$jsonquerystr.$googleapikey;
 	$ch = curl_init();
 	curl_setopt($ch, CURLOPT_URL, $queryurl);
@@ -2350,7 +2349,7 @@ function dec_tag($m, $id = FALSE) {
 
 		//calculate triples
 		$calculated_triples = check_for_tag_in_tag_attribute($topic);
-		if(!$calculated_triples && !$reload) {
+		if(!$calculated_triples || $reload) {
 			triples_of_a_tag($topic);
 		}
 	
