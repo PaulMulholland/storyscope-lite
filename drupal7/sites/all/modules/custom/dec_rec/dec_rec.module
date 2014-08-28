@@ -1481,7 +1481,11 @@ function triples_of_a_tag($topic) {
 		//artist movement details
 		$result = fb_periods_movements_associated_artist($topic, $result);
 	}
-	
+
+	if(in_array("/location/location", $types)) {
+		//location contained by
+		$result = fb_location_containedBy($topic, $result);
+	}
 	//saving
 	save_tag_names_to_db($result["names"]);
 	save_triples_to_db($result["triples"]);
@@ -1562,6 +1566,27 @@ function save_triples_to_db($triples) {
 		//save to tag triple value table
  		save_tag_attribute_id_values($id, $values);
 	}
+}
+
+function fb_location_containedBy($topic = '/m/02cft', $result = array("triples"=>array(),"names"=>array())) {
+	$triples = array();
+	$tag_names = array();
+	$query = array(array(
+  "mid"=> $topic,
+  "/location/location/containedby"=> array(array(
+    "mid"=> null,
+    "name"=> null
+  ))
+));
+	
+	$resultarray = execute_mql_event_query($query);
+
+	if(isset($resultarray["result"]["0"]["/location/location/containedby"])) {
+		$triples[] = array($topic, "Contained by", get_values($resultarray["result"]["0"]["/location/location/containedby"]), 1);
+		$tag_names = get_topic_name_pairs(array("/location/location/containedby"),$resultarray["result"]["0"],$tag_names);
+	}
+	return array("triples"=>array_merge($triples, $result["triples"]),
+			"names"=>array_merge($tag_names, $result["names"]));	
 }
 
 /**
