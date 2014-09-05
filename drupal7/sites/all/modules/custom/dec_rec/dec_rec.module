@@ -1,5 +1,4 @@
 <?php
-define('GOOGLEAPIKEY', 'AIzaSyBYyj76m4jLMbI1ZQH06-OiSmfUwfwKz8k');
 /**
  * file: dec_rec.module
  *
@@ -2567,7 +2566,7 @@ function produce_event_table_for_timeline($event) {
 }
 
 /**
- * Output event table
+ * Output event table for event array
  */
 function produce_event_table($event) {
 	$rows = array();
@@ -2602,7 +2601,7 @@ function output_event_table_dec_tag($event_id, $topic_types) {
 }
 
 /**
- * Output event as table
+ * Output event as table for event_id
  */
 function output_event_table($event_id) {
 	$event = load_art_event_without_title_addition($event_id);
