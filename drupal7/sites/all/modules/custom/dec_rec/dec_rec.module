@@ -1298,7 +1298,7 @@ function save_fb_image($topic, $thumbnail_url = FALSE) {
 function dec_reset() {
 	//if the line below is uncommented then this function can reset local cached databases of freebase data
 // 	reset_recommender_database();
-	return "databse reset";
+	return "database reset";
 }
 
 /**
@@ -1453,9 +1453,6 @@ function reset_recommender_database() {
 	$query = "delete from tag_types WHERE 1;";
 	db_query($query);
 
-	//Stores mapping between tags and their names used in event slots and event groups associated with a tag
-	$query = "delete from attribute_name WHERE 1;";
-	db_query($query);
 }
 
 /**
@@ -1490,6 +1487,32 @@ function triples_of_a_tag($topic) {
 		//location contained by
 		$result = fb_location_containedBy($topic, $result);
 	}
+	
+	if(in_array("/exhibitions/exhibition", $types)) {
+		//exhibition details
+		$result = fb_exhibition_details($topic, $result);
+	}
+	
+	if(in_array("/exhibitions/exhibition_subject", $types)) {
+		//subject of exhibition
+		$result = fb_exhibition_subject_exhibition($topic, $result);
+	}
+	
+	if(in_array("/exhibitions/exhibition_producer", $types)) {
+		//subject of exhibition
+		$result = fb_exhibition_producer_exhibition($topic, $result);
+	}
+
+	if(in_array("/exhibitions/exhibit", $types)) {
+		//subject of exhibition
+		$result = fb_exhibit_exhibition($topic, $result);
+	}
+
+	if(in_array("/exhibitions/exhibition_curator", $types)) {
+		//subject of exhibition
+		$result = fb_exhibition_curator_exhibition($topic, $result);
+	}
+	
 	//saving
 	save_tag_names_to_db($result["names"]);
 	save_triples_to_db($result["triples"]);
@@ -1702,6 +1725,159 @@ function fb_deceased_person_death_date_location($topic = '/m/071k7_', $result = 
 			"names"=>array_merge($tag_names, $result["names"]));	
 }
 
+
+/**
+ * Retrieve subjects, event type, producer, exhibits, curator of an exhibition
+ */
+function fb_exhibition_details($topic = '/m/0hdzz0h', $result = array("triples"=>array(),"names"=>array())) {
+	$triples = array();
+	$tag_names = array();
+	$query = array(array(
+  "mid"=> $topic,
+  "type"=> "/exhibitions/exhibition",
+  "/exhibitions/exhibition/exhibits"=> array(array(
+    "name"=> null,
+    "mid"=> null
+  )),
+  "/exhibitions/exhibition/curators"=> array(array(
+    "name"=> null,
+    "mid"=> null
+  )),
+  "/exhibitions/exhibition/produced_by"=> array(array(
+    "name"=> null,
+    "mid"=> null
+  )),
+  "/exhibitions/exhibition/subjects"=> array(array(
+    "name"=> null,
+    "mid"=> null
+  )),
+  "/exhibitions/exhibition/exhibition_types"=> array(array(
+    "name"=> null,
+    "mid"=> null
+  ))
+));
+	$resultarray = execute_mql_event_query($query);
+	
+	if(isset($resultarray["result"]["0"]["/exhibitions/exhibition/exhibits"])) {
+		$triples[] = array($topic, "Exhibits", get_values($resultarray["result"]["0"]["/exhibitions/exhibition/exhibits"]), 1);
+		$tag_names = get_topic_name_pairs(array("/exhibitions/exhibition/exhibits"),$resultarray["result"]["0"],$tag_names);
+	}
+	if(isset($resultarray["result"]["0"]["/exhibitions/exhibition/curators"])) {
+		$triples[] = array($topic, "Curated by", get_values($resultarray["result"]["0"]["/exhibitions/exhibition/curators"]), 1);
+		$tag_names = get_topic_name_pairs(array("/exhibitions/exhibition/curators"),$resultarray["result"]["0"],$tag_names);
+	}	
+	if(isset($resultarray["result"]["0"]["/exhibitions/exhibition/produced_by"])) {
+		$triples[] = array($topic, "Produced by", get_values($resultarray["result"]["0"]["/exhibitions/exhibition/produced_by"]), 1);
+		$tag_names = get_topic_name_pairs(array("/exhibitions/exhibition/produced_by"),$resultarray["result"]["0"],$tag_names);
+	}
+	if(isset($resultarray["result"]["0"]["/exhibitions/exhibition/subjects"])) {
+		$triples[] = array($topic, "Subjects", get_values($resultarray["result"]["0"]["/exhibitions/exhibition/subjects"]), 1);
+		$tag_names = get_topic_name_pairs(array("/exhibitions/exhibition/subjects"),$resultarray["result"]["0"],$tag_names);
+	}
+	if(isset($resultarray["result"]["0"]["/exhibitions/exhibition/exhibition_types"])) {
+		$triples[] = array($topic, "Exhibition type", get_values($resultarray["result"]["0"]["/exhibitions/exhibition/exhibition_types"]), 1);
+		$tag_names = get_topic_name_pairs(array("/exhibitions/exhibition/exhibition_types"),$resultarray["result"]["0"],$tag_names);
+	}
+	return array("triples"=>array_merge($triples, $result["triples"]),
+			"names"=>array_merge($tag_names, $result["names"]));
+}
+
+/**
+ * Retrieve exhibition of exhibition subject
+ */
+function fb_exhibition_subject_exhibition($topic = '/m/03y2s9', $result = array("triples"=>array(),"names"=>array())) {
+	$triples = array();
+	$tag_names = array();
+	$query = array(array(
+  "mid"=> $topic,
+  "type"=> "/exhibitions/exhibition_subject",
+  "/exhibitions/exhibition_subject/exhibitions_created_about_this_subject"=> array(array(
+    "name"=> null,
+    "mid"=> null
+  ))
+));	
+	$resultarray = execute_mql_event_query($query);
+	
+	if(isset($resultarray["result"]["0"]["/exhibitions/exhibition_subject/exhibitions_created_about_this_subject"])) {
+		$triples[] = array($topic, "Subject of exhibition", get_values($resultarray["result"]["0"]["/exhibitions/exhibition_subject/exhibitions_created_about_this_subject"]), 1);
+		$tag_names = get_topic_name_pairs(array("/exhibitions/exhibition_subject/exhibitions_created_about_this_subject"),$resultarray["result"]["0"],$tag_names);
+	}
+	return array("triples"=>array_merge($triples, $result["triples"]),
+			"names"=>array_merge($tag_names, $result["names"]));
+}
+
+/**
+ * Retrieve exhibition of exhibition producer
+ */
+function fb_exhibition_producer_exhibition($topic = '/m/02vz3d', $result = array("triples"=>array(),"names"=>array())) {
+	$triples = array();
+	$tag_names = array();
+	$query = array(array(
+  "mid"=> $topic,
+  "type"=> "/exhibitions/exhibition_producer",
+  "/exhibitions/exhibition_producer/exhibitions_produced"=> array(array(
+    "name"=> null,
+    "mid"=> null
+  ))
+));
+	$resultarray = execute_mql_event_query($query);
+	
+	if(isset($resultarray["result"]["0"]["/exhibitions/exhibition_producer/exhibitions_produced"])) {
+		$triples[] = array($topic, "Producer of exhibition", get_values($resultarray["result"]["0"]["/exhibitions/exhibition_producer/exhibitions_produced"]), 1);
+		$tag_names = get_topic_name_pairs(array("/exhibitions/exhibition_producer/exhibitions_produced"),$resultarray["result"]["0"],$tag_names);
+	}
+	return array("triples"=>array_merge($triples, $result["triples"]),
+			"names"=>array_merge($tag_names, $result["names"]));
+}
+
+/**
+ * Retrieve exhibition of exhibit
+ */
+function fb_exhibit_exhibition($topic = '/m/0hd_4hm', $result = array("triples"=>array(),"names"=>array())) {
+	$triples = array();
+	$tag_names = array();
+	$query = array(array(
+  "mid"=> $topic,
+  "type"=> "/exhibitions/exhibit",
+  "/exhibitions/exhibit/exhibitions_displayed_in"=> array(array(
+    "name"=> null,
+    "mid"=> null
+  ))
+));
+	$resultarray = execute_mql_event_query($query);
+	
+	if(isset($resultarray["result"]["0"]["/exhibitions/exhibit/exhibitions_displayed_in"])) {
+		$triples[] = array($topic, "Displayed in exhibition", get_values($resultarray["result"]["0"]["/exhibitions/exhibit/exhibitions_displayed_in"]), 1);
+		$tag_names = get_topic_name_pairs(array("/exhibitions/exhibit/exhibitions_displayed_in"),$resultarray["result"]["0"],$tag_names);
+	}
+	return array("triples"=>array_merge($triples, $result["triples"]),
+			"names"=>array_merge($tag_names, $result["names"]));
+}
+
+/**
+ * Retrieve exhibition of exhibition curator
+ */
+function fb_exhibition_curator_exhibition($topic = '/m/0hd_0bn', $result = array("triples"=>array(),"names"=>array())) {
+	$triples = array();
+	$tag_names = array();
+	$query = array(array(
+  "mid"=> $topic,
+  "type"=> "/exhibitions/exhibition_curator",
+  "/exhibitions/exhibition_curator/exhibitions_curated"=> array(array(
+    "name"=> null,
+    "mid"=> null
+  ))
+));
+	$resultarray = execute_mql_event_query($query);
+	
+	if(isset($resultarray["result"]["0"]["/exhibitions/exhibition_curator/exhibitions_curated"])) {
+		$triples[] = array($topic, "Curator of exhibition", get_values($resultarray["result"]["0"]["/exhibitions/exhibition_curator/exhibitions_curated"]), 1);
+		$tag_names = get_topic_name_pairs(array("/exhibitions/exhibition_curator/exhibitions_curated"),$resultarray["result"]["0"],$tag_names);
+	}
+	return array("triples"=>array_merge($triples, $result["triples"]),
+			"names"=>array_merge($tag_names, $result["names"]));
+}
+
 /**
  * Retrieve event space for a setting
  */
@@ -1874,7 +2050,7 @@ function dec_setting() {
 /**
  * Themes of a setting
  */
-function dec_get_themes_for_events_of_setting($location, $year, $end = 0) {//****here
+function dec_get_themes_for_events_of_setting($location, $year, $end = 0) {
 
 	$query = "SELECT * 
 FROM
@@ -4222,7 +4398,7 @@ function fb_topic_organization_member($topic, $previous_output = array("events"=
 }
 
 /**
- * Retrieve exhibition data of an exhibition producer
+ * Retrieve exhibition data of an exhibition producer//****here no date info
  */
 function fb_topic_exhibition_producer($topic, $previous_output = array("events"=>array(),"names"=>array(), "links"=>array())) {
 	$query = array(array(
@@ -4298,7 +4474,7 @@ function fb_topic_exhibition_producer($topic, $previous_output = array("events"=
 }
 
 /**
- * Retrieve exhibition data of an exhibition curator
+ * Retrieve exhibition data of an exhibition curator//****here no date info
  */
 function fb_topic_exhibition_curator($topic, $previous_output = array("events"=>array(),"names"=>array(), "links"=>array())) {
 	$query = array(array(
@@ -4375,7 +4551,7 @@ function fb_topic_exhibition_curator($topic, $previous_output = array("events"=>
 }
 
 /**
- * Retrieve exhibition data of an exhibition subject
+ * Retrieve exhibition data of an exhibition subject//****here no date info
  */
 function fb_topic_exhibition_subject($topic, $previous_output = array("events"=>array(),"names"=>array(), "links"=>array())) {
 	$query = array(array(
@@ -4957,7 +5133,7 @@ function fb_object_award_winning_work($topic, $previous_output = array("events"=
 }
 
 /**
- * Retrieve exhibition history of an object
+ * Retrieve exhibition history of an object//****here no date info
  */
 function fb_object_exhibited($topic, $previous_output = array("events"=>array(),"names"=>array(), "links"=>array())) {
 	$query = array(array(
@@ -5033,7 +5209,7 @@ function fb_object_exhibited($topic, $previous_output = array("events"=>array(),
 }
 
 /**
- * Retrieve exhibition data for topic that is an exhibition
+ * Retrieve exhibition data for topic that is an exhibition//****here no date info
 */
 function fb_exhibition_production_of_the_exhibition($topic, $previous_output = array("events"=>array(),"names"=>array(), "links"=>array())) {
 	$query = array(array(
@@ -5962,29 +6138,31 @@ function new_event_space_of_a_topic($topic = "/m/01qwfk", $reload = FALSE) {
 		
 	}
 	
-	
+	//changed to facts
 	//**type: /exhibitions/exhibition_producer
-	if(in_array("/exhibitions/exhibition_producer", $types)) {
-		$res[] = "/exhibitions/exhibition_producer";
-		//producer of exhibition
-		$result = fb_topic_exhibition_producer($topic, $result);
-	}
+// 	if(in_array("/exhibitions/exhibition_producer", $types)) {
+// 		$res[] = "/exhibitions/exhibition_producer";
+	//producer of exhibition
+// 		$result = fb_topic_exhibition_producer($topic, $result);
+// 	}
 	
+	//changed to facts
 	//**type: /exhibitions/exhibition_curator
-	if(in_array("/exhibitions/exhibition_curator", $types)) {
-		$res[] = "/exhibitions/exhibition_curator";
+// 	if(in_array("/exhibitions/exhibition_curator", $types)) {
+// 		$res[] = "/exhibitions/exhibition_curator";
 		//exhibition curator
-		$result = fb_topic_exhibition_curator($topic, $result);
+// 		$result = fb_topic_exhibition_curator($topic, $result);
 		
-	}
+// 	}
 	
+	//changed to facts
 	//**type: /exhibitions/exhibition_subject
-	if(in_array("/exhibitions/exhibition_subject", $types)) {
-		$res[] = "/exhibitions/exhibition_subject";
+// 	if(in_array("/exhibitions/exhibition_subject", $types)) {
+// 		$res[] = "/exhibitions/exhibition_subject";
 		//exhibition subject
-		$result = fb_topic_exhibition_subject($topic, $result);
+// 		$result = fb_topic_exhibition_subject($topic, $result);
 		
-	}
+// 	}
 	
 	
 	//**type: /visual_art/art_owner
@@ -6039,24 +6217,26 @@ function new_event_space_of_a_topic($topic = "/m/01qwfk", $reload = FALSE) {
 		$result = fb_object_award_winning_work($topic, $result);
 		
 	}
-	
+
+	//changed to facts
 	//**type: /exhibitions/exhibit
-	if(in_array("/exhibitions/exhibit", $types)) {
-		$res[] = "/exhibitions/exhibit";
+// 	if(in_array("/exhibitions/exhibit", $types)) {
+// 		$res[] = "/exhibitions/exhibit";
 		//object exhibited
-		$result = fb_object_exhibited($topic, $result);
-	}
+// 		$result = fb_object_exhibited($topic, $result);
+// 	}
 	
 	//**type: /exhibitions/exhibition
 	if(in_array("/exhibitions/exhibition", $types)) {
 		$res[] = "/exhibitions/exhibition";
 		
+		//changed to facts
 		//production of the exhibition
-		$result = fb_exhibition_production_of_the_exhibition($topic, $result);
-		
+// 		$result = fb_exhibition_production_of_the_exhibition($topic, $result);
+
 		//exhibition held at venue
 		$result = fb_exhibition_held_at_venue($topic, $result);
-	
+
 		//creation of exhibited objects
 		$result = fb_exhibition_creation_of_object($topic, $result);
 	}
