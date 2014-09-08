@@ -899,6 +899,7 @@ function dec_tag_timeline($topic = '/m/01qwfk', $attribute = FALSE) {
 		$output[] = load_art_event_dec_tag($event, $types, TRUE);
 	}
 	$header = create_timeline_header($topic);
+
 	$timeline_array = translate_events_for_timeline($output, $header);
 	return $timeline_array;
 }
@@ -1014,7 +1015,13 @@ function create_timeline_header($topic) {
 		return $header;
 	}
 	$header['headline'] = l(get_topic_name($topic),'tag'.$topic);
-	$header['text'] = get_topic_description($topic, 150);
+	$description = get_topic_description($topic, 150);
+	if($description) {
+		$header['text'] = $description;
+	}
+	else {
+		$header['text'] = ' ';
+	}
 	$header['type'] = 'default';
 	if($image = check_freebase_saved_image($topic)) {
 		$header['asset']['media'] = $image;
@@ -2741,6 +2748,12 @@ function produce_event_table_for_timeline($event) {
 	return $output;
 }
 
+
+/**
+ * Output event table row for event table
+ */
+//*****here
+
 /**
  * Output event table for event array
  */
@@ -2748,7 +2761,7 @@ function produce_event_table($event) {
 	$rows = array();
 	foreach($event as $key=>$elements) {
 		$value_string = "";
-		if(is_array($elements)) {
+		if(is_array($elements))	{
 			foreach($elements as $element) {
 				if(is_array($element)) {
 					$value_string .= l($element[1], "tag".$element[0])."</br> ";
@@ -2757,14 +2770,14 @@ function produce_event_table($event) {
 				// 			elseif($key == 'start_time' || $key == 'end_time') {
 				// 				$value_string .= l($element, "tag/".$element)."</br> ";
 					// 			}
-					else {
-						$value_string .= $element."</br> ";
-					}
+				else {
+					$value_string .= $element."</br> ";
 				}
-				$rows[] = array($key,$value_string);
 			}
+			$rows[] = array($key,$value_string);
 		}
-		return theme('table', array('rows' => $rows, 'attributes' => array('width' => '50%')));
+	}
+	return theme('table', array('rows' => $rows, 'attributes' => array('width' => '50%')));
 }
 
 /**
