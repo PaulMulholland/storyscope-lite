@@ -66,14 +66,6 @@ function get_timeline_path() {
  * Menu items for the recommender
  */
 function dec_rec_menu(){
-//      $items['admin/config/services/dec_rec'] = array(
-// 	 'title' => 'SemRecommender service',
-// 	 'description' => 'Configure the SemRecommender service used by StoryScope.',
-// 	 'page callback' => 'drupal_get_form',
-// 	 'page arguments' => array('dec_rec_form_config'),
-// 	 'access callback' => 'user_access',
-// 	 'access arguments' => array('administer site configuration'),
-//      );
    $items['admin/settings/dec_rec'] = array(
     'title' => 'Recommender module settings',
     'description' => 'Description of Recommender module settings page',
@@ -300,9 +292,7 @@ function tagtimelinedata($m, $id = FALSE) {
 	//save new timeline data
  	save_topic_timelime($topic, $attribute, $timeline_data);
 	
-//  	return drupal_json_output(json_decode($timeline_data));
  	return drupal_json_output(json_decode($timeline_data));
- 	
 }
 
 /**
@@ -340,8 +330,6 @@ function save_topic_timelime($topic, $attribute = FALSE, $timeline_data) {
 		$query = "INSERT INTO tag_timeline_data (tag, attribute, timeline_data) VALUES (:tag, 'no_attribute', :data) ON DUPLICATE KEY UPDATE tag = VALUES(tag), attribute = VALUES(attribute), timeline_data = VALUES(timeline_data);";
 		db_query($query, array(':tag' => $topic, ':data' => $timeline_data));
 	}
-	
-	
 }
 
 /**
@@ -491,16 +479,12 @@ function tagstimelinedata($story_id) {
  		return drupal_json_output(json_decode(stripslashes($cached_data)));
  	}
  
-	
  	$timeline_data = drupal_json_encode(array('timeline'=>dec_tags_timeline($story_id, $event_type)));
-
 
 	//save new timeline data
 	save_story_timeline($story_id, $event_type, $timeline_data);
 	
-	//  	return drupal_json_output(json_decode($timeline_data));
 	return drupal_json_output(json_decode($timeline_data));
-
 }
 
 /**
@@ -756,7 +740,6 @@ function dec_timeline($m, $id = FALSE) {
 			else {
 				drupal_set_title($topic.': '.$attribute_title);
 			}
-// 			drupal_set_title(check_for_topic_name($topic).': '.$attribute_title);
 		}
 		else {
 			$name = get_topic_name($topic);
@@ -766,7 +749,6 @@ function dec_timeline($m, $id = FALSE) {
 			else {
 				drupal_set_title($topic.': '.$attribute);
 			}
-// 			drupal_set_title(check_for_topic_name($topic));
 		}
 	}
 	else {
@@ -777,7 +759,6 @@ function dec_timeline($m, $id = FALSE) {
 		else {
 			drupal_set_title($topic);
 		}
-// 		drupal_set_title(check_for_topic_name($topic));
 	}
 	
 
@@ -787,7 +768,7 @@ function dec_timeline($m, $id = FALSE) {
         var timeline_config = {
             width:              "100%",
             height:             "600",';
-// 	$output .= 'source:             "'.'http://localhost/my-data3.json'.'"';
+
 	if(!$id) {
 		$topic_path = '/'.$topic;
 	}
@@ -858,11 +839,9 @@ function dec_tags_timeline($story_id, $event_type = FALSE) {
 	$output = array();	
 	if($event_type) {
 		$events = get_all_temporal_events_for_story2($story_id, $event_type);
-// 		$events = get_all_temporal_events_for_story_event_type($story_id, $event_type);
 	}
 	else {
 		$events = get_all_temporal_events_for_story2($story_id);
-//  	$events = get_all_temporal_events_for_story($story_id);
 	}
 
 	if(!empty($events)) {
@@ -877,7 +856,6 @@ function dec_tags_timeline($story_id, $event_type = FALSE) {
 	$header = create_timeline_story_header($story_id);
 
 	//timeline array
-
 	$timeline_array = translate_story_events_for_timeline($output, $header);
 	
 	return $timeline_array;
@@ -889,11 +867,15 @@ function dec_tags_timeline($story_id, $event_type = FALSE) {
 function dec_tag_timeline($topic = '/m/01qwfk', $attribute = FALSE) {
 	$output = array();
 	$types = check_for_tag_types($topic);
+	$all_events = get_all_events_for_tag($topic);
+	$event_list = flat_list_of_single_tag_events($all_events);
 	if($attribute) {
-		$events = temporal_events_for_tag_attribute($topic, $attribute);
+// 		$events = temporal_events_for_tag_attribute($topic, $attribute);
+		$events = temporal_event_list_for_event_array_and_activity($attribute, $event_list);
 	}
 	else {
-		$events = temporal_events_for_tag($topic);
+// 		$events = temporal_events_for_tag($topic);
+		$events = temporal_event_list_for_event_array($event_list);
 	}
 	foreach($events as $event) {
 		$output[] = load_art_event_dec_tag($event, $types, TRUE);
@@ -1125,9 +1107,12 @@ function translate_events_for_timeline($events, $header) {
 		if(is_array($event['title'])) {
 			$entry['headline'] = l($event['title']['0']['1'],'tag'.$event['title']['0']['0']);
 			if($image = check_freebase_saved_image($event['title']['0']['0'])) {
-			$entry['asset'] = array('media'=> $image, 
+				$entry['asset'] = array('media'=> $image, 
 					'caption'=> produce_event_table_for_timeline($event),
 					'thumbnail'=> check_freebase_saved_image($event['title']['0']['0'],TRUE));
+			}
+			else {
+				$entry['text'] .= produce_event_table_for_timeline($event);
 			}
 		}
 		$list[] = $entry;
@@ -1197,6 +1182,7 @@ time_table.attribute = attribute_name.attribute AND
 	}
 	return $output;
 }
+
 
 /**
  * Get events for a tag and attribute that can be displayed on a timeline
@@ -1305,7 +1291,220 @@ function save_fb_image($topic, $thumbnail_url = FALSE) {
 function dec_reset() {
 	//if the line below is uncommented then this function can reset local cached databases of freebase data
 // 	reset_recommender_database();
-	return "database reset";
+$table = event_table_for_event_list();
+	return "database reset".$table;
+}
+
+/**
+ * Produces event table for a list of events
+ */
+function event_table_for_event_list($event_list = array('/m/0b34d','/m/04y9zg6','/m/053_g0','/m/047lvl3','/m/013v45','/m/0hnb6fd','/m/022840','/m/0hccjyn','/m/0hccjz1')) {
+	$event_string = "('".implode("','", $event_list)."')";
+	$query = "SELECT event_value_table.event, event_value_table.position, event_value_table.value, tag_name.name  FROM
+(SELECT event_attribute_value.event, attribute_name.name, event_attribute_position.position, event_attribute_value.value FROM event_attribute_value, attribute_name, event_attribute_position
+WHERE event_attribute_value.event IN ".$event_string." AND
+event_attribute_value.attribute = attribute_name.attribute AND
+attribute_name.name = event_attribute_position.event_attribute) as event_value_table
+LEFT JOIN tag_name ON tag_name.tag = event_value_table.value;";
+	$result = db_query($query);
+	foreach($result as $record) {
+		if(!isset($output[$record->event])) {
+			$output[$record->event] = array(array(),array(),array(),array(),array(),array(),array());
+		}
+		if($record->name) {
+			$output[$record->event][$record->position][] = l($record->name,'tag'.$record->value);
+		}
+		else {
+			$output[$record->event][$record->position][] = $record->value;
+		}
+	}
+
+	$output_with_titles = array();
+	foreach($output as $event_id=>$event_row) {
+		$row = array();
+		foreach($event_row as $event_cell) {
+			$row[] = implode(', ', $event_cell);
+		}
+		$output_with_titles[$event_id] = $row;
+		
+		//add title to the event array
+		$event_type = get_type_of_stored_event($event_id);
+		
+		if($event_name = get_topic_name($event_id)) {
+			$output_with_titles[$event_id][0] = l($event_name,'tag'.$event_id);
+			
+// 			$output['title'][] = array($event_id,$event_name);
+			//cache topic info
+			$handle = background_process_start_locked('dontrunconcurrently','check_topic_name_image_description', $event_id);
+		
+		}
+		elseif($event_type == 'award_won') {
+			$output_with_titles[$event_id][0] = get_event_label_with_event_attribute_name($event_id, 'agent').' won '
+					.get_event_label($event_id, '/award/award_honor/award');
+		}
+		elseif($event_type == 'award_nomination') {
+			$output_with_titles[$event_id][0] = get_event_label_with_event_attribute_name($event_id, 'agent').' nominated for '
+					.get_event_label($event_id, '/award/award_nomination/award');
+		}
+		elseif($event_type == 'education') {
+			$output_with_titles[$event_id][0] = get_event_label_with_event_attribute_name($event_id, 'agent').' educated at '
+					.get_event_label_with_event_attribute_name($event_id, 'location');
+		}
+		elseif($event_type == 'place_lived') {
+			$output_with_titles[$event_id][0] = get_event_label_with_event_attribute_name($event_id, 'agent').' lived in '
+					.get_event_label_with_event_attribute_name($event_id, 'location');
+		}
+		elseif($event_type == 'exhibition_run') {
+			$output_with_titles[$event_id][0] = get_event_label($event_id, '/exhibitions/exhibition_run/venue').' exhibited '
+					.$output['title'][] = get_event_label($event_id, '/exhibitions/exhibition_run/exhibition');
+		}
+		elseif($event_type == 'object_location') {
+			$output_with_titles[$event_id][0] = get_event_label($event_id, '/visual_art/artwork_location_relationship/artwork').' in '
+					.get_event_label($event_id, '/visual_art/artwork_location_relationship/location');
+		}
+		elseif($event_type == 'object_ownership') {
+			$output_with_titles[$event_id][0] = get_event_label($event_id, '/visual_art/artwork_owner_relationship/artwork').' owned by '
+					.get_event_label($event_id, '/visual_art/artwork_owner_relationship/owner');
+		}
+		elseif($event_type == 'organization_membership') {
+			$output_with_titles[$event_id][0] = get_event_label($event_id, '/organization/organization_membership/member').' member of '
+					.get_event_label($event_id, '/organization/organization_membership/organization');
+		}
+
+	}
+	$table = theme('table',array('rows' => $output_with_titles, 'header' => array('title','activity','agent','start_time','end_time','location','tags')));
+	return $table;
+}
+
+/**
+ * Produces event table for a single tag
+ */
+function event_table_for_tag($topic = '/m/01qwfk') {
+	$topic_types = check_for_tag_types($topic);
+	$query = "SELECT event_value_table.event, event_value_table.position, event_value_table.value, tag_name.name  FROM
+(SELECT event_table.event, attribute_name.name, event_attribute_position.position, value_table.value
+FROM event_attribute_value as event_table, event_attribute_value as value_table, attribute_name, event_attribute_position
+WHERE event_table.value = '".$topic."' AND
+event_table.event =  value_table.event AND
+value_table.attribute = attribute_name.attribute AND
+attribute_name.name = event_attribute_position.event_attribute) as event_value_table
+LEFT JOIN tag_name ON tag_name.tag = event_value_table.value;";
+
+	$result = db_query($query);
+	
+	$output = array();
+	foreach($result as $record) {
+		if(!isset($output[$record->event])) {
+			$output[$record->event] = array(array(),array(),array(),array(),array(),array(),array());
+		}
+		if($record->name) {
+			$output[$record->event][$record->position][] = l($record->name,'tag'.$record->value);
+		}
+		else {
+			$output[$record->event][$record->position][] = $record->value;
+		}
+	}
+	
+	$output_with_titles = array();
+	foreach($output as $event_id=>$event_row) {
+		$row = array();
+		foreach($event_row as $event_cell) {
+			$row[] = implode(', ', $event_cell);
+		}
+		$output_with_titles[$event_id] = $row;
+	
+		//add title to the event array
+		$event_type = get_type_of_stored_event($event_id);
+	
+		if($event_name = get_topic_name($event_id)) {
+			$output_with_titles[$event_id][0] = l($event_name,'tag'.$event_id);
+			//cache topic info
+			$handle = background_process_start_locked('dontrunconcurrently','check_topic_name_image_description', $event_id);
+	
+		}
+		elseif($event_type == 'award_won') {
+			if(in_array('/award/award', $topic_types)) {
+				$value_name = get_event_value_with_event_attribute_name($event_id, 'agent');
+				$output_with_titles[$event_id][0] = l($value_name[1],'tag'.$value_name[0]);
+			}
+			else {
+				$value_name = get_event_value($event_id, '/award/award_honor/award');
+				$output_with_titles[$event_id][0] = l($value_name[1],'tag'.$value_name[0]);
+			}
+		}
+		elseif($event_type == 'award_nomination') {
+			if(in_array('/award/award', $topic_types)) {
+				$value_name = get_event_value_with_event_attribute_name($event_id, 'agent');
+				$output_with_titles[$event_id][0] = l($value_name[1],'tag'.$value_name[0]);
+			}
+			else {
+				$value_name = get_event_value($event_id, '/award/award_nomination/award');
+				$output_with_titles[$event_id][0] = l($value_name[1],'tag'.$value_name[0]);
+			}
+		}
+		elseif($event_type == 'education') {
+			if(in_array('/education/educational_institution', $topic_types)) {
+				$value_name = get_event_value_with_event_attribute_name($event_id, 'agent');
+				$output_with_titles[$event_id][0] = l($value_name[1],'tag'.$value_name[0]);
+			}
+			else {
+				$value_name = get_event_value_with_event_attribute_name($event_id, 'location');
+				$output_with_titles[$event_id][0] = l($value_name[1],'tag'.$value_name[0]);
+			}
+		}
+		elseif($event_type == 'place_lived') {
+			if(in_array('/location/location', $topic_types)) {
+				$value_name = get_event_value_with_event_attribute_name($event_id, 'agent');
+				$output_with_titles[$event_id][0] = l($value_name[1],'tag'.$value_name[0]);
+			}
+			else {
+				$value_name = get_event_value_with_event_attribute_name($event_id, 'location');
+				$output_with_titles[$event_id][0] = l($value_name[1],'tag'.$value_name[0]);
+			}
+		}
+		elseif($event_type == 'exhibition_run') {
+			if(in_array('/exhibitions/exhibition', $topic_types)) {
+				$value_name = get_event_value($event_id, '/exhibitions/exhibition_run/venue');
+				$output_with_titles[$event_id][0] = l($value_name[1],'tag'.$value_name[0]);
+			}
+			else {
+				$value_name = get_event_value($event_id, '/exhibitions/exhibition_run/exhibition');
+				$output_with_titles[$event_id][0] = l($value_name[1],'tag'.$value_name[0]);
+			}
+		}
+		elseif($event_type == 'object_location') {
+			if(in_array('/visual_art/artwork', $topic_types)) {
+				$value_name = get_event_value($event_id, '/visual_art/artwork_location_relationship/location');
+				$output_with_titles[$event_id][0] = l($value_name[1],'tag'.$value_name[0]);
+			}
+			else {
+				$value_name = get_event_value($event_id, '/visual_art/artwork_location_relationship/artwork');
+				$output_with_titles[$event_id][0] = l($value_name[1],'tag'.$value_name[0]);
+			}
+		}
+		elseif($event_type == 'object_ownership') {
+			if(in_array('/visual_art/art_owner', $topic_types)) {
+				$value_name = get_event_value($event_id, '/visual_art/artwork_owner_relationship/artwork');
+				$output_with_titles[$event_id][0] = l($value_name[1],'tag'.$value_name[0]);
+			}
+			else {
+				$value_name = get_event_value($event_id, '/visual_art/artwork_owner_relationship/owner');
+				$output_with_titles[$event_id][0] = l($value_name[1],'tag'.$value_name[0]);
+			}
+		}
+		elseif($event_type == 'organization_membership') {
+			if(in_array(' /organization/membership_organization', $topic_types)) {
+				$value_name = get_event_value($event_id, '/organization/organization_membership/member');
+				$output_with_titles[$event_id][0] = l($value_name[1],'tag'.$value_name[0]);
+			}
+			else {
+				$value_name = get_event_value($event_id, '/organization/organization_membership/organization');
+				$output_with_titles[$event_id][0] = l($value_name[1],'tag'.$value_name[0]);
+			}
+		}
+	}
+	$table = theme('table',array('rows' => $output_with_titles, 'header' => array('title','activity','agent','start_time','end_time','location','tags')));
+	return $table;
 }
 
 /**
@@ -1602,6 +1801,9 @@ function save_triples_to_db($triples) {
 	}
 }
 
+/**
+ * Retrieve locations that contain the current topic location
+ */
 function fb_location_containedBy($topic = '/m/02cft', $result = array("triples"=>array(),"names"=>array())) {
 	$triples = array();
 	$tag_names = array();
@@ -1991,7 +2193,11 @@ function dec_setting() {
 	
 	//get events for a setting
 	$all_events = get_all_events_for_setting($location, $full_start_time, $full_end_time);
-
+	$event_array = flat_list_of_events($all_events);
+	
+	//event table and timeline links
+	$setting_event_table = event_table_for_event_list($event_array);
+	$timeline_links = dec_setting_timeline_links($time, $end, $location, $event_array);
 	//get themes for the events of a setting
 	$themes = dec_get_themes_for_events_of_setting($location, $full_start_time, $full_end_time);
 
@@ -2013,7 +2219,13 @@ function dec_setting() {
 		}
 	}
 	
-	//tag description
+	//tag name and description
+	if($name) {
+		$output .= '<div style="clear:both">Location: '.l($name,'tag'.$location).'</div>';
+	}
+	else {
+		$output .= '<div style="clear:both">Location: '.$location.'</div>';
+	}
 	$description = get_topic_description($location);
 	if($description) {
 		// 		$output .= '<div style="clear:both">Description:</div><div style="clear:both">'.$description.'</div>';
@@ -2027,29 +2239,35 @@ function dec_setting() {
 		}
 	
 	}
-
-	if(!empty($all_events)) {
-		$output .= '<div style="clear:both"><h2>Event space: </h2></div>';
-		if($end_year) {
-			$output .= '<div style="clear:both"><div style="align:right; text-align:right">'.l('Timeline','timeline_for_setting',array('query'=>array('location'=>$location, 'time'=>$time, 'end'=>$end))).'</div></div>';
-		}
-		else {
-			$output .= '<div style="clear:both"><div style="align:right; text-align:right">'.l('Timeline','timeline_for_setting',array('query'=>array('location'=>$location, 'time'=>$time))).'</div></div>';
-		}
-		foreach($all_events as $label=>$events) {
-			$output .= '<div style="clear:both">'.ucfirst($label).':</div>';
-			if($end_year) {
-				$output .= '<div style="clear:both"><div style="align:right; text-align:right">'.l('Timeline: '.ucfirst($label),'timeline_for_setting',array('query'=>array('location'=>$location, 'time'=>$time, 'event_type'=>$label, 'end'=>$end))).'</div></div>';
-			}
-			else {
-				$output .= '<div style="clear:both"><div style="align:right; text-align:right">'.l('Timeline: '.ucfirst($label),'timeline_for_setting',array('query'=>array('location'=>$location, 'time'=>$time, 'event_type'=>$label))).'</div></div>';
-			}
-			foreach($events as $event) {
-				$output .= '<div style="float: left; width: 200px;">'.output_event_table($event)."</div>";
 	
-			}
-		}
+	if(!empty($event_array)) {
+		$output .= '<div style="clear:both"><h2>Event space: </h2></div>';
+		$output .= $timeline_links;
+		$output .= $setting_event_table;
 	}
+
+// 	if(!empty($all_events)) {
+// 		$output .= '<div style="clear:both"><h2>Event space: </h2></div>';
+// 		if($end_year) {
+// 			$output .= '<div style="clear:both"><div style="align:right; text-align:right">'.l('Timeline','timeline_for_setting',array('query'=>array('location'=>$location, 'time'=>$time, 'end'=>$end))).'</div></div>';
+// 		}
+// 		else {
+// 			$output .= '<div style="clear:both"><div style="align:right; text-align:right">'.l('Timeline','timeline_for_setting',array('query'=>array('location'=>$location, 'time'=>$time))).'</div></div>';
+// 		}
+// 		foreach($all_events as $label=>$events) {
+// 			$output .= '<div style="clear:both">'.ucfirst($label).':</div>';
+// 			if($end_year) {
+// 				$output .= '<div style="clear:both"><div style="align:right; text-align:right">'.l('Timeline: '.ucfirst($label),'timeline_for_setting',array('query'=>array('location'=>$location, 'time'=>$time, 'event_type'=>$label, 'end'=>$end))).'</div></div>';
+// 			}
+// 			else {
+// 				$output .= '<div style="clear:both"><div style="align:right; text-align:right">'.l('Timeline: '.ucfirst($label),'timeline_for_setting',array('query'=>array('location'=>$location, 'time'=>$time, 'event_type'=>$label))).'</div></div>';
+// 			}
+// 			foreach($events as $event) {
+// 				$output .= '<div style="float: left; width: 200px;">'.output_event_table($event)."</div>";
+	
+// 			}
+// 		}
+// 	}
 	return $output;
 	
 }
@@ -2058,7 +2276,6 @@ function dec_setting() {
  * Themes of a setting
  */
 function dec_get_themes_for_events_of_setting($location, $year, $end = 0) {
-
 	$query = "SELECT * 
 FROM
 (SELECT event_attribute_value.value, COUNT(event_attribute_value.value) as frequency, tag_name.name
@@ -2388,16 +2605,24 @@ function dec_list_of_tags($tag_array, $max_value) {
 	drupal_set_title(implode(", ",$tag_name_array));
 	
 	//do the calculations
-	$all_events = get_all_events_for_story2($max_value, $tag_array);
-	$event_list = flat_list_of_events($all_events);
-	$nonmatching_themes = top_n_nonmatching_themes_of_story2($event_list, $max_value, 10);
-	$matching_themes = top_n_matching_themes_of_story2($event_list, $max_value, 10);
+// 	$all_events = get_all_events_for_story2($max_value, $tag_array);
+// 	$event_list = flat_list_of_events($all_events);
 
 	//update tag event mapping
 	foreach($tag_array as $single_tag) {
 		$event_array = flat_list_of_single_tag_events(get_all_events_for_tag($single_tag));
 		save_tag_event_results($single_tag, $event_array);
 	}
+	
+	//use this list for event table 
+	$event_list = event_list_for_story_id($max_value);
+	
+	$nonmatching_themes = top_n_nonmatching_themes_of_story2($event_list, $max_value, 10);
+	$matching_themes = top_n_matching_themes_of_story2($event_list, $max_value, 10);	
+	$event_table = event_table_for_event_list($event_list);
+	$timeline_links = dec_tags_timeline_links($max_value);
+
+// 	$other_all_events = other_all_events($max_value);
 	$overlapping_settings = get_n_matching_settings_for_a_story2($max_value, 5);	
 	
 	//matching themes (i.e. the story tags)
@@ -2455,24 +2680,200 @@ function dec_list_of_tags($tag_array, $max_value) {
 	}
 	
 	//events
-	if(!empty($all_events)) {
-		$output .= '<div style="clear:both"><h2>Event space: </h2></div>';
-		$output .= '<div style="clear:both"><div style="align:right; text-align:right">'.l('Timeline','timeline_for_tags/'.$max_value).'</div></div>';
+// 	if(!empty($all_events)) {
+// 		$output .= '<div style="clear:both"><h2>Event space: </h2></div>';
+// 		$output .= '<div style="clear:both"><div style="align:right; text-align:right">'.l('Timeline','timeline_for_tags/'.$max_value).'</div></div>';
 		
-		foreach($all_events as $label=>$events) {
+// 		foreach($all_events as $label=>$events) {
 
-			$output .= '<div style="clear:both">'.ucfirst($label).':</div>';
-			$output .= '<div style="clear:both"><div style="align:right; text-align:right">'.l('Timeline '.ucfirst($label),'timeline_for_tags/'.$max_value,array('query'=>array('event_type'=>$label))).'</div></div>';
-			foreach($events as $event) {
-				$output .= '<div style="float: left; width: 200px;">'.output_event_table($event)."</div>";
+// 			$output .= '<div style="clear:both">'.ucfirst($label).':</div>';
+// 			$output .= '<div style="clear:both"><div style="align:right; text-align:right">'.l('Timeline '.ucfirst($label),'timeline_for_tags/'.$max_value,array('query'=>array('event_type'=>$label))).'</div></div>';
+// 			foreach($events as $event) {
+// 				$output .= '<div style="float: left; width: 200px;">'.output_event_table($event)."</div>";
 	
-			}
-		}
+// 			}
+// 		}
+// 	}
+	if(!empty($event_list)) {
+		$output .= '<div style="clear:both"><h2>Event space: </h2></div>';
 	}
-		
+	$output .= $timeline_links;
+	$output .= $event_table;
+	
 	return $output;
 }
 
+/**
+ * Produce timeline links for the event space of a setting
+ */
+function dec_setting_timeline_links($time, $end, $location, $event_array) {
+	$attribute_list = temporal_type_list_for_event_array($event_array);
+	if(!empty($attribute_list)) {
+		$output_list = array();
+		if($end) {
+			$output_list[] = l('All','timeline_for_setting',array('query'=>array('location'=>$location, 'time'=>$time, 'end'=>$end)));
+		}
+		else {
+			$output_list[] = l('All','timeline_for_setting',array('query'=>array('location'=>$location, 'time'=>$time)));
+		}
+		foreach($attribute_list as $attribute) {
+			if($end) {
+				$output_list[] = l(ucfirst($attribute),'timeline_for_setting',array('query'=>array('location'=>$location, 'time'=>$time, 'event_type'=>$attribute, 'end'=>$end)));
+			}
+			else {
+				$output_list[] = l(ucfirst($attribute),'timeline_for_setting',array('query'=>array('location'=>$location, 'time'=>$time, 'event_type'=>$attribute)));
+			}
+		}
+		$output = '<div style="clear:both">Timelime: '.implode(', ',$output_list).'</div>';
+	}
+	else {
+		$output = '';
+	}
+	return $output;
+}
+
+/**
+ * Produce timeline links for event space of a single tag
+ */
+function dec_tag_timeline_links($topic, $event_array) {
+	$attribute_list = temporal_type_list_for_event_array($event_array);
+	if(is_freebase_topic_id($topic)) {
+		$topic_path = $topic;
+	}
+	else {
+		$topic_path = '/'.$topic;
+	}
+	if(!empty($attribute_list)) {
+		$output_list = array();
+		$output_list[] = l('All','timeline'.$topic_path);
+		foreach($attribute_list as $attribute) {
+			$output_list[] = l(ucfirst($attribute),'timeline'.$topic_path,array('query'=>array('attribute'=>$attribute)));
+		}
+		$output = '<div style="clear:both">Timelime: '.implode(', ',$output_list).'</div>';
+	}
+	else {
+		$output = '';
+	}
+	return $output;	
+}
+
+/**
+ * Produce timeline links for event space of a story (i.e. set of tags)
+ */
+function dec_tags_timeline_links($story_id) {
+	$attribute_list = temporal_type_list_for_story_id($story_id);
+	if(!empty($attribute_list)) {
+		$output_list = array();
+		$output_list[] = l('All','timeline_for_tags/'.$story_id);
+		foreach($attribute_list as $attribute) {
+			$output_list[] = l(ucfirst($attribute),'timeline_for_tags/'.$story_id,array('query'=>array('event_type'=>$attribute)));
+		}
+		$output = '<div style="clear:both">Timelime: '.implode(', ',$output_list).'</div>';
+	}
+	else {
+		$output = '';
+	}
+	return $output;
+}
+
+
+/**
+ * Events in the array that have the specified activity type and temporal information
+ */
+function temporal_event_list_for_event_array_and_activity($activity = 'military_conflict', $event_list = array('/m/0b34d','/m/04y9zg6','/m/053_g0','/m/047lvl3','/m/013v45','/m/0hnb6fd','/m/022840','/m/0hccjyn','/m/0hccjz1')) {
+	$event_string = "('".implode("','", $event_list)."')";
+	$query = "SELECT DISTINCT activity_table.event
+	FROM event_attribute_value as activity_table, event_attribute_value as time_table, attribute_name
+	WHERE activity_table.event IN ".$event_string." AND
+	activity_table.attribute = 'activity' AND
+	activity_table.value = '".$activity."' AND
+	time_table.event = activity_table.event AND
+	time_table.attribute = attribute_name.attribute AND
+	(attribute_name.name = 'start_time' OR attribute_name.name = 'end_time');";
+	$result = db_query($query);
+	$new_event_list = array();
+	foreach($result as $event) {
+		$new_event_list[] = $event->event;
+	}
+	return $new_event_list;
+}
+
+/**
+ * Events in the array that have the specified activity type and temporal information
+ */
+function temporal_event_list_for_event_array($event_list = array('/m/0b34d','/m/04y9zg6','/m/053_g0','/m/047lvl3','/m/013v45','/m/0hnb6fd','/m/022840','/m/0hccjyn','/m/0hccjz1')) {
+	$event_string = "('".implode("','", $event_list)."')";
+	$query = "SELECT DISTINCT activity_table.event
+	FROM event_attribute_value as activity_table, event_attribute_value as time_table, attribute_name
+	WHERE activity_table.event IN ".$event_string." AND
+	activity_table.attribute = 'activity' AND
+	time_table.event = activity_table.event AND
+	time_table.attribute = attribute_name.attribute AND
+	(attribute_name.name = 'start_time' OR attribute_name.name = 'end_time');";
+	$result = db_query($query);
+	$new_event_list = array();
+	foreach($result as $event) {
+		$new_event_list[] = $event->event;
+	}
+	return $new_event_list;
+}
+
+/**
+ * Event types of the events in the array that have temporal information
+ */
+function temporal_type_list_for_event_array($event_list = array('/m/0b34d','/m/04y9zg6','/m/053_g0','/m/047lvl3','/m/013v45','/m/0hnb6fd','/m/022840','/m/0hccjyn','/m/0hccjz1')) {
+	$event_string = "('".implode("','", $event_list)."')";
+	$query = "SELECT DISTINCT activity_table.value
+	FROM event_attribute_value as activity_table, event_attribute_value as time_table, attribute_name
+	WHERE activity_table.event IN ".$event_string." AND
+	activity_table.attribute = 'activity' AND
+	time_table.event = activity_table.event AND
+	time_table.attribute = attribute_name.attribute AND
+	(attribute_name.name = 'start_time' OR attribute_name.name = 'end_time');";
+	$result = db_query($query);
+	$attribute_list = array();
+	foreach($result as $event) {
+		$attribute_list[] = $event->value;
+	}
+	return $attribute_list;		
+}
+
+/**
+ * Event types of events of a story
+ */
+function temporal_type_list_for_story_id($story_id) {
+	$query = "SELECT DISTINCT activity_table.value
+	FROM query_tag, tag_event_id, event_attribute_value as activity_table, event_attribute_value as time_table, attribute_name
+	WHERE query_tag.id = '".$story_id."' AND
+	query_tag.tag = tag_event_id.tag AND
+	activity_table.event = tag_event_id.event_id AND
+	activity_table.attribute = 'activity' AND
+	time_table.event = tag_event_id.event_id AND
+	time_table.attribute = attribute_name.attribute AND
+	(attribute_name.name = 'start_time' OR attribute_name.name = 'end_time');";
+	$result = db_query($query);
+	$attribute_list = array();
+	foreach($result as $event) {
+		$attribute_list[] = $event->value;
+	}
+	return $attribute_list;	
+}
+
+/**
+ * Event list of a story. Recalculated when the story is viewed.
+ */
+function event_list_for_story_id($story_id) {
+	$query = "SELECT tag_event_id.event_id
+	FROM query_tag, tag_event_id
+	WHERE query_tag.id = '".$story_id."' AND
+	query_tag.tag = tag_event_id.tag;";
+	$result = db_query($query);
+	$event_list = array();
+	foreach($result as $event) {
+		$event_list[] = $event->event_id;
+	}
+	return $event_list;
+}
 /**
  * Flatten list of events of a story
 */
@@ -2670,25 +3071,32 @@ function dec_tag($m, $id = FALSE) {
 	
 	$all_events = get_all_events_for_tag($topic);
 
-	if(!empty($all_events)) {
-		$output .= '<div style="clear:both"><h2>Event space: </h2></div>';
-		if(is_freebase_topic_id($topic)) {
-			$topic_path = $topic;
-		}
-		else {
-			$topic_path = '/'.$topic;
-		}
-		$output .= '<div style="clear:both"><div style="align:right; text-align:right">'.l('Timeline','timeline'.$topic_path).'</div></div>';
-				foreach($all_events as $all_event) {
-					$output .= '<div style="clear:both">'.ucfirst($all_event['label']).':</div>';
-					$output .= '<div style="clear:both"><div style="align:right; text-align:right">'.l('Timeline: '.ucfirst($all_event['label']),'timeline'.$topic_path,array('query'=>array('attribute'=>$all_event['name']))).'</div></div>';
-						foreach($all_event['events'] as $event) {
-							$output .= '<div style="float: left; width: 200px;">'.output_event_table_dec_tag($event, $types)."</div>";
+// 	if(!empty($all_events)) {
+// 		$output .= '<div style="clear:both"><h2>Event space: </h2></div>';
+// 		if(is_freebase_topic_id($topic)) {
+// 			$topic_path = $topic;
+// 		}
+// 		else {
+// 			$topic_path = '/'.$topic;
+// 		}
+// 		$output .= '<div style="clear:both"><div style="align:right; text-align:right">'.l('Timeline','timeline'.$topic_path).'</div></div>';
+// 				foreach($all_events as $all_event) {
+// 					$output .= '<div style="clear:both">'.ucfirst($all_event['label']).':</div>';
+// 					$output .= '<div style="clear:both"><div style="align:right; text-align:right">'.l('Timeline: '.ucfirst($all_event['label']),'timeline'.$topic_path,array('query'=>array('attribute'=>$all_event['name']))).'</div></div>';
+// 						foreach($all_event['events'] as $event) {
+// 							$output .= '<div style="float: left; width: 200px;">'.output_event_table_dec_tag($event, $types)."</div>";
 				
-			}
-		}
+// 			}
+// 		}
+// 	}
+	
+	$event_list = flat_list_of_single_tag_events($all_events);
+	if(!empty($event_list)) {
+		$output .= '<div style="clear:both"><h2>Event space: </h2></div>';
+		$output .= dec_tag_timeline_links($topic, $event_list);
+		$output .= event_table_for_event_list($event_list);
 	}
-
+// 	$event_table = event_table_for_tag($topic);
 // 	if(!empty($linked_events) || !empty($related_events)) {
 // 		$output .= '<div style="clear:both"><h2>Event space: </h2></div>';
 // 	}
@@ -2748,12 +3156,6 @@ function produce_event_table_for_timeline($event) {
 	return $output;
 }
 
-
-/**
- * Output event table row for event table
- */
-//*****here
-
 /**
  * Output event table for event array
  */
@@ -2785,7 +3187,6 @@ function produce_event_table($event) {
  */
 function output_event_table_dec_tag($event_id, $topic_types) {
 	$event = load_art_event_dec_tag($event_id, $topic_types);
-
 	return produce_event_table($event);
 }
 
@@ -2871,9 +3272,9 @@ event_attribute_value.attribute = attribute_name.attribute AND
 
 	$object = $result->fetchObject();
 	if(isset($object->value) && isset($object->name)) {
-		return array($object->value, $object->name);
 		//pre-cache topic for timelines
 		$handle = background_process_start_locked('dontrunconcurrently','check_topic_name_image_description', $object->value);
+		return array($object->value, $object->name);
 	}
 	else {
 		return FALSE;
@@ -2915,9 +3316,9 @@ function get_event_value($event_id, $attribute) {
 	
 	$object = $result->fetchObject();
 	if(isset($object->value) && isset($object->name)) {
-		return array($object->value, $object->name);
 		//pre-cache topic for timelines
 		$handle = background_process_start_locked('dontrunconcurrently','check_topic_name_image_description', $object->value);
+		return array($object->value, $object->name);
 	}
 	else {
 		return FALSE;
@@ -3051,6 +3452,7 @@ LEFT JOIN tag_name ON tag_name.tag = events.value;";
 			$output['title'][] = get_event_value($event_id, '/organization/organization_membership/organization');
 		}
 	}
+
 	return $output;
 }
 
@@ -3212,6 +3614,7 @@ GROUP BY attribute_name.reverse_name;";
 			$output['event'] = array('name'=>'event', 'label'=>'event', 'events'=>array($topic));
 		}
 	}
+
 	return $output;
 }
 
@@ -3929,7 +4332,7 @@ function save_tag_event_results($tag, $event_array) {
 	}
 	$values_list = implode(",",$list_items);
 	$query = "INSERT INTO tag_event_id (tag, event_id) VALUES ".$values_list." ON DUPLICATE KEY UPDATE tag = VALUES(tag), event_id = VALUES(event_id);";
-	
+
 	db_query($query);
 		
 }
