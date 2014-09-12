@@ -395,7 +395,7 @@ function dec_rec_install() {
 	$values = array(
 		array('attribute'=>'activity', 'name'=>'activity', 'reverse_name'=>'activity'),
 		array('attribute'=>'/education/education/student', 'name'=>'agent', 'reverse_name'=>'education history'),
-		array('attribute'=>'/education/education/institution', 'name'=>'location', 'reverse_name'=>'students'),
+		array('attribute'=>'/education/education/institution', 'name'=>'agent', 'reverse_name'=>'students'),
 		array('attribute'=>'/education/education/start_date', 'name'=>'start_time', 'reverse_name'=>'start of education'),
 		array('attribute'=>'/education/education/end_date', 'name'=>'end_time', 'reverse_name'=>'end of education'),
 		array('attribute'=>'/education/education/degree', 'name'=>'tag', 'reverse_name'=>'degree awarded'),

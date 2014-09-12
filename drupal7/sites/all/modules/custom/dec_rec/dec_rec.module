@@ -4452,7 +4452,11 @@ function fb_person_studying($topic, $previous_output = array("events"=>array(),"
     ),
     "/education/education/institution"=> array(
       "mid"=> null,
-      "name"=> null
+      "name"=> null,
+    		"type"=> array(array(
+    				"id"=> "/location/location",
+    				"optional"=> "optional"
+    		))
     ),
     "/education/education/start_date"=> array(
       "value"=> null,
@@ -4495,6 +4499,10 @@ function fb_person_studying($topic, $previous_output = array("events"=>array(),"
 	$topic_name_pairs = array();
 
 	foreach($resultarray["result"][0]["/people/person/education"] as $result) {
+		if(isset($result["/education/education/institution"]["type"][0])) {
+			$output[$result["mid"]]['location'] = check_array_is_returned($result["/education/education/institution"]["mid"]);
+		}
+		
 		$output[$result["mid"]]["activity"] = "education";
 		$output[$result["mid"]]["/education/education/student"] = $result["/education/education/student"]["mid"];
 		$output[$result["mid"]]["/education/education/institution"] = $result["/education/education/institution"]["mid"];
@@ -4796,10 +4804,16 @@ function fb_topic_organization_member($topic, $previous_output = array("events"=
   "/organization/organization_member/member_of"=> array(array(
     "mid"=> null,
     "/organization/organization_membership/member"=> array(
-      "name"=> null,"mid"=> null
+      "name"=> null,
+      "mid"=> null
     ),
     "/organization/organization_membership/organization"=> array(
-      "name"=> null,"mid"=> null
+      "name"=> null,
+      "mid"=> null,
+      "type"=> array(array(
+        "id"=> "/location/location",
+        "optional"=> "optional"
+      ))
     ),
     "/organization/organization_membership/from"=> null,
     "/organization/organization_membership/to"=> null
@@ -4807,7 +4821,7 @@ function fb_topic_organization_member($topic, $previous_output = array("events"=
 ));
 	
 	$resultarray = execute_mql_event_query($query);
-
+	
 	$output = array();
 	if(!isset($resultarray["result"][0])) {
 		return $previous_output;
@@ -4816,6 +4830,11 @@ function fb_topic_organization_member($topic, $previous_output = array("events"=
 	$topic_name_pairs = array();
 
 	foreach($resultarray["result"][0]["/organization/organization_member/member_of"] as $result) {
+		
+		if(isset($result["/organization/organization_membership/organization"]["type"][0])) {
+			$output[$result["mid"]]['location'] = check_array_is_returned($result["/organization/organization_membership/organization"]["mid"]);
+		}
+		
 		$output[$result["mid"]]["activity"] = "organization_membership";
 		$output[$result["mid"]]["/organization/organization_membership/member"] = check_array_is_returned($result["/organization/organization_membership/member"]["mid"]);
 		$output[$result["mid"]]["/organization/organization_membership/organization"] = check_array_is_returned($result["/organization/organization_membership/organization"]["mid"]);
@@ -4829,7 +4848,7 @@ function fb_topic_organization_member($topic, $previous_output = array("events"=
 		$topic_event_links[] = array($topic, 'Membership of organizations', $result["mid"]);
 
 	}
-	
+
 	return array("events"=>array_merge($output, $previous_output["events"]),
 			"names"=>array_merge($topic_name_pairs, $previous_output["names"]),
 			"links"=>array_merge($topic_event_links, $previous_output["links"]));
@@ -6457,7 +6476,11 @@ function fb_institution_having_graduates($topic, $previous_output = array("event
 							"name"=> null,"mid"=> null
 					),
 					"/education/education/institution"=> array(
-							"name"=> null,"mid"=> null
+							"name"=> null,"mid"=> null,
+							"type"=> array(array(
+									"id"=> "/location/location",
+									"optional"=> "optional"
+							))
 					),
 					"/education/education/start_date"=> array(
 							"value"=> null,
@@ -6496,6 +6519,11 @@ function fb_institution_having_graduates($topic, $previous_output = array("event
 	$topic_name_pairs = array();
 
 	foreach($resultarray["result"][0]["/education/educational_institution/students_graduates"] as $result) {
+		
+		if(isset($result["/education/education/institution"]["type"][0])) {
+			$output[$result["mid"]]['location'] = check_array_is_returned($result["/education/education/institution"]["mid"]);
+		}
+		
 		$output[$result["mid"]]["activity"] = "education";
 		$output[$result["mid"]]["/education/education/student"] = $result["/education/education/student"]["mid"];
 		$output[$result["mid"]]["/education/education/institution"] = $result["/education/education/institution"]["mid"];
@@ -6527,14 +6555,18 @@ function fb_institution_having_graduates($topic, $previous_output = array("event
 */
 function fb_organisation_having_members($topic, $previous_output = array("events"=>array(),"names"=>array(), "links"=>array())) {
 	$query = array(array(
-  "mid"=> $topic,
+  "mid"=> $topic,		
   "/organization/membership_organization/members"=> array(array(
     "mid"=> null,
     "/organization/organization_membership/member"=> array(
       "name"=> null,"mid"=> null
     ),
     "/organization/organization_membership/organization"=> array(
-      "name"=> null,"mid"=> null
+      "name"=> null,"mid"=> null,
+    		"type"=> array(array(
+    				"id"=> "/location/location",
+    				"optional"=> "optional"
+    		)),
     ),
     "/organization/organization_membership/from"=> array(
       "value"=> null
@@ -6555,7 +6587,11 @@ function fb_organisation_having_members($topic, $previous_output = array("events
 	$topic_name_pairs = array();
 
 	foreach($resultarray["result"][0]["/organization/membership_organization/members"] as $result) {
-
+		
+		if(isset($result["/organization/organization_membership/organization"]["type"][0])) {
+			$output[$result["mid"]]['location'] = check_array_is_returned($result["/organization/organization_membership/organization"]["mid"]);
+		}
+		
 		$output[$result["mid"]]["activity"] = "organization_membership";
 		$output[$result["mid"]]["/organization/organization_membership/member"] = check_array_is_returned($result["/organization/organization_membership/member"]["mid"]);
 		$output[$result["mid"]]["/organization/organization_membership/organization"] = check_array_is_returned($result["/organization/organization_membership/organization"]["mid"]);
