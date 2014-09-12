@@ -6191,9 +6191,9 @@ function fb_exhibition_creation_of_object($topic, $previous_output = array("even
 					)) 
 			))
 	));
-dpm($query);
+
 	$resultarray = execute_mql_event_query($query);
-dpm($resultarray);
+
 	$output = array();
 	if(!isset($resultarray["result"][0])) {
 		return $previous_output;
@@ -6245,7 +6245,7 @@ dpm($resultarray);
 		$topic_name_pairs = add_top_level_pair($result, $topic_name_pairs);
 		$topic_event_links[] = array($topic, 'Objects created', $result["mid"]);
 	}
-dpm($output);
+
 	return array("events"=>array_merge($output, $previous_output["events"]),
 			"names"=>array_merge($topic_name_pairs, $previous_output["names"]),
 			"links"=>array_merge($topic_event_links, $previous_output["links"]));
@@ -6771,7 +6771,7 @@ function fb_period_movement_creating_object($topic, $previous_output = array("ev
 	));
 	
 	$resultarray = execute_mql_event_query($query);
-	dpm($resultarray);
+
 	$output = array();
 	if(!isset($resultarray["result"][0])) {
 		return $previous_output;
