@@ -6771,7 +6771,7 @@ function fb_period_movement_creating_object($topic, $previous_output = array("ev
 	));
 	
 	$resultarray = execute_mql_event_query($query);
-	
+	dpm($resultarray);
 	$output = array();
 	if(!isset($resultarray["result"][0])) {
 		return $previous_output;
@@ -6830,8 +6830,101 @@ function fb_period_movement_creating_object($topic, $previous_output = array("ev
 }
 
 /**
- * Combatants of military conflict
+ * Publication events of a period of movement
  */
+function fb_period_movement_creating_publication($topic, $previous_output = array("events"=>array(),"names"=>array(), "links"=>array())) {
+	$query = array(array(
+  "mid"=> $topic,
+  "/book/school_or_movement/associated_works"=> array(array(
+    "name"=> null,
+    "mid"=> null,
+    "/book/written_work/author"=> array(array(
+      "name"=> null,
+      "mid"=> null
+    )),
+    "/book/written_work/editor"=> array(array(
+      "name"=> null,
+      "mid"=> null,
+      "optional"=> "optional"
+    )),
+    "/book/written_work/date_of_first_publication"=> null,
+    "/book/written_work/subjects"=> array(array(
+      "name"=> null,
+      "mid"=> null,
+      "optional"=> "optional"
+    )),
+    "/book/written_work/school_or_movement"=> array(array(
+      "name"=> null,
+      "mid"=> null,
+      "optional"=> "optional"
+    )),
+    "/book/written_work/part_of_series"=> array(array(
+      "name"=> null,
+      "mid"=> null,
+      "optional"=> "optional"
+    )),
+    "/book/written_work/previous_in_series"=> array(array(
+      "name"=> null,
+      "mid"=> null,
+      "optional"=> "optional"
+    )),
+    "/book/written_work/next_in_series"=> array(array(
+      "name"=> null,
+      "mid"=> null,
+      "optional"=> "optional"
+    ))
+  ))
+));
+	
+	$resultarray = execute_mql_event_query($query);
+	
+	$output = array();
+	if(!isset($resultarray["result"][0])) {
+		return $previous_output;
+	}
+	$topic_event_links = array();
+	$topic_name_pairs = array();
+	
+	foreach($resultarray["result"][0]["/book/school_or_movement/associated_works"] as $result) {
+		$output[$result["mid"]]["activity"] = "book_authoring";
+		$output[$result["mid"]]["/book/written_work/author"] = get_values($result["/book/written_work/author"]);
+		$output[$result["mid"]]["/book/written_work/editor"] = get_values($result["/book/written_work/editor"]);
+	
+		$output[$result["mid"]]["/book/written_work/date_of_first_publication"] = $result["/book/written_work/date_of_first_publication"];
+	
+		$output[$result["mid"]]["/book/written_work/school_or_movement"] = get_values($result["/book/written_work/school_or_movement"]);
+		$output[$result["mid"]]["/book/written_work/part_of_series"] = get_values($result["/book/written_work/part_of_series"]);
+		$output[$result["mid"]]["/book/written_work/previous_in_series"] = get_values($result["/book/written_work/previous_in_series"]);
+		$output[$result["mid"]]["/book/written_work/next_in_series"] = get_values($result["/book/written_work/next_in_series"]);
+		$output[$result["mid"]]["/book/written_work"] = check_array_is_returned($result["mid"]);
+	
+		// 		$output[$result["mid"]]["tags"] =
+		// 		array_merge(get_values($result["/book/written_work/school_or_movement"]),
+		// 				get_values($result["/book/written_work/part_of_series"]),
+		// 				get_values($result["/book/written_work/previous_in_series"]),
+		// 				get_values($result["/book/written_work/next_in_series"]),
+		// 				check_array_is_returned($result["mid"]));
+	
+		$topic_name_pairs = get_topic_name_pairs(array("/book/written_work/author","/book/written_work/editor","/book/written_work/date_of_first_publication",
+				"/book/written_work/school_or_movement","/book/written_work/part_of_series","/book/written_work/previous_in_series","/book/written_work/next_in_series"),$result,$topic_name_pairs);
+		$topic_name_pairs = add_top_level_pair($result, $topic_name_pairs);
+		$topic_event_links[] = array($topic, 'Books authored', $result["mid"]);
+	
+		//add inferred locations for artwork creation
+		$location_result = locations_for_authorship_date($output[$result["mid"]]["/book/written_work/author"][0], $output[$result["mid"]]["/book/written_work/date_of_first_publication"]);
+		if(!empty($location_result['locations'])) {
+			$output[$result["mid"]]['location'] = $location_result['locations'];
+		}
+		if(!empty($location_result['topic_name_pairs'])) {
+			$topic_name_pairs = array_merge($topic_name_pairs,$location_result['topic_name_pairs']);
+		}
+	}
+	
+	return array("events"=>array_merge($output, $previous_output["events"]),
+			"names"=>array_merge($topic_name_pairs, $previous_output["names"]),
+			"links"=>array_merge($topic_event_links, $previous_output["links"]));
+}
+
 /**
  * Retrieve data for topic that is an event
  */
@@ -7138,22 +7231,15 @@ function new_event_space_of_a_topic($topic = "/m/01qwfk", $reload = FALSE) {
 		//subject of created artwork
 		$result = fb_topic_artwork_subject($topic, $result);
 	
-	}
-
-	//**type: /visual_art/art_period_movement
-	if(in_array("/visual_art/art_period_movement", $types)) {
-		$res[] = "/visual_art/art_period_movement";
-		//subject of created artwork
-		$result = fb_period_movement_creating_object($topic, $result);
-	
 	}	
 
 	//**type: /visual_art/art_period_movement
 	if(in_array("/visual_art/art_period_movement", $types)) {
 		$res[] = "/visual_art/art_period_movement";
-		//subject of created artwork
+		//movement creating object
 		$result = fb_period_movement_creating_object($topic, $result);
-	
+		//movement creating publication
+		$result = fb_period_movement_creating_publication($topic, $result);
 	}
 
 	//**type: /time/event
