@@ -1290,9 +1290,8 @@ function save_fb_image($topic, $thumbnail_url = FALSE) {
  */
 function dec_reset() {
 	//if the line below is uncommented then this function can reset local cached databases of freebase data
-// 	reset_recommender_database();
-$table = event_table_for_event_list();
-	return "database reset".$table;
+	reset_recommender_database();
+	return "database reset";
 }
 
 /**
@@ -1818,7 +1817,7 @@ function fb_location_containedBy($topic = '/m/02cft', $result = array("triples"=
 	$resultarray = execute_mql_event_query($query);
 
 	if(isset($resultarray["result"]["0"]["/location/location/containedby"])) {
-		$triples[] = array($topic, "Contained by", get_values($resultarray["result"]["0"]["/location/location/containedby"]), 1);
+		$triples[] = array($topic, "Part of", get_values($resultarray["result"]["0"]["/location/location/containedby"]), 1);
 		$tag_names = get_topic_name_pairs(array("/location/location/containedby"),$resultarray["result"]["0"],$tag_names);
 	}
 	return array("triples"=>array_merge($triples, $result["triples"]),
@@ -4672,7 +4671,16 @@ function fb_topic_creating_object($topic, $previous_output = array("events"=>arr
 // 					get_values($result["/visual_art/artwork/edition_of"]),
 // 					get_values($result["/visual_art/artwork/belongs_to_series"]),
 // 					check_array_is_returned($result["mid"]));
-
+	
+		//add inferred locations for artwork creation
+		$location_result = locations_for_artwork_creation_date($output[$result["mid"]]["/visual_art/artwork"][0], $output[$result["mid"]]["/visual_art/artwork/artist"][0], $output[$result["mid"]]["/visual_art/artwork/date_begun"], $output[$result["mid"]]["/visual_art/artwork/date_completed"]);
+		if(!empty($location_result['locations'])) {
+			$output[$result["mid"]]['location'] = $location_result['locations'];
+		}
+		if(!empty($location_result['topic_name_pairs'])) {
+			$topic_name_pairs = array_merge($topic_name_pairs,$location_result['topic_name_pairs']);
+		}
+		
 		$topic_name_pairs = get_topic_name_pairs(array("/visual_art/artwork/artist","/visual_art/artwork/art_subject","/visual_art/artwork/art_form","/visual_art/artwork/art_genre","/visual_art/artwork/media","/visual_art/artwork/support","/visual_art/artwork/period_or_movement","/visual_art/artwork/locations","/visual_art/artwork/owners","/visual_art/artwork/editions","/visual_art/artwork/edition_of","/visual_art/artwork/belongs_to_series"),$result,$topic_name_pairs);
 		$topic_name_pairs = add_top_level_pair($result, $topic_name_pairs);
 		$topic_event_links[] = array($topic, 'Objects created', $result["mid"]);
@@ -4736,7 +4744,7 @@ function fb_topic_publishing($topic, $previous_output = array("events"=>array(),
 		$output[$result["mid"]]["activity"] = "book_authoring";
 		$output[$result["mid"]]["/book/written_work/author"] = get_values($result["/book/written_work/author"]);
 		$output[$result["mid"]]["/book/written_work/editor"] = get_values($result["/book/written_work/editor"]);
-
+		
 		$output[$result["mid"]]["/book/written_work/date_of_first_publication"] = $result["/book/written_work/date_of_first_publication"];
 		
 		$output[$result["mid"]]["/book/written_work/school_or_movement"] = get_values($result["/book/written_work/school_or_movement"]);
@@ -4756,6 +4764,15 @@ function fb_topic_publishing($topic, $previous_output = array("events"=>array(),
 				"/book/written_work/school_or_movement","/book/written_work/part_of_series","/book/written_work/previous_in_series","/book/written_work/next_in_series"),$result,$topic_name_pairs);
 		$topic_name_pairs = add_top_level_pair($result, $topic_name_pairs);
 		$topic_event_links[] = array($topic, 'Books authored', $result["mid"]);
+		
+		//add inferred locations for artwork creation
+		$location_result = locations_for_authorship_date($output[$result["mid"]]["/book/written_work/author"][0], $output[$result["mid"]]["/book/written_work/date_of_first_publication"]);
+		if(!empty($location_result['locations'])) {
+			$output[$result["mid"]]['location'] = $location_result['locations'];
+		}
+		if(!empty($location_result['topic_name_pairs'])) {
+			$topic_name_pairs = array_merge($topic_name_pairs,$location_result['topic_name_pairs']);
+		}
 		
 		
 	}
@@ -5087,6 +5104,15 @@ function fb_topic_art_owner($topic, $previous_output = array("events"=>array(),"
 		$topic_name_pairs = get_topic_name_pairs(array("/visual_art/artwork_owner_relationship/owner","/visual_art/artwork_owner_relationship/artwork"),$result,$topic_name_pairs);
 		$topic_name_pairs = add_top_level_pair($result, $topic_name_pairs);
 		$topic_event_links[] = array($topic, 'Objects owned', $result["mid"]);
+		
+		//add inferred locations for artwork creation
+		$location_result = locations_for_artwork_ownership_date($output[$result["mid"]]["/visual_art/artwork_owner_relationship/owner"][0], $output[$result["mid"]]["/visual_art/artwork_owner_relationship/date_acquired"], $output[$result["mid"]]["/visual_art/artwork_owner_relationship/last_date_owned"]);
+		if(!empty($location_result['locations'])) {
+			$output[$result["mid"]]['location'] = $location_result['locations'];
+		}
+		if(!empty($location_result['topic_name_pairs'])) {
+			$topic_name_pairs = array_merge($topic_name_pairs,$location_result['topic_name_pairs']);
+		}
 
 	}
 	
@@ -5152,6 +5178,15 @@ function fb_topic_award_winner($topic, $previous_output = array("events"=>array(
 		$topic_name_pairs = get_topic_name_pairs(array("/award/award_honor/award","/award/award_honor/honored_for","/award/award_honor/award_winner","/award/award_honor/ceremony","/award/award_honor/achievement_level"),$result,$topic_name_pairs);
 		$topic_name_pairs = add_top_level_pair($result, $topic_name_pairs);
 		$topic_event_links[] = array($topic, 'Awards won', $result["mid"]);
+		
+		//add locations for award or ceremony
+		$location_result = locations_for_ceremony_award($output[$result["mid"]]["/award/award_honor/ceremony"], $output[$result["mid"]]["/award/award_honor/award"]);
+		if(!empty($location_result['locations'])) {
+			$output[$result["mid"]]['location'] = $location_result['locations'];
+		}
+		if(!empty($location_result['topic_name_pairs'])) {
+			$topic_name_pairs = array_merge($topic_name_pairs,$location_result['topic_name_pairs']);
+		}
 	
 	}
 	return array("events"=>array_merge($output, $previous_output["events"]),
@@ -5209,12 +5244,310 @@ function fb_topic_award_nominee($topic, $previous_output = array("events"=>array
 		$topic_name_pairs = get_topic_name_pairs(array("/award/award_nomination/award","/award/award_nomination/nominated_for","/award/award_nomination/award_nominee","/award/award_nomination/ceremony"),$result,$topic_name_pairs);
 		$topic_name_pairs = add_top_level_pair($result, $topic_name_pairs);
 		$topic_event_links[] = array($topic, 'Award nominations', $result["mid"]);
+		
+		//add locations for award or ceremony
+		$location_result = locations_for_ceremony_award($output[$result["mid"]]["/award/award_nomination/ceremony"], $output[$result["mid"]]["/award/award_nomination/award"]);
+		if(!empty($location_result['locations'])) {
+			$output[$result["mid"]]['location'] = $location_result['locations'];
+		}
+		if(!empty($location_result['topic_name_pairs'])) {
+			$topic_name_pairs = array_merge($topic_name_pairs,$location_result['topic_name_pairs']);
+		}
 
 	}
 	
 	return array("events"=>array_merge($output, $previous_output["events"]),
 			"names"=>array_merge($topic_name_pairs, $previous_output["names"]),
 			"links"=>array_merge($topic_event_links, $previous_output["links"]));
+}
+
+
+/**
+ * artworks, their artists and times
+ */
+function artwork_artist_begun_completed() {
+	$query = "SELECT event_artist_artwork_begun_table.artist, event_artist_artwork_begun_table.artwork, event_artist_artwork_begun_table.begun, event_completed_table.completed
+FROM
+(SELECT event_artist_artwork_table.event, event_artist_artwork_table.artist, event_artist_artwork_table.artwork, event_begun_table.begun
+FROM 
+(SELECT  activity_table.event, artist_table.value as artist, artwork_table.value as artwork
+FROM event_attribute_value as activity_table, event_attribute_value as artist_table, event_attribute_value as artwork_table 
+WHERE activity_table.attribute = 'activity' AND
+activity_table.value = 'object_creation' AND
+activity_table.event = artist_table.event AND
+artist_table.attribute = '/visual_art/artwork/artist' AND
+activity_table.event = artwork_table.event AND
+artwork_table.attribute = '/visual_art/artwork') as event_artist_artwork_table
+LEFT JOIN 
+(SELECT event_attribute_value.event, event_attribute_value.value as begun
+FROM event_attribute_value
+WHERE event_attribute_value.attribute = '/visual_art/artwork/date_begun') as event_begun_table
+ON event_begun_table.event = event_artist_artwork_table.event) event_artist_artwork_begun_table
+LEFT JOIN
+(SELECT event_attribute_value.event, event_attribute_value.value as completed
+FROM event_attribute_value
+WHERE event_attribute_value.attribute = '/visual_art/artwork/date_completed') as event_completed_table
+ON event_completed_table.event = event_artist_artwork_begun_table.event LIMIT 30;";
+	$result = db_query($query);
+	$output = array();
+	foreach($result as $record) {
+		$output[] = $record;
+	}
+	return $output;
+}
+
+function artwork_location_test() {
+	$data_list = artwork_artist_begun_completed();
+	foreach($data_list as $data) {
+		dpm(array($data->artwork, $data->artist, $data->begun, $data->completed));
+		dpm(locations_for_artwork_creation_date($data->artwork, $data->artist, $data->begun, $data->completed));
+	}
+}
+
+/**
+ * Finding locations for ceremony and award
+ */
+//locations_for_ceremony_award(NULL, '/m/05mf78')
+//locations_for_ceremony_award('/m/02glmx', NULL)
+function locations_for_ceremony_award($ceremony, $award) {
+	if(empty($ceremony)) {
+		$ceremony = NULL;
+	}
+	else {
+		$ceremony = $ceremony[0];
+	}
+	if(empty($award)) {
+		$award = NULL;
+	}
+	else {
+		$award = $award[0];
+	}
+	
+	$locations = array();
+	$topic_name_pairs = array();
+	if($ceremony) {
+		//ceremony has a location
+		$query = array(array(
+  "mid"=> $ceremony,
+  "name"=> null,
+  "type"=> "/award/award_ceremony",
+  "/time/event/locations"=> array(array(
+    "mid"=> null,
+    "name"=> null
+  ))
+));
+		$resultarray = execute_mql_event_query($query);
+		if(!empty($resultarray['result'][0]['/time/event/locations'])) {
+			foreach($resultarray['result'][0]['/time/event/locations'] as $place) {
+				$locations[] = $place['mid'];
+				$topic_name_pairs[$place['mid']] = $place['name'];
+			}
+		}
+	}
+	if($award) {
+		//presenting organisation is a location
+		$query = array(array(
+  "mid"=> $award,
+  "name"=> null,
+  "type"=> "/award/award",
+  "/award/award_category/presenting_organization"=> array(array(
+    "mid"=> null,
+    "name"=> null,
+    "type"=> "/location/location"
+  ))
+));
+		$resultarray = execute_mql_event_query($query);
+		if(!empty($resultarray['result'][0]['/award/award_category/presenting_organization'])) {
+			foreach($resultarray['result'][0]['/award/award_category/presenting_organization'] as $place) {
+				$locations[] = $place['mid'];
+				$topic_name_pairs[$place['mid']] = $place['name'];
+			}
+		}
+	}
+	$locations = array_unique($locations);
+	return array('locations'=>$locations, 'topic_name_pairs'=>$topic_name_pairs);	
+}
+
+/**
+ * Finding locations for written work authorship
+ */
+//locations_for_authorship_date('/m/01xnj',NULL,'1904')
+function locations_for_authorship_date($author, $from) {
+	$locations = array();
+	$topic_name_pairs = array();
+
+	if($from) {
+		//where was the author living at time of authorship?
+		$query = array(array(
+				"mid"=> $author,
+				"type"=> "/people/person",
+				"/people/person/places_lived"=> array(array(
+						"location"=> array(
+								"mid"=> null,
+								"name"=>null
+						),
+						"start_date<="=> $from,
+						"end_date>="=> $from
+				))
+		));
+
+		$resultarray = execute_mql_event_query($query);
+
+		if(!empty($resultarray['result'][0]['/people/person/places_lived'])) {
+			foreach($resultarray['result'][0]['/people/person/places_lived'] as $place) {
+				$locations[] = $place['location']['mid'];
+				$topic_name_pairs[$place['location']['mid']] = $place['location']['name'];
+			}
+		}
+	}
+
+	//is the author of the written work a location?
+	$query = array(array(
+			"mid"=> $author,
+	  "name"=> null,
+			"type"=> "/location/location"
+	));
+	$resultarray = execute_mql_event_query($query);
+	if(isset($resultarray['result'][0]['mid'])) {
+		$locations[] = $resultarray['result'][0]['mid'];
+		$topic_name_pairs[$resultarray['result'][0]['mid']] = $resultarray['result'][0]['name'];
+	}
+	$locations = array_unique($locations);
+	return array('locations'=>$locations, 'topic_name_pairs'=>$topic_name_pairs);
+}
+
+/**
+ * Finding locations for artwork ownership
+ */
+//locations_for_artwork_ownership_date('/m/01xnj',NULL,'1904')
+function locations_for_artwork_ownership_date($owner, $from, $to) {
+	$locations = array();
+	$topic_name_pairs = array();
+	if($from && !$to) {
+		$to = $from;
+	}
+	elseif(!$from && $to) {
+		$from = $to;
+	}
+	
+	if($from && $to) {
+		//where was the owner living at time of ownership?
+		$query = array(array(
+				"mid"=> $owner,
+				"type"=> "/people/person",
+				"/people/person/places_lived"=> array(array(
+				    "location"=> array(
+				      "mid"=> null,
+				      "name"=>null
+				    ),
+				    "start_date<="=> $to,
+				    "end_date>="=> $from
+				))
+		));
+		
+		$resultarray = execute_mql_event_query($query);
+
+		if(!empty($resultarray['result'][0]['/people/person/places_lived'])) {
+			foreach($resultarray['result'][0]['/people/person/places_lived'] as $place) {
+				$locations[] = $place['location']['mid'];
+				$topic_name_pairs[$place['location']['mid']] = $place['location']['name'];
+			}
+		}
+	}
+	
+	//is the owner of the artwork a location?
+	$query = array(array(
+      "mid"=> $owner,
+	  "name"=> null,
+      "type"=> "/location/location"
+));
+	$resultarray = execute_mql_event_query($query);
+	if(isset($resultarray['result'][0]['mid'])) {
+		$locations[] = $resultarray['result'][0]['mid'];
+		$topic_name_pairs[$resultarray['result'][0]['mid']] = $resultarray['result'][0]['name'];
+	}
+	$locations = array_unique($locations);
+	return array('locations'=>$locations, 'topic_name_pairs'=>$topic_name_pairs);
+}
+
+/**
+ * Finding locations for artwork creation
+ */
+//locations_for_artwork_creation_date('/m/025dvlv','/m/01xnj',NULL,'1904')
+function locations_for_artwork_creation_date($artwork, $artist, $from, $to) {
+	$locations = array();
+	$topic_name_pairs = array();
+	if($from && !$to) {
+		$to = $from;
+	}
+	elseif(!$from && $to) {
+		$from = $to;
+	}
+	
+	if($from && $to) {
+		//where was the artist living at the time of object creation?
+		$query = array(array(
+	  "mid"=> $artist,
+	  "name"=> null,
+	  "/people/person/places_lived"=> array(array(
+	    "location"=> array(
+	      "mid"=> null,
+	      "name"=>null
+	    ),
+	    "start_date<="=> $to,
+	    "end_date>="=> $from
+	  ))
+	));
+		$resultarray = execute_mql_event_query($query);
+
+		if(!empty($resultarray['result'][0]['/people/person/places_lived'])) {
+			foreach($resultarray['result'][0]['/people/person/places_lived'] as $place) {
+				$locations[] = $place['location']['mid'];
+				$topic_name_pairs[$place['location']['mid']] = $place['location']['name'];
+			}
+		}
+		
+		//is the object location known for its creation date?
+		$query = array(array(
+				"mid"=> $artwork,
+				"name"=> null,
+				"/visual_art/artwork/locations"=> array(array(
+						"location"=> array(
+								"mid"=> null,
+								"name"=>null
+						),
+						"from<="=> $to,
+						"to>="=> $from
+				))
+		));
+		$resultarray = execute_mql_event_query($query);
+		if(!empty($resultarray['result'][0]['/visual_art/artwork/locations'])) {
+			foreach($resultarray['result'][0]['/visual_art/artwork/locations'] as $place) {
+				$locations[] = $place['location']['mid'];
+				$topic_name_pairs[$place['location']['mid']] = $place['location']['name'];
+			}
+		}
+	}
+	
+	//is the subject of the artwork a location?
+	$query = array(array(
+  "mid"=> $artwork,
+  "name"=> null,
+  "/visual_art/artwork/art_subject"=> array(array(
+    "mid"=> null,
+    "type"=> "/location/location",
+  	"name"=>null
+  ))
+));
+	$resultarray = execute_mql_event_query($query);
+	if(!empty($resultarray['result'][0]['/visual_art/artwork/art_subject'])) {
+		foreach($resultarray['result'][0]['/visual_art/artwork/art_subject'] as $place) {
+			$locations[] = $place['mid'];
+			$topic_name_pairs[$place['mid']] = $place['name'];
+		}
+	}		
+	$locations = array_unique($locations);
+	return array('locations'=>$locations, 'topic_name_pairs'=>$topic_name_pairs);
 }
 
 /**
@@ -5314,6 +5647,14 @@ function fb_artwork_created($topic, $previous_output = array("events"=>array(),"
 // 				get_values($result["/visual_art/artwork/belongs_to_series"]),
 // 				check_array_is_returned($result["mid"]));
 	
+		//add inferred locations for artwork creation
+		$location_result = locations_for_artwork_creation_date($output[$result["mid"]]["/visual_art/artwork"][0], $output[$result["mid"]]["/visual_art/artwork/artist"][0], $output[$result["mid"]]["/visual_art/artwork/date_begun"], $output[$result["mid"]]["/visual_art/artwork/date_completed"]);
+		if(!empty($location_result['locations'])) {
+			$output[$result["mid"]]['location'] = $location_result['locations'];
+		}
+		if(!empty($location_result['topic_name_pairs'])) {
+			$topic_name_pairs = array_merge($topic_name_pairs,$location_result['topic_name_pairs']);
+		}
 
 		$topic_name_pairs = get_topic_name_pairs(array("/visual_art/artwork/artist","/visual_art/artwork/art_subject","/visual_art/artwork/art_form","/visual_art/artwork/art_genre","/visual_art/artwork/media","/visual_art/artwork/support","/visual_art/artwork/period_or_movement","/visual_art/artwork/locations","/visual_art/artwork/owners","/visual_art/artwork/editions","/visual_art/artwork/edition_of","/visual_art/artwork/belongs_to_series"),$result,$topic_name_pairs);
 		$topic_name_pairs = add_top_level_pair($result, $topic_name_pairs);
@@ -5418,8 +5759,18 @@ function fb_object_owned($topic, $previous_output = array("events"=>array(),"nam
 		$topic_name_pairs = get_topic_name_pairs(array("/visual_art/artwork_owner_relationship/owner","/visual_art/artwork_owner_relationship/artwork"),$result,$topic_name_pairs);
 		$topic_name_pairs = add_top_level_pair($result, $topic_name_pairs);
 		$topic_event_links[] = array($topic, 'Object ownership history', $result["mid"]);
+		
+		//add inferred locations for artwork creation
+		$location_result = locations_for_artwork_ownership_date($output[$result["mid"]]["/visual_art/artwork_owner_relationship/owner"][0], $output[$result["mid"]]["/visual_art/artwork_owner_relationship/date_acquired"], $output[$result["mid"]]["/visual_art/artwork_owner_relationship/last_date_owned"]);
+		if(!empty($location_result['locations'])) {
+			$output[$result["mid"]]['location'] = $location_result['locations'];
+		}
+		if(!empty($location_result['topic_name_pairs'])) {
+			$topic_name_pairs = array_merge($topic_name_pairs,$location_result['topic_name_pairs']);
+		}
 
 	}
+	
 	return array("events"=>array_merge($output, $previous_output["events"]),
 			"names"=>array_merge($topic_name_pairs, $previous_output["names"]),
 			"links"=>array_merge($topic_event_links, $previous_output["links"]));
@@ -5476,6 +5827,15 @@ function fb_object_award_nominated_work($topic, $previous_output = array("events
 		$topic_name_pairs = get_topic_name_pairs(array("/award/award_nomination/award","/award/award_nomination/nominated_for","/award/award_nomination/award_nominee","/award/award_nomination/ceremony"),$result,$topic_name_pairs);
 		$topic_name_pairs = add_top_level_pair($result, $topic_name_pairs);
 		$topic_event_links[] = array($topic, 'Award nominations for object', $result["mid"]);
+		
+		//add locations for award or ceremony
+		$location_result = locations_for_ceremony_award($output[$result["mid"]]["/award/award_nomination/ceremony"], $output[$result["mid"]]["/award/award_nomination/award"]);
+		if(!empty($location_result['locations'])) {
+			$output[$result["mid"]]['location'] = $location_result['locations'];
+		}
+		if(!empty($location_result['topic_name_pairs'])) {
+			$topic_name_pairs = array_merge($topic_name_pairs,$location_result['topic_name_pairs']);
+		}
 	}
 	
 	return array("events"=>array_merge($output, $previous_output["events"]),
@@ -5541,6 +5901,15 @@ function fb_object_award_winning_work($topic, $previous_output = array("events"=
 		$topic_name_pairs = get_topic_name_pairs(array("/award/award_honor/award","/award/award_honor/honored_for","/award/award_honor/award_winner","/award/award_honor/ceremony","/award/award_honor/achievement_level"),$result,$topic_name_pairs);
 		$topic_name_pairs = add_top_level_pair($result, $topic_name_pairs);
 		$topic_event_links[] = array($topic, 'Awards won for object', $result["mid"]);
+		
+		//add locations for award or ceremony
+		$location_result = locations_for_ceremony_award($output[$result["mid"]]["/award/award_honor/ceremony"], $output[$result["mid"]]["/award/award_honor/award"]);
+		if(!empty($location_result['locations'])) {
+			$output[$result["mid"]]['location'] = $location_result['locations'];
+		}
+		if(!empty($location_result['topic_name_pairs'])) {
+			$topic_name_pairs = array_merge($topic_name_pairs,$location_result['topic_name_pairs']);
+		}
 	}
 
 	return array("events"=>array_merge($output, $previous_output["events"]),
@@ -5966,6 +6335,15 @@ function fb_award_having_prize_winner($topic, $previous_output = array("events"=
 		$topic_name_pairs = get_topic_name_pairs(array("/award/award_honor/award","/award/award_honor/honored_for","/award/award_honor/award_winner","/award/award_honor/ceremony","/award/award_honor/achievement_level"),$result,$topic_name_pairs);
 		$topic_name_pairs = add_top_level_pair($result, $topic_name_pairs);
 		$topic_event_links[] = array($topic, 'Award winners', $result["mid"]);
+		
+		//add locations for award or ceremony
+		$location_result = locations_for_ceremony_award($output[$result["mid"]]["/award/award_honor/ceremony"], $output[$result["mid"]]["/award/award_honor/award"]);
+		if(!empty($location_result['locations'])) {
+			$output[$result["mid"]]['location'] = $location_result['locations'];
+		}
+		if(!empty($location_result['topic_name_pairs'])) {
+			$topic_name_pairs = array_merge($topic_name_pairs,$location_result['topic_name_pairs']);
+		}
 	
 	}
 
@@ -6028,6 +6406,15 @@ function fb_award_having_nominee($topic, $previous_output = array("events"=>arra
 		$topic_name_pairs = get_topic_name_pairs(array("/award/award_nomination/award","/award/award_nomination/nominated_for","/award/award_nomination/award_nominee","/award/award_nomination/ceremony"),$result,$topic_name_pairs);
 		$topic_name_pairs = add_top_level_pair($result, $topic_name_pairs);
 		$topic_event_links[] = array($topic, 'Award nominees', $result["mid"]);
+		
+		//add locations for award or ceremony
+		$location_result = locations_for_ceremony_award($output[$result["mid"]]["/award/award_nomination/ceremony"], $output[$result["mid"]]["/award/award_nomination/award"]);
+		if(!empty($location_result['locations'])) {
+			$output[$result["mid"]]['location'] = $location_result['locations'];
+		}
+		if(!empty($location_result['topic_name_pairs'])) {
+			$topic_name_pairs = array_merge($topic_name_pairs,$location_result['topic_name_pairs']);
+		}
 	}
 	
 	return array("events"=>array_merge($output, $previous_output["events"]),

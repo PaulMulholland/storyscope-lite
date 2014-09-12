@@ -461,7 +461,8 @@ function dec_rec_install() {
 		array('attribute'=>'/time/event/people_involved', 'name'=>'agent', 'reverse_name'=>'person of event'),
 		array('attribute'=>'/time/event/start_date', 'name'=>'start_time', 'reverse_name'=>'start time of event'),
 		array('attribute'=>'/time/event/end_date', 'name'=>'end_time', 'reverse_name'=>'end time of event'),
-		array('attribute'=>'/time/event/locations', 'name'=>'location', 'reverse_name'=>'location of event')
+		array('attribute'=>'/time/event/locations', 'name'=>'location', 'reverse_name'=>'location of event'),
+		array('attribute'=>'location', 'name'=>'location', 'reverse_name'=>'location')
 	);  	
 	$query = db_insert('attribute_name')->fields(array('attribute', 'name', 'reverse_name'));
 	foreach($values as $value) {
