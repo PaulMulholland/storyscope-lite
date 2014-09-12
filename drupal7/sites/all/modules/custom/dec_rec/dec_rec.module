@@ -4629,7 +4629,11 @@ function fb_topic_creating_object($topic, $previous_output = array("events"=>arr
     "/visual_art/artwork/belongs_to_series"=> array(array(
       "name"=> null,"mid"=> null,
       "optional"=> "optional"
-    ))
+    )),
+  	"/exhibitions/exhibit/exhibitions_displayed_in"=> array(array(
+  		"name"=> null,"mid"=> null,
+  		"optional"=> "optional"
+	))
   ))
 ));
 
@@ -4647,6 +4651,7 @@ function fb_topic_creating_object($topic, $previous_output = array("events"=>arr
 		$output[$result["mid"]]["/visual_art/artwork/artist"] = get_values($result["/visual_art/artwork/artist"]);
 		$output[$result["mid"]]["/visual_art/artwork/date_begun"] = $result["/visual_art/artwork/date_begun"];
 		$output[$result["mid"]]["/visual_art/artwork/date_completed"] = $result["/visual_art/artwork/date_completed"];
+		$output[$result["mid"]]["/exhibitions/exhibit/exhibitions_displayed_in"] = get_values($result["/exhibitions/exhibit/exhibitions_displayed_in"]);
 		
 		$output[$result["mid"]]["/visual_art/artwork/art_subject"] = get_values($result["/visual_art/artwork/art_subject"]);
 		$output[$result["mid"]]["/visual_art/artwork/art_genre"] = get_values($result["/visual_art/artwork/art_genre"]);
@@ -4681,7 +4686,7 @@ function fb_topic_creating_object($topic, $previous_output = array("events"=>arr
 			$topic_name_pairs = array_merge($topic_name_pairs,$location_result['topic_name_pairs']);
 		}
 		
-		$topic_name_pairs = get_topic_name_pairs(array("/visual_art/artwork/artist","/visual_art/artwork/art_subject","/visual_art/artwork/art_form","/visual_art/artwork/art_genre","/visual_art/artwork/media","/visual_art/artwork/support","/visual_art/artwork/period_or_movement","/visual_art/artwork/locations","/visual_art/artwork/owners","/visual_art/artwork/editions","/visual_art/artwork/edition_of","/visual_art/artwork/belongs_to_series"),$result,$topic_name_pairs);
+		$topic_name_pairs = get_topic_name_pairs(array("/visual_art/artwork/artist","/visual_art/artwork/art_subject","/visual_art/artwork/art_form","/visual_art/artwork/art_genre","/visual_art/artwork/media","/visual_art/artwork/support","/visual_art/artwork/period_or_movement","/visual_art/artwork/locations","/visual_art/artwork/owners","/visual_art/artwork/editions","/visual_art/artwork/edition_of","/visual_art/artwork/belongs_to_series","/exhibitions/exhibit/exhibitions_displayed_in"),$result,$topic_name_pairs);
 		$topic_name_pairs = add_top_level_pair($result, $topic_name_pairs);
 		$topic_event_links[] = array($topic, 'Objects created', $result["mid"]);
 
@@ -5606,7 +5611,11 @@ function fb_artwork_created($topic, $previous_output = array("events"=>array(),"
   "/visual_art/artwork/belongs_to_series"=> array(array(
     "name"=> null,"mid"=> null,
     "optional"=> "optional"
-  ))
+  )),
+	"/exhibitions/exhibit/exhibitions_displayed_in"=> array(array(
+		"name"=> null,"mid"=> null,
+		"optional"=> "optional"
+	))
 ));
 	
 	$resultarray = execute_mql_event_query($query);
@@ -5621,6 +5630,7 @@ function fb_artwork_created($topic, $previous_output = array("events"=>array(),"
 		$output[$result["mid"]]["/visual_art/artwork/artist"] = get_values($result["/visual_art/artwork/artist"]);
 		$output[$result["mid"]]["/visual_art/artwork/date_begun"] = $result["/visual_art/artwork/date_begun"];
 		$output[$result["mid"]]["/visual_art/artwork/date_completed"] = $result["/visual_art/artwork/date_completed"];
+		$output[$result["mid"]]["/exhibitions/exhibit/exhibitions_displayed_in"] = get_values($result["/exhibitions/exhibit/exhibitions_displayed_in"]);
 		
 		$output[$result["mid"]]["/visual_art/artwork/art_subject"] = get_values($result["/visual_art/artwork/art_subject"]);
 		$output[$result["mid"]]["/visual_art/artwork/art_genre"] = get_values($result["/visual_art/artwork/art_genre"]);
@@ -5656,7 +5666,7 @@ function fb_artwork_created($topic, $previous_output = array("events"=>array(),"
 			$topic_name_pairs = array_merge($topic_name_pairs,$location_result['topic_name_pairs']);
 		}
 
-		$topic_name_pairs = get_topic_name_pairs(array("/visual_art/artwork/artist","/visual_art/artwork/art_subject","/visual_art/artwork/art_form","/visual_art/artwork/art_genre","/visual_art/artwork/media","/visual_art/artwork/support","/visual_art/artwork/period_or_movement","/visual_art/artwork/locations","/visual_art/artwork/owners","/visual_art/artwork/editions","/visual_art/artwork/edition_of","/visual_art/artwork/belongs_to_series"),$result,$topic_name_pairs);
+		$topic_name_pairs = get_topic_name_pairs(array("/visual_art/artwork/artist","/visual_art/artwork/art_subject","/visual_art/artwork/art_form","/visual_art/artwork/art_genre","/visual_art/artwork/media","/visual_art/artwork/support","/visual_art/artwork/period_or_movement","/visual_art/artwork/locations","/visual_art/artwork/owners","/visual_art/artwork/editions","/visual_art/artwork/edition_of","/visual_art/artwork/belongs_to_series","/exhibitions/exhibit/exhibitions_displayed_in"),$result,$topic_name_pairs);
 		$topic_name_pairs = add_top_level_pair($result, $topic_name_pairs);
 		$topic_event_links[] = array($topic, 'Object creation details', $result["mid"]);
 
@@ -6174,12 +6184,16 @@ function fb_exhibition_creation_of_object($topic, $previous_output = array("even
 				    "/visual_art/artwork/belongs_to_series"=> array(array(
 				      "name"=> null,"mid"=> null,
 				      "optional"=> "optional"
-				    ))
+				    )),
+					"/exhibitions/exhibit/exhibitions_displayed_in"=> array(array(
+							"name"=> null,"mid"=> null,
+							"optional"=> "optional"
+					)) 
 			))
 	));
-
+dpm($query);
 	$resultarray = execute_mql_event_query($query);
-
+dpm($resultarray);
 	$output = array();
 	if(!isset($resultarray["result"][0])) {
 		return $previous_output;
@@ -6192,7 +6206,7 @@ function fb_exhibition_creation_of_object($topic, $previous_output = array("even
 		$output[$result["mid"]]["/visual_art/artwork/artist"] = get_values($result["/visual_art/artwork/artist"]);
 		$output[$result["mid"]]["/visual_art/artwork/date_begun"] = $result["/visual_art/artwork/date_begun"];
 		$output[$result["mid"]]["/visual_art/artwork/date_completed"] = $result["/visual_art/artwork/date_completed"];
-		
+		$output[$result["mid"]]["/exhibitions/exhibit/exhibitions_displayed_in"] = get_values($result["/exhibitions/exhibit/exhibitions_displayed_in"]);
 		$output[$result["mid"]]["/visual_art/artwork/art_subject"] = get_values($result["/visual_art/artwork/art_subject"]);
 		$output[$result["mid"]]["/visual_art/artwork/art_genre"] = get_values($result["/visual_art/artwork/art_genre"]);
 		$output[$result["mid"]]["/visual_art/artwork/media"] = get_values($result["/visual_art/artwork/media"]);
@@ -6217,12 +6231,21 @@ function fb_exhibition_creation_of_object($topic, $previous_output = array("even
 		// 				get_values($result["/visual_art/artwork/edition_of"]),
 		// 				get_values($result["/visual_art/artwork/belongs_to_series"]),
 		// 				check_array_is_returned($result["mid"]));
-
-		$topic_name_pairs = get_topic_name_pairs(array("/visual_art/artwork/artist","/visual_art/artwork/art_subject","/visual_art/artwork/art_form","/visual_art/artwork/art_genre","/visual_art/artwork/media","/visual_art/artwork/support","/visual_art/artwork/period_or_movement","/visual_art/artwork/locations","/visual_art/artwork/owners","/visual_art/artwork/editions","/visual_art/artwork/edition_of","/visual_art/artwork/belongs_to_series"),$result,$topic_name_pairs);
+		
+		//add inferred locations for artwork creation
+		$location_result = locations_for_artwork_creation_date($output[$result["mid"]]["/visual_art/artwork"][0], $output[$result["mid"]]["/visual_art/artwork/artist"][0], $output[$result["mid"]]["/visual_art/artwork/date_begun"], $output[$result["mid"]]["/visual_art/artwork/date_completed"]);
+		if(!empty($location_result['locations'])) {
+			$output[$result["mid"]]['location'] = $location_result['locations'];
+		}
+		if(!empty($location_result['topic_name_pairs'])) {
+			$topic_name_pairs = array_merge($topic_name_pairs,$location_result['topic_name_pairs']);
+		}
+		
+		$topic_name_pairs = get_topic_name_pairs(array("/visual_art/artwork/artist","/visual_art/artwork/art_subject","/visual_art/artwork/art_form","/visual_art/artwork/art_genre","/visual_art/artwork/media","/visual_art/artwork/support","/visual_art/artwork/period_or_movement","/visual_art/artwork/locations","/visual_art/artwork/owners","/visual_art/artwork/editions","/visual_art/artwork/edition_of","/visual_art/artwork/belongs_to_series","/exhibitions/exhibit/exhibitions_displayed_in"),$result,$topic_name_pairs);
 		$topic_name_pairs = add_top_level_pair($result, $topic_name_pairs);
-		$topic_event_links[] = array($topic, 'Exhibited objects', $result["mid"]);
+		$topic_event_links[] = array($topic, 'Objects created', $result["mid"]);
 	}
-
+dpm($output);
 	return array("events"=>array_merge($output, $previous_output["events"]),
 			"names"=>array_merge($topic_name_pairs, $previous_output["names"]),
 			"links"=>array_merge($topic_event_links, $previous_output["links"]));
@@ -6613,6 +6636,10 @@ function fb_topic_artwork_subject($topic, $previous_output = array("events"=>arr
 					"/visual_art/artwork/belongs_to_series"=> array(array(
 							"name"=> null,"mid"=> null,
 							"optional"=> "optional"
+					)),
+					"/exhibitions/exhibit/exhibitions_displayed_in"=> array(array(
+							"name"=> null,"mid"=> null,
+							"optional"=> "optional"
 					))
 			))
 	));
@@ -6631,7 +6658,7 @@ function fb_topic_artwork_subject($topic, $previous_output = array("events"=>arr
 		$output[$result["mid"]]["/visual_art/artwork/artist"] = get_values($result["/visual_art/artwork/artist"]);
 		$output[$result["mid"]]["/visual_art/artwork/date_begun"] = $result["/visual_art/artwork/date_begun"];
 		$output[$result["mid"]]["/visual_art/artwork/date_completed"] = $result["/visual_art/artwork/date_completed"];
-		
+		$output[$result["mid"]]["/exhibitions/exhibit/exhibitions_displayed_in"] = get_values($result["/exhibitions/exhibit/exhibitions_displayed_in"]);
 		$output[$result["mid"]]["/visual_art/artwork/art_subject"] = get_values($result["/visual_art/artwork/art_subject"]);
 		$output[$result["mid"]]["/visual_art/artwork/art_genre"] = get_values($result["/visual_art/artwork/art_genre"]);
 		$output[$result["mid"]]["/visual_art/artwork/media"] = get_values($result["/visual_art/artwork/media"]);
@@ -6656,9 +6683,18 @@ function fb_topic_artwork_subject($topic, $previous_output = array("events"=>arr
 // 				get_values($result["/visual_art/artwork/belongs_to_series"]),
 // 				check_array_is_returned($result["mid"]));
 	
-		$topic_name_pairs = get_topic_name_pairs(array("/visual_art/artwork/artist","/visual_art/artwork/art_subject","/visual_art/artwork/art_form","/visual_art/artwork/art_genre","/visual_art/artwork/media","/visual_art/artwork/support","/visual_art/artwork/period_or_movement","/visual_art/artwork/locations","/visual_art/artwork/owners","/visual_art/artwork/editions","/visual_art/artwork/edition_of","/visual_art/artwork/belongs_to_series"),$result,$topic_name_pairs);
+		$topic_name_pairs = get_topic_name_pairs(array("/visual_art/artwork/artist","/visual_art/artwork/art_subject","/visual_art/artwork/art_form","/visual_art/artwork/art_genre","/visual_art/artwork/media","/visual_art/artwork/support","/visual_art/artwork/period_or_movement","/visual_art/artwork/locations","/visual_art/artwork/owners","/visual_art/artwork/editions","/visual_art/artwork/edition_of","/visual_art/artwork/belongs_to_series","/exhibitions/exhibit/exhibitions_displayed_in"),$result,$topic_name_pairs);
 		$topic_name_pairs = add_top_level_pair($result, $topic_name_pairs);
 		$topic_event_links[] = array($topic, 'Subject of works', $result["mid"]);
+		
+		//add inferred locations for artwork creation
+		$location_result = locations_for_artwork_creation_date($output[$result["mid"]]["/visual_art/artwork"][0], $output[$result["mid"]]["/visual_art/artwork/artist"][0], $output[$result["mid"]]["/visual_art/artwork/date_begun"], $output[$result["mid"]]["/visual_art/artwork/date_completed"]);
+		if(!empty($location_result['locations'])) {
+			$output[$result["mid"]]['location'] = $location_result['locations'];
+		}
+		if(!empty($location_result['topic_name_pairs'])) {
+			$topic_name_pairs = array_merge($topic_name_pairs,$location_result['topic_name_pairs']);
+		}
 	}
 
 	return array("events"=>array_merge($output, $previous_output["events"]),
@@ -6726,6 +6762,10 @@ function fb_period_movement_creating_object($topic, $previous_output = array("ev
 					"/visual_art/artwork/belongs_to_series"=> array(array(
 							"name"=> null,"mid"=> null,
 							"optional"=> "optional"
+					)),
+					"/exhibitions/exhibit/exhibitions_displayed_in"=> array(array(
+							"name"=> null,"mid"=> null,
+							"optional"=> "optional"
 					))
 			))
 	));
@@ -6744,6 +6784,7 @@ function fb_period_movement_creating_object($topic, $previous_output = array("ev
 		$output[$result["mid"]]["/visual_art/artwork/artist"] = get_values($result["/visual_art/artwork/artist"]);
 		$output[$result["mid"]]["/visual_art/artwork/date_begun"] = $result["/visual_art/artwork/date_begun"];
 		$output[$result["mid"]]["/visual_art/artwork/date_completed"] = $result["/visual_art/artwork/date_completed"];
+		$output[$result["mid"]]["/exhibitions/exhibit/exhibitions_displayed_in"] = get_values($result["/exhibitions/exhibit/exhibitions_displayed_in"]);
 		
 		$output[$result["mid"]]["/visual_art/artwork/art_subject"] = get_values($result["/visual_art/artwork/art_subject"]);
 		$output[$result["mid"]]["/visual_art/artwork/art_genre"] = get_values($result["/visual_art/artwork/art_genre"]);
@@ -6768,10 +6809,19 @@ function fb_period_movement_creating_object($topic, $previous_output = array("ev
 // 				get_values($result["/visual_art/artwork/edition_of"]),
 // 				get_values($result["/visual_art/artwork/belongs_to_series"]),
 // 				check_array_is_returned($result["mid"]));
-	
-		$topic_name_pairs = get_topic_name_pairs(array("/visual_art/artwork/artist","/visual_art/artwork/art_subject","/visual_art/artwork/art_form","/visual_art/artwork/art_genre","/visual_art/artwork/media","/visual_art/artwork/support","/visual_art/artwork/period_or_movement","/visual_art/artwork/locations","/visual_art/artwork/owners","/visual_art/artwork/editions","/visual_art/artwork/edition_of","/visual_art/artwork/belongs_to_series"),$result,$topic_name_pairs);
+		
+		//add inferred locations for artwork creation
+		$location_result = locations_for_artwork_creation_date($output[$result["mid"]]["/visual_art/artwork"][0], $output[$result["mid"]]["/visual_art/artwork/artist"][0], $output[$result["mid"]]["/visual_art/artwork/date_begun"], $output[$result["mid"]]["/visual_art/artwork/date_completed"]);
+		if(!empty($location_result['locations'])) {
+			$output[$result["mid"]]['location'] = $location_result['locations'];
+		}
+		if(!empty($location_result['topic_name_pairs'])) {
+			$topic_name_pairs = array_merge($topic_name_pairs,$location_result['topic_name_pairs']);
+		}
+		
+		$topic_name_pairs = get_topic_name_pairs(array("/visual_art/artwork/artist","/visual_art/artwork/art_subject","/visual_art/artwork/art_form","/visual_art/artwork/art_genre","/visual_art/artwork/media","/visual_art/artwork/support","/visual_art/artwork/period_or_movement","/visual_art/artwork/locations","/visual_art/artwork/owners","/visual_art/artwork/editions","/visual_art/artwork/edition_of","/visual_art/artwork/belongs_to_series","/exhibitions/exhibit/exhibitions_displayed_in"),$result,$topic_name_pairs);
 		$topic_name_pairs = add_top_level_pair($result, $topic_name_pairs);
-		$topic_event_links[] = array($topic, 'Period or movement of works', $result["mid"]);
+		$topic_event_links[] = array($topic, 'Objects created', $result["mid"]);
 	}
 	
 	return array("events"=>array_merge($output, $previous_output["events"]),
@@ -6779,6 +6829,9 @@ function fb_period_movement_creating_object($topic, $previous_output = array("ev
 			"links"=>array_merge($topic_event_links, $previous_output["links"]));	
 }
 
+/**
+ * Combatants of military conflict
+ */
 /**
  * Retrieve data for topic that is an event
  */
@@ -7043,7 +7096,7 @@ function new_event_space_of_a_topic($topic = "/m/01qwfk", $reload = FALSE) {
 		//creation of exhibited objects
 		$result = fb_exhibition_creation_of_object($topic, $result);
 	}
-	
+
 	//**type: /exhibitions/exhibition_venue
 	if(in_array("/exhibitions/exhibition_venue", $types)) {
 		$res[] = "/exhibitions/exhibition_venue";
