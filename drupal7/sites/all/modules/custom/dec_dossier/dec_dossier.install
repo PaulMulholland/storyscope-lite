@@ -6,10 +6,11 @@
  * 
  */
 
-function dec_rec_install() {
+/* function dec_rec_install() {
 
 }
 
 function dec_rec_uninstall() {
 
 }
+*/
