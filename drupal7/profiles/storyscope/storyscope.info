@@ -27,12 +27,14 @@ dependencies[] = rdf
 dependencies[] = update
 dependencies[] = trigger
 
-
-; Panels
+; Views & Panels
 dependencies[] = ctools
 dependencies[] = panels
 dependencies[] = page_manager
 dependencies[] = views_content
+dependencies[] = views_ui
+dependencies[] = annertech_panels
+dependencies[] = storyscope_panels 
 
 ; Other essentials
 dependencies[] = backup_migrate
