@@ -1,5 +1,5 @@
 name = StoryScope Profile
-description = "Installs a Story Scope [lite] instance"
+description = "Installs a Storyscope 'Lite' instance"
 version = VERSION
 core = 7.x
 
@@ -35,6 +35,7 @@ dependencies[] = views_content
 dependencies[] = views_ui
 dependencies[] = annertech_panels
 dependencies[] = storyscope_panels 
+dependencies[] = panels_node_dossier
 
 ; Other essentials
 dependencies[] = backup_migrate
