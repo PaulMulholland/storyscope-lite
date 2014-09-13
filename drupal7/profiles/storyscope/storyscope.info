@@ -1,4 +1,4 @@
-name = StoryScope Profile
+name = Storyscope Profile
 description = "Installs a Storyscope 'Lite' instance"
 version = VERSION
 core = 7.x
@@ -62,6 +62,7 @@ dependencies[] = content_type_storyscope_story
 
 ;Custom Views
 dependencies[] = views_dossiers
+dependencies[] = views_dossier_stories
 
 ;Freebase Suggest
 dependencies[] = jquery_freebase
