@@ -58,7 +58,7 @@ dependencies[] = content_type_storyscope_dossier
 dependencies[] = content_type_storyscope_story
 
 ;Custom Views
-dependencies[] = views_dossier
+dependencies[] = views_dossiers
 
 ;Freebase Suggest
 dependencies[] = jquery_freebase
