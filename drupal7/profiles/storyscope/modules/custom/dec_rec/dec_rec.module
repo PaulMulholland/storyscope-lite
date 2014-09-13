@@ -4452,7 +4452,11 @@ function fb_person_studying($topic, $previous_output = array("events"=>array(),"
     ),
     "/education/education/institution"=> array(
       "mid"=> null,
-      "name"=> null
+      "name"=> null,
+    		"type"=> array(array(
+    				"id"=> "/location/location",
+    				"optional"=> "optional"
+    		))
     ),
     "/education/education/start_date"=> array(
       "value"=> null,
@@ -4495,6 +4499,10 @@ function fb_person_studying($topic, $previous_output = array("events"=>array(),"
 	$topic_name_pairs = array();
 
 	foreach($resultarray["result"][0]["/people/person/education"] as $result) {
+		if(isset($result["/education/education/institution"]["type"][0])) {
+			$output[$result["mid"]]['location'] = check_array_is_returned($result["/education/education/institution"]["mid"]);
+		}
+		
 		$output[$result["mid"]]["activity"] = "education";
 		$output[$result["mid"]]["/education/education/student"] = $result["/education/education/student"]["mid"];
 		$output[$result["mid"]]["/education/education/institution"] = $result["/education/education/institution"]["mid"];
@@ -4629,7 +4637,11 @@ function fb_topic_creating_object($topic, $previous_output = array("events"=>arr
     "/visual_art/artwork/belongs_to_series"=> array(array(
       "name"=> null,"mid"=> null,
       "optional"=> "optional"
-    ))
+    )),
+  	"/exhibitions/exhibit/exhibitions_displayed_in"=> array(array(
+  		"name"=> null,"mid"=> null,
+  		"optional"=> "optional"
+	))
   ))
 ));
 
@@ -4647,6 +4659,7 @@ function fb_topic_creating_object($topic, $previous_output = array("events"=>arr
 		$output[$result["mid"]]["/visual_art/artwork/artist"] = get_values($result["/visual_art/artwork/artist"]);
 		$output[$result["mid"]]["/visual_art/artwork/date_begun"] = $result["/visual_art/artwork/date_begun"];
 		$output[$result["mid"]]["/visual_art/artwork/date_completed"] = $result["/visual_art/artwork/date_completed"];
+		$output[$result["mid"]]["/exhibitions/exhibit/exhibitions_displayed_in"] = get_values($result["/exhibitions/exhibit/exhibitions_displayed_in"]);
 		
 		$output[$result["mid"]]["/visual_art/artwork/art_subject"] = get_values($result["/visual_art/artwork/art_subject"]);
 		$output[$result["mid"]]["/visual_art/artwork/art_genre"] = get_values($result["/visual_art/artwork/art_genre"]);
@@ -4681,7 +4694,7 @@ function fb_topic_creating_object($topic, $previous_output = array("events"=>arr
 			$topic_name_pairs = array_merge($topic_name_pairs,$location_result['topic_name_pairs']);
 		}
 		
-		$topic_name_pairs = get_topic_name_pairs(array("/visual_art/artwork/artist","/visual_art/artwork/art_subject","/visual_art/artwork/art_form","/visual_art/artwork/art_genre","/visual_art/artwork/media","/visual_art/artwork/support","/visual_art/artwork/period_or_movement","/visual_art/artwork/locations","/visual_art/artwork/owners","/visual_art/artwork/editions","/visual_art/artwork/edition_of","/visual_art/artwork/belongs_to_series"),$result,$topic_name_pairs);
+		$topic_name_pairs = get_topic_name_pairs(array("/visual_art/artwork/artist","/visual_art/artwork/art_subject","/visual_art/artwork/art_form","/visual_art/artwork/art_genre","/visual_art/artwork/media","/visual_art/artwork/support","/visual_art/artwork/period_or_movement","/visual_art/artwork/locations","/visual_art/artwork/owners","/visual_art/artwork/editions","/visual_art/artwork/edition_of","/visual_art/artwork/belongs_to_series","/exhibitions/exhibit/exhibitions_displayed_in"),$result,$topic_name_pairs);
 		$topic_name_pairs = add_top_level_pair($result, $topic_name_pairs);
 		$topic_event_links[] = array($topic, 'Objects created', $result["mid"]);
 
@@ -4791,10 +4804,16 @@ function fb_topic_organization_member($topic, $previous_output = array("events"=
   "/organization/organization_member/member_of"=> array(array(
     "mid"=> null,
     "/organization/organization_membership/member"=> array(
-      "name"=> null,"mid"=> null
+      "name"=> null,
+      "mid"=> null
     ),
     "/organization/organization_membership/organization"=> array(
-      "name"=> null,"mid"=> null
+      "name"=> null,
+      "mid"=> null,
+      "type"=> array(array(
+        "id"=> "/location/location",
+        "optional"=> "optional"
+      ))
     ),
     "/organization/organization_membership/from"=> null,
     "/organization/organization_membership/to"=> null
@@ -4802,7 +4821,7 @@ function fb_topic_organization_member($topic, $previous_output = array("events"=
 ));
 	
 	$resultarray = execute_mql_event_query($query);
-
+	
 	$output = array();
 	if(!isset($resultarray["result"][0])) {
 		return $previous_output;
@@ -4811,6 +4830,11 @@ function fb_topic_organization_member($topic, $previous_output = array("events"=
 	$topic_name_pairs = array();
 
 	foreach($resultarray["result"][0]["/organization/organization_member/member_of"] as $result) {
+		
+		if(isset($result["/organization/organization_membership/organization"]["type"][0])) {
+			$output[$result["mid"]]['location'] = check_array_is_returned($result["/organization/organization_membership/organization"]["mid"]);
+		}
+		
 		$output[$result["mid"]]["activity"] = "organization_membership";
 		$output[$result["mid"]]["/organization/organization_membership/member"] = check_array_is_returned($result["/organization/organization_membership/member"]["mid"]);
 		$output[$result["mid"]]["/organization/organization_membership/organization"] = check_array_is_returned($result["/organization/organization_membership/organization"]["mid"]);
@@ -4824,7 +4848,7 @@ function fb_topic_organization_member($topic, $previous_output = array("events"=
 		$topic_event_links[] = array($topic, 'Membership of organizations', $result["mid"]);
 
 	}
-	
+
 	return array("events"=>array_merge($output, $previous_output["events"]),
 			"names"=>array_merge($topic_name_pairs, $previous_output["names"]),
 			"links"=>array_merge($topic_event_links, $previous_output["links"]));
@@ -5606,7 +5630,11 @@ function fb_artwork_created($topic, $previous_output = array("events"=>array(),"
   "/visual_art/artwork/belongs_to_series"=> array(array(
     "name"=> null,"mid"=> null,
     "optional"=> "optional"
-  ))
+  )),
+	"/exhibitions/exhibit/exhibitions_displayed_in"=> array(array(
+		"name"=> null,"mid"=> null,
+		"optional"=> "optional"
+	))
 ));
 	
 	$resultarray = execute_mql_event_query($query);
@@ -5621,6 +5649,7 @@ function fb_artwork_created($topic, $previous_output = array("events"=>array(),"
 		$output[$result["mid"]]["/visual_art/artwork/artist"] = get_values($result["/visual_art/artwork/artist"]);
 		$output[$result["mid"]]["/visual_art/artwork/date_begun"] = $result["/visual_art/artwork/date_begun"];
 		$output[$result["mid"]]["/visual_art/artwork/date_completed"] = $result["/visual_art/artwork/date_completed"];
+		$output[$result["mid"]]["/exhibitions/exhibit/exhibitions_displayed_in"] = get_values($result["/exhibitions/exhibit/exhibitions_displayed_in"]);
 		
 		$output[$result["mid"]]["/visual_art/artwork/art_subject"] = get_values($result["/visual_art/artwork/art_subject"]);
 		$output[$result["mid"]]["/visual_art/artwork/art_genre"] = get_values($result["/visual_art/artwork/art_genre"]);
@@ -5656,7 +5685,7 @@ function fb_artwork_created($topic, $previous_output = array("events"=>array(),"
 			$topic_name_pairs = array_merge($topic_name_pairs,$location_result['topic_name_pairs']);
 		}
 
-		$topic_name_pairs = get_topic_name_pairs(array("/visual_art/artwork/artist","/visual_art/artwork/art_subject","/visual_art/artwork/art_form","/visual_art/artwork/art_genre","/visual_art/artwork/media","/visual_art/artwork/support","/visual_art/artwork/period_or_movement","/visual_art/artwork/locations","/visual_art/artwork/owners","/visual_art/artwork/editions","/visual_art/artwork/edition_of","/visual_art/artwork/belongs_to_series"),$result,$topic_name_pairs);
+		$topic_name_pairs = get_topic_name_pairs(array("/visual_art/artwork/artist","/visual_art/artwork/art_subject","/visual_art/artwork/art_form","/visual_art/artwork/art_genre","/visual_art/artwork/media","/visual_art/artwork/support","/visual_art/artwork/period_or_movement","/visual_art/artwork/locations","/visual_art/artwork/owners","/visual_art/artwork/editions","/visual_art/artwork/edition_of","/visual_art/artwork/belongs_to_series","/exhibitions/exhibit/exhibitions_displayed_in"),$result,$topic_name_pairs);
 		$topic_name_pairs = add_top_level_pair($result, $topic_name_pairs);
 		$topic_event_links[] = array($topic, 'Object creation details', $result["mid"]);
 
@@ -6174,7 +6203,11 @@ function fb_exhibition_creation_of_object($topic, $previous_output = array("even
 				    "/visual_art/artwork/belongs_to_series"=> array(array(
 				      "name"=> null,"mid"=> null,
 				      "optional"=> "optional"
-				    ))
+				    )),
+					"/exhibitions/exhibit/exhibitions_displayed_in"=> array(array(
+							"name"=> null,"mid"=> null,
+							"optional"=> "optional"
+					)) 
 			))
 	));
 
@@ -6192,7 +6225,7 @@ function fb_exhibition_creation_of_object($topic, $previous_output = array("even
 		$output[$result["mid"]]["/visual_art/artwork/artist"] = get_values($result["/visual_art/artwork/artist"]);
 		$output[$result["mid"]]["/visual_art/artwork/date_begun"] = $result["/visual_art/artwork/date_begun"];
 		$output[$result["mid"]]["/visual_art/artwork/date_completed"] = $result["/visual_art/artwork/date_completed"];
-		
+		$output[$result["mid"]]["/exhibitions/exhibit/exhibitions_displayed_in"] = get_values($result["/exhibitions/exhibit/exhibitions_displayed_in"]);
 		$output[$result["mid"]]["/visual_art/artwork/art_subject"] = get_values($result["/visual_art/artwork/art_subject"]);
 		$output[$result["mid"]]["/visual_art/artwork/art_genre"] = get_values($result["/visual_art/artwork/art_genre"]);
 		$output[$result["mid"]]["/visual_art/artwork/media"] = get_values($result["/visual_art/artwork/media"]);
@@ -6217,10 +6250,19 @@ function fb_exhibition_creation_of_object($topic, $previous_output = array("even
 		// 				get_values($result["/visual_art/artwork/edition_of"]),
 		// 				get_values($result["/visual_art/artwork/belongs_to_series"]),
 		// 				check_array_is_returned($result["mid"]));
-
-		$topic_name_pairs = get_topic_name_pairs(array("/visual_art/artwork/artist","/visual_art/artwork/art_subject","/visual_art/artwork/art_form","/visual_art/artwork/art_genre","/visual_art/artwork/media","/visual_art/artwork/support","/visual_art/artwork/period_or_movement","/visual_art/artwork/locations","/visual_art/artwork/owners","/visual_art/artwork/editions","/visual_art/artwork/edition_of","/visual_art/artwork/belongs_to_series"),$result,$topic_name_pairs);
+		
+		//add inferred locations for artwork creation
+		$location_result = locations_for_artwork_creation_date($output[$result["mid"]]["/visual_art/artwork"][0], $output[$result["mid"]]["/visual_art/artwork/artist"][0], $output[$result["mid"]]["/visual_art/artwork/date_begun"], $output[$result["mid"]]["/visual_art/artwork/date_completed"]);
+		if(!empty($location_result['locations'])) {
+			$output[$result["mid"]]['location'] = $location_result['locations'];
+		}
+		if(!empty($location_result['topic_name_pairs'])) {
+			$topic_name_pairs = array_merge($topic_name_pairs,$location_result['topic_name_pairs']);
+		}
+		
+		$topic_name_pairs = get_topic_name_pairs(array("/visual_art/artwork/artist","/visual_art/artwork/art_subject","/visual_art/artwork/art_form","/visual_art/artwork/art_genre","/visual_art/artwork/media","/visual_art/artwork/support","/visual_art/artwork/period_or_movement","/visual_art/artwork/locations","/visual_art/artwork/owners","/visual_art/artwork/editions","/visual_art/artwork/edition_of","/visual_art/artwork/belongs_to_series","/exhibitions/exhibit/exhibitions_displayed_in"),$result,$topic_name_pairs);
 		$topic_name_pairs = add_top_level_pair($result, $topic_name_pairs);
-		$topic_event_links[] = array($topic, 'Exhibited objects', $result["mid"]);
+		$topic_event_links[] = array($topic, 'Objects created', $result["mid"]);
 	}
 
 	return array("events"=>array_merge($output, $previous_output["events"]),
@@ -6434,7 +6476,11 @@ function fb_institution_having_graduates($topic, $previous_output = array("event
 							"name"=> null,"mid"=> null
 					),
 					"/education/education/institution"=> array(
-							"name"=> null,"mid"=> null
+							"name"=> null,"mid"=> null,
+							"type"=> array(array(
+									"id"=> "/location/location",
+									"optional"=> "optional"
+							))
 					),
 					"/education/education/start_date"=> array(
 							"value"=> null,
@@ -6473,6 +6519,11 @@ function fb_institution_having_graduates($topic, $previous_output = array("event
 	$topic_name_pairs = array();
 
 	foreach($resultarray["result"][0]["/education/educational_institution/students_graduates"] as $result) {
+		
+		if(isset($result["/education/education/institution"]["type"][0])) {
+			$output[$result["mid"]]['location'] = check_array_is_returned($result["/education/education/institution"]["mid"]);
+		}
+		
 		$output[$result["mid"]]["activity"] = "education";
 		$output[$result["mid"]]["/education/education/student"] = $result["/education/education/student"]["mid"];
 		$output[$result["mid"]]["/education/education/institution"] = $result["/education/education/institution"]["mid"];
@@ -6504,14 +6555,18 @@ function fb_institution_having_graduates($topic, $previous_output = array("event
 */
 function fb_organisation_having_members($topic, $previous_output = array("events"=>array(),"names"=>array(), "links"=>array())) {
 	$query = array(array(
-  "mid"=> $topic,
+  "mid"=> $topic,		
   "/organization/membership_organization/members"=> array(array(
     "mid"=> null,
     "/organization/organization_membership/member"=> array(
       "name"=> null,"mid"=> null
     ),
     "/organization/organization_membership/organization"=> array(
-      "name"=> null,"mid"=> null
+      "name"=> null,"mid"=> null,
+    		"type"=> array(array(
+    				"id"=> "/location/location",
+    				"optional"=> "optional"
+    		)),
     ),
     "/organization/organization_membership/from"=> array(
       "value"=> null
@@ -6532,7 +6587,11 @@ function fb_organisation_having_members($topic, $previous_output = array("events
 	$topic_name_pairs = array();
 
 	foreach($resultarray["result"][0]["/organization/membership_organization/members"] as $result) {
-
+		
+		if(isset($result["/organization/organization_membership/organization"]["type"][0])) {
+			$output[$result["mid"]]['location'] = check_array_is_returned($result["/organization/organization_membership/organization"]["mid"]);
+		}
+		
 		$output[$result["mid"]]["activity"] = "organization_membership";
 		$output[$result["mid"]]["/organization/organization_membership/member"] = check_array_is_returned($result["/organization/organization_membership/member"]["mid"]);
 		$output[$result["mid"]]["/organization/organization_membership/organization"] = check_array_is_returned($result["/organization/organization_membership/organization"]["mid"]);
@@ -6613,6 +6672,10 @@ function fb_topic_artwork_subject($topic, $previous_output = array("events"=>arr
 					"/visual_art/artwork/belongs_to_series"=> array(array(
 							"name"=> null,"mid"=> null,
 							"optional"=> "optional"
+					)),
+					"/exhibitions/exhibit/exhibitions_displayed_in"=> array(array(
+							"name"=> null,"mid"=> null,
+							"optional"=> "optional"
 					))
 			))
 	));
@@ -6631,7 +6694,7 @@ function fb_topic_artwork_subject($topic, $previous_output = array("events"=>arr
 		$output[$result["mid"]]["/visual_art/artwork/artist"] = get_values($result["/visual_art/artwork/artist"]);
 		$output[$result["mid"]]["/visual_art/artwork/date_begun"] = $result["/visual_art/artwork/date_begun"];
 		$output[$result["mid"]]["/visual_art/artwork/date_completed"] = $result["/visual_art/artwork/date_completed"];
-		
+		$output[$result["mid"]]["/exhibitions/exhibit/exhibitions_displayed_in"] = get_values($result["/exhibitions/exhibit/exhibitions_displayed_in"]);
 		$output[$result["mid"]]["/visual_art/artwork/art_subject"] = get_values($result["/visual_art/artwork/art_subject"]);
 		$output[$result["mid"]]["/visual_art/artwork/art_genre"] = get_values($result["/visual_art/artwork/art_genre"]);
 		$output[$result["mid"]]["/visual_art/artwork/media"] = get_values($result["/visual_art/artwork/media"]);
@@ -6656,9 +6719,18 @@ function fb_topic_artwork_subject($topic, $previous_output = array("events"=>arr
 // 				get_values($result["/visual_art/artwork/belongs_to_series"]),
 // 				check_array_is_returned($result["mid"]));
 	
-		$topic_name_pairs = get_topic_name_pairs(array("/visual_art/artwork/artist","/visual_art/artwork/art_subject","/visual_art/artwork/art_form","/visual_art/artwork/art_genre","/visual_art/artwork/media","/visual_art/artwork/support","/visual_art/artwork/period_or_movement","/visual_art/artwork/locations","/visual_art/artwork/owners","/visual_art/artwork/editions","/visual_art/artwork/edition_of","/visual_art/artwork/belongs_to_series"),$result,$topic_name_pairs);
+		$topic_name_pairs = get_topic_name_pairs(array("/visual_art/artwork/artist","/visual_art/artwork/art_subject","/visual_art/artwork/art_form","/visual_art/artwork/art_genre","/visual_art/artwork/media","/visual_art/artwork/support","/visual_art/artwork/period_or_movement","/visual_art/artwork/locations","/visual_art/artwork/owners","/visual_art/artwork/editions","/visual_art/artwork/edition_of","/visual_art/artwork/belongs_to_series","/exhibitions/exhibit/exhibitions_displayed_in"),$result,$topic_name_pairs);
 		$topic_name_pairs = add_top_level_pair($result, $topic_name_pairs);
 		$topic_event_links[] = array($topic, 'Subject of works', $result["mid"]);
+		
+		//add inferred locations for artwork creation
+		$location_result = locations_for_artwork_creation_date($output[$result["mid"]]["/visual_art/artwork"][0], $output[$result["mid"]]["/visual_art/artwork/artist"][0], $output[$result["mid"]]["/visual_art/artwork/date_begun"], $output[$result["mid"]]["/visual_art/artwork/date_completed"]);
+		if(!empty($location_result['locations'])) {
+			$output[$result["mid"]]['location'] = $location_result['locations'];
+		}
+		if(!empty($location_result['topic_name_pairs'])) {
+			$topic_name_pairs = array_merge($topic_name_pairs,$location_result['topic_name_pairs']);
+		}
 	}
 
 	return array("events"=>array_merge($output, $previous_output["events"]),
@@ -6726,12 +6798,16 @@ function fb_period_movement_creating_object($topic, $previous_output = array("ev
 					"/visual_art/artwork/belongs_to_series"=> array(array(
 							"name"=> null,"mid"=> null,
 							"optional"=> "optional"
+					)),
+					"/exhibitions/exhibit/exhibitions_displayed_in"=> array(array(
+							"name"=> null,"mid"=> null,
+							"optional"=> "optional"
 					))
 			))
 	));
 	
 	$resultarray = execute_mql_event_query($query);
-	
+
 	$output = array();
 	if(!isset($resultarray["result"][0])) {
 		return $previous_output;
@@ -6744,6 +6820,7 @@ function fb_period_movement_creating_object($topic, $previous_output = array("ev
 		$output[$result["mid"]]["/visual_art/artwork/artist"] = get_values($result["/visual_art/artwork/artist"]);
 		$output[$result["mid"]]["/visual_art/artwork/date_begun"] = $result["/visual_art/artwork/date_begun"];
 		$output[$result["mid"]]["/visual_art/artwork/date_completed"] = $result["/visual_art/artwork/date_completed"];
+		$output[$result["mid"]]["/exhibitions/exhibit/exhibitions_displayed_in"] = get_values($result["/exhibitions/exhibit/exhibitions_displayed_in"]);
 		
 		$output[$result["mid"]]["/visual_art/artwork/art_subject"] = get_values($result["/visual_art/artwork/art_subject"]);
 		$output[$result["mid"]]["/visual_art/artwork/art_genre"] = get_values($result["/visual_art/artwork/art_genre"]);
@@ -6768,15 +6845,120 @@ function fb_period_movement_creating_object($topic, $previous_output = array("ev
 // 				get_values($result["/visual_art/artwork/edition_of"]),
 // 				get_values($result["/visual_art/artwork/belongs_to_series"]),
 // 				check_array_is_returned($result["mid"]));
-	
-		$topic_name_pairs = get_topic_name_pairs(array("/visual_art/artwork/artist","/visual_art/artwork/art_subject","/visual_art/artwork/art_form","/visual_art/artwork/art_genre","/visual_art/artwork/media","/visual_art/artwork/support","/visual_art/artwork/period_or_movement","/visual_art/artwork/locations","/visual_art/artwork/owners","/visual_art/artwork/editions","/visual_art/artwork/edition_of","/visual_art/artwork/belongs_to_series"),$result,$topic_name_pairs);
+		
+		//add inferred locations for artwork creation
+		$location_result = locations_for_artwork_creation_date($output[$result["mid"]]["/visual_art/artwork"][0], $output[$result["mid"]]["/visual_art/artwork/artist"][0], $output[$result["mid"]]["/visual_art/artwork/date_begun"], $output[$result["mid"]]["/visual_art/artwork/date_completed"]);
+		if(!empty($location_result['locations'])) {
+			$output[$result["mid"]]['location'] = $location_result['locations'];
+		}
+		if(!empty($location_result['topic_name_pairs'])) {
+			$topic_name_pairs = array_merge($topic_name_pairs,$location_result['topic_name_pairs']);
+		}
+		
+		$topic_name_pairs = get_topic_name_pairs(array("/visual_art/artwork/artist","/visual_art/artwork/art_subject","/visual_art/artwork/art_form","/visual_art/artwork/art_genre","/visual_art/artwork/media","/visual_art/artwork/support","/visual_art/artwork/period_or_movement","/visual_art/artwork/locations","/visual_art/artwork/owners","/visual_art/artwork/editions","/visual_art/artwork/edition_of","/visual_art/artwork/belongs_to_series","/exhibitions/exhibit/exhibitions_displayed_in"),$result,$topic_name_pairs);
 		$topic_name_pairs = add_top_level_pair($result, $topic_name_pairs);
-		$topic_event_links[] = array($topic, 'Period or movement of works', $result["mid"]);
+		$topic_event_links[] = array($topic, 'Objects created', $result["mid"]);
 	}
 	
 	return array("events"=>array_merge($output, $previous_output["events"]),
 			"names"=>array_merge($topic_name_pairs, $previous_output["names"]),
 			"links"=>array_merge($topic_event_links, $previous_output["links"]));	
+}
+
+/**
+ * Publication events of a period of movement
+ */
+function fb_period_movement_creating_publication($topic, $previous_output = array("events"=>array(),"names"=>array(), "links"=>array())) {
+	$query = array(array(
+  "mid"=> $topic,
+  "/book/school_or_movement/associated_works"=> array(array(
+    "name"=> null,
+    "mid"=> null,
+    "/book/written_work/author"=> array(array(
+      "name"=> null,
+      "mid"=> null
+    )),
+    "/book/written_work/editor"=> array(array(
+      "name"=> null,
+      "mid"=> null,
+      "optional"=> "optional"
+    )),
+    "/book/written_work/date_of_first_publication"=> null,
+    "/book/written_work/subjects"=> array(array(
+      "name"=> null,
+      "mid"=> null,
+      "optional"=> "optional"
+    )),
+    "/book/written_work/school_or_movement"=> array(array(
+      "name"=> null,
+      "mid"=> null,
+      "optional"=> "optional"
+    )),
+    "/book/written_work/part_of_series"=> array(array(
+      "name"=> null,
+      "mid"=> null,
+      "optional"=> "optional"
+    )),
+    "/book/written_work/previous_in_series"=> array(array(
+      "name"=> null,
+      "mid"=> null,
+      "optional"=> "optional"
+    )),
+    "/book/written_work/next_in_series"=> array(array(
+      "name"=> null,
+      "mid"=> null,
+      "optional"=> "optional"
+    ))
+  ))
+));
+	
+	$resultarray = execute_mql_event_query($query);
+	
+	$output = array();
+	if(!isset($resultarray["result"][0])) {
+		return $previous_output;
+	}
+	$topic_event_links = array();
+	$topic_name_pairs = array();
+	
+	foreach($resultarray["result"][0]["/book/school_or_movement/associated_works"] as $result) {
+		$output[$result["mid"]]["activity"] = "book_authoring";
+		$output[$result["mid"]]["/book/written_work/author"] = get_values($result["/book/written_work/author"]);
+		$output[$result["mid"]]["/book/written_work/editor"] = get_values($result["/book/written_work/editor"]);
+	
+		$output[$result["mid"]]["/book/written_work/date_of_first_publication"] = $result["/book/written_work/date_of_first_publication"];
+	
+		$output[$result["mid"]]["/book/written_work/school_or_movement"] = get_values($result["/book/written_work/school_or_movement"]);
+		$output[$result["mid"]]["/book/written_work/part_of_series"] = get_values($result["/book/written_work/part_of_series"]);
+		$output[$result["mid"]]["/book/written_work/previous_in_series"] = get_values($result["/book/written_work/previous_in_series"]);
+		$output[$result["mid"]]["/book/written_work/next_in_series"] = get_values($result["/book/written_work/next_in_series"]);
+		$output[$result["mid"]]["/book/written_work"] = check_array_is_returned($result["mid"]);
+	
+		// 		$output[$result["mid"]]["tags"] =
+		// 		array_merge(get_values($result["/book/written_work/school_or_movement"]),
+		// 				get_values($result["/book/written_work/part_of_series"]),
+		// 				get_values($result["/book/written_work/previous_in_series"]),
+		// 				get_values($result["/book/written_work/next_in_series"]),
+		// 				check_array_is_returned($result["mid"]));
+	
+		$topic_name_pairs = get_topic_name_pairs(array("/book/written_work/author","/book/written_work/editor","/book/written_work/date_of_first_publication",
+				"/book/written_work/school_or_movement","/book/written_work/part_of_series","/book/written_work/previous_in_series","/book/written_work/next_in_series"),$result,$topic_name_pairs);
+		$topic_name_pairs = add_top_level_pair($result, $topic_name_pairs);
+		$topic_event_links[] = array($topic, 'Books authored', $result["mid"]);
+	
+		//add inferred locations for artwork creation
+		$location_result = locations_for_authorship_date($output[$result["mid"]]["/book/written_work/author"][0], $output[$result["mid"]]["/book/written_work/date_of_first_publication"]);
+		if(!empty($location_result['locations'])) {
+			$output[$result["mid"]]['location'] = $location_result['locations'];
+		}
+		if(!empty($location_result['topic_name_pairs'])) {
+			$topic_name_pairs = array_merge($topic_name_pairs,$location_result['topic_name_pairs']);
+		}
+	}
+	
+	return array("events"=>array_merge($output, $previous_output["events"]),
+			"names"=>array_merge($topic_name_pairs, $previous_output["names"]),
+			"links"=>array_merge($topic_event_links, $previous_output["links"]));
 }
 
 /**
@@ -7043,7 +7225,7 @@ function new_event_space_of_a_topic($topic = "/m/01qwfk", $reload = FALSE) {
 		//creation of exhibited objects
 		$result = fb_exhibition_creation_of_object($topic, $result);
 	}
-	
+
 	//**type: /exhibitions/exhibition_venue
 	if(in_array("/exhibitions/exhibition_venue", $types)) {
 		$res[] = "/exhibitions/exhibition_venue";
@@ -7085,22 +7267,15 @@ function new_event_space_of_a_topic($topic = "/m/01qwfk", $reload = FALSE) {
 		//subject of created artwork
 		$result = fb_topic_artwork_subject($topic, $result);
 	
-	}
-
-	//**type: /visual_art/art_period_movement
-	if(in_array("/visual_art/art_period_movement", $types)) {
-		$res[] = "/visual_art/art_period_movement";
-		//subject of created artwork
-		$result = fb_period_movement_creating_object($topic, $result);
-	
 	}	
 
 	//**type: /visual_art/art_period_movement
 	if(in_array("/visual_art/art_period_movement", $types)) {
 		$res[] = "/visual_art/art_period_movement";
-		//subject of created artwork
+		//movement creating object
 		$result = fb_period_movement_creating_object($topic, $result);
-	
+		//movement creating publication
+		$result = fb_period_movement_creating_publication($topic, $result);
 	}
 
 	//**type: /time/event
