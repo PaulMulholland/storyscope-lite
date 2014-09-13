@@ -66,7 +66,6 @@ function storyscope_install() {
   //  Set the custom theme
   variable_set('theme_default', 'storyscopezen');
   theme_enable(array('storyscopezen'));
-  theme_enable(array('story_output'));
 
   // Enable some standard blocks.
   $default_theme = variable_get('theme_default', 'storyscopezen');
