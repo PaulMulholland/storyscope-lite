@@ -6,6 +6,7 @@ dependencies[] = field_collection
 dependencies[] = file
 dependencies[] = jquery_freebase
 dependencies[] = media
+dependencies[] = media_colorbox
 dependencies[] = text
 features[features_api][] = api:2
 features[field_base][] = body

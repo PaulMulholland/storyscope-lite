@@ -508,7 +508,7 @@ function storyscopezen_field__field_fb_style_movement($variables) {
 /**
 * Overrides the theme_field for field_fb_tags to make it clickable.
 */
-function storyscopezen_field__field_fb_tags($variables) {
+/* function storyscopezen_field__field_fb_tags($variables) {
 	$output = '';
 	$output = '<div class="field-label">Tags:&nbsp;</div>';
 
@@ -535,6 +535,7 @@ function storyscopezen_field__field_fb_tags($variables) {
 	$output = '<div class="' . $variables['classes'] . '"' . $variables['attributes'] . '>' . $output . '</div>';
 	return $output;
 }
+*/
 
 /**
  * Overrides the theme_field for field_fb_agent to make it clickable.

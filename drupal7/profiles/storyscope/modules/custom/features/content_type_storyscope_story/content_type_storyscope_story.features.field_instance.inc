@@ -96,9 +96,9 @@ function content_type_storyscope_story_field_default_field_instances() {
         'label' => 'hidden',
         'module' => 'text',
         'settings' => array(
-          'trim_length' => 600,
+          'trim_length' => 100,
         ),
-        'type' => 'text_summary_or_trimmed',
+        'type' => 'text_trimmed',
         'weight' => 0,
       ),
     ),
@@ -173,9 +173,18 @@ function content_type_storyscope_story_field_default_field_instances() {
     'display' => array(
       'default' => array(
         'label' => 'above',
-        'module' => 'file',
-        'settings' => array(),
-        'type' => 'file_default',
+        'module' => 'media_colorbox',
+        'settings' => array(
+          'audio_playlist' => 0,
+          'colorbox_caption' => 'title',
+          'colorbox_gallery' => 'page',
+          'colorbox_gallery_custom' => '',
+          'colorbox_view_mode' => 'colorbox',
+          'file_view_mode' => 'media_small',
+          'fixed_height' => '',
+          'fixed_width' => '',
+        ),
+        'type' => 'media_colorbox',
         'weight' => 1,
       ),
       'teaser' => array(
