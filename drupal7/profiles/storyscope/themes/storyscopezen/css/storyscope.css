@@ -9,7 +9,7 @@
  * Contributing author: Tyler Smith (@mbmufffin)
  */
 /* Browser Resets */
-/* line 17, ../sass/_flexslider.scss */
+/* line 14, ../sass/_flexslider.scss */
 .flex-container a:active,
 .flexslider a:active,
 .flex-container a:focus,
@@ -17,7 +17,7 @@
   outline: none;
 }
 
-/* line 20, ../sass/_flexslider.scss */
+/* line 18, ../sass/_flexslider.scss */
 .slides,
 .flex-control-nav,
 .flex-direction-nav {
@@ -160,7 +160,7 @@ html[xmlns] .slides {
 
 /* line 56, ../sass/_flexslider.scss */
 .flex-direction-nav .disabled {
-  opacity: .3!important;
+  opacity: 0.3 !important;
   filter: alpha(opacity=30);
   cursor: default;
 }
@@ -266,10 +266,8 @@ html[xmlns] .slides {
   text-align: left;
   width: auto;
   padding: 0.5em;
-  -webkit-border-radius: 2px;
   -moz-border-radius: 2px;
-  -ms-border-radius: 2px;
-  -o-border-radius: 2px;
+  -webkit-border-radius: 2px;
   border-radius: 2px;
 }
 
@@ -279,9 +277,9 @@ html[xmlns] .slides {
   font-size: 0;
   color: transparent;
   background-color: #dabec6;
-  -webkit-transition: background-color 0.5s;
   -moz-transition: background-color 0.5s;
   -o-transition: background-color 0.5s;
+  -webkit-transition: background-color 0.5s;
   transition: background-color 0.5s;
 }
 /* line 98, ../sass/_flexslider.scss */
@@ -358,7 +356,7 @@ html[xmlns] .slides {
   cursor: pointer;
   clear: both;
   float: right;
-  color: #7ac953;
+  color: #7AC953;
 }
 /* line 59, ../sass/modules/_story.scss */
 .page-dossiers-stories .pane-views-object-object-stories-section-object-object-stories-pane .resource-container .view-object-story-events, .page-dossiers-stories .pane-views-object-object-stories-section-object-object-stories-pane.resource-container .view-object-story-events,
@@ -392,7 +390,7 @@ html[xmlns] .slides {
   display: block;
   cursor: pointer;
   clear: both;
-  color: #7ac953;
+  color: #7AC953;
 }
 
 /* line 85, ../sass/modules/_story.scss */
@@ -458,15 +456,15 @@ html[xmlns] .slides {
   cursor: default;
 }
 
-/* line 149, ../sass/modules/_story.scss */
+/* line 148, ../sass/modules/_story.scss */
 .form-field-name-field-story-set .field-name-field-story-snapshot-os-text + .form-submit,
 .form-field-name-field-story-set .field-type-field-collection + .form-submit {
-  color: #cdcccb;
+  color: #CDCCCB;
   border: none;
   background-color: white;
   margin-top: 25px;
 }
-/* line 161, ../sass/modules/_story.scss */
+/* line 160, ../sass/modules/_story.scss */
 .form-field-name-field-story-set .form-type-textarea > label,
 .form-field-name-field-story-set .tabledrag-toggle-weight-wrapper {
   display: none;
@@ -489,16 +487,16 @@ html[xmlns] .slides {
 }
 /* line 181, ../sass/modules/_story.scss */
 .node-section-form .up-button:hover, .node-section-form .down-button:hover {
-  color: #cdcccb;
-  border-bottom: solid 1px #cdcccb;
+  color: #CDCCCB;
+  border-bottom: solid 1px #CDCCCB;
 }
 
 /* Freebase popup */
 /* line 3, ../sass/modules/_freebase.scss */
 .freebase-popup {
-  border: 1px solid #4e4e4e;
+  border: 1px solid #4E4E4E;
   cursor: pointer;
-  color: #4e4e4e;
+  color: #4E4E4E;
 }
 /* line 7, ../sass/modules/_freebase.scss */
 .freebase-popup p {
@@ -509,7 +507,7 @@ html[xmlns] .slides {
 .freebase-popup .popup-exit {
   float: right;
   font-weight: bold;
-  color: #4e4e4e;
+  color: #4E4E4E;
   padding: 0.5em;
 }
 /* line 17, ../sass/modules/_freebase.scss */
@@ -523,7 +521,7 @@ html[xmlns] .slides {
 }
 /* line 24, ../sass/modules/_freebase.scss */
 .freebase-popup .popup-title {
-  background: #cdcccb;
+  background: #CDCCCB;
   padding: 1em;
 }
 /* line 28, ../sass/modules/_freebase.scss */
@@ -538,7 +536,7 @@ html[xmlns] .slides {
 
 /* line 7, ../sass/storyscope.scss */
 body {
-  color: #4e4e4e;
+  color: #4E4E4E;
 }
 
 /* =============================================================================
@@ -548,10 +546,10 @@ body {
  * The order of link states are based on Eric Meyer's article:
  * http://meyerweb.com/eric/thoughts/2007/06/11/who-ordered-the-link-states
  */
-/* line 22, ../sass/storyscope.scss */
+/* line 21, ../sass/storyscope.scss */
 a:visited,
 a:link {
-  color: #a1a3a6;
+  color: #A1A3A6;
   text-decoration: none;
   border-bottom: solid 1px transparent;
 }
@@ -567,16 +565,16 @@ a:visited {
   border-bottom: solid 1px $light-gray;
 }
 */
-/* line 38, ../sass/storyscope.scss */
+/* line 36, ../sass/storyscope.scss */
 a:hover,
 a:focus,
 a:active {
   color: #545658;
-  border-bottom: solid 1px #cdcccb;
+  border-bottom: solid 1px #CDCCCB;
 }
 
 /* Headings */
-/* line 50, ../sass/storyscope.scss */
+/* line 45, ../sass/storyscope.scss */
 h1,
 h2,
 .node-story-visualisation .exhibit-collectionView-body ol li > div > div:first-child,
@@ -600,7 +598,7 @@ h2.node-title, .node-story-visualisation .exhibit-collectionView-body ol li > di
 
 /* line 64, ../sass/storyscope.scss */
 h3 {
-  color: #a0a0a0;
+  color: #A0A0A0;
   margin-bottom: 0.4em;
 }
 
@@ -617,13 +615,13 @@ p {
 
 /* line 81, ../sass/storyscope.scss */
 #navigation a {
-  color: #4e4e4e;
+  color: #4E4E4E;
   border-bottom: none;
   font-weight: bold;
 }
-/* line 24, ../../../../../../../../../../Library/Ruby/Gems/1.8/gems/compass-0.12.2/frameworks/compass/stylesheets/compass/typography/links/_link-colors.scss */
+/* line 24, ../../../../../../../../../../Users/eoinkilfeather/.rvm/gems/ruby-2.0.0-p195/gems/compass-core-1.0.1/stylesheets/compass/typography/links/_link-colors.scss */
 #navigation a:hover {
-  color: #a0a0a0;
+  color: #A0A0A0;
 }
 
 /* line 87, ../sass/storyscope.scss */
@@ -683,7 +681,7 @@ p {
 .front .tabs {
   display: none;
 }
-/* line 132, ../sass/storyscope.scss */
+/* line 131, ../sass/storyscope.scss */
 .front .panel-top,
 .front .container-full {
   background-color: #dddbc0;
@@ -719,7 +717,7 @@ p {
 .front .container-full .pane-user-login .form-required {
   display: none;
 }
-/* line 157, ../sass/storyscope.scss */
+/* line 156, ../sass/storyscope.scss */
 .front .panel-top .pane-user-login #edit-name,
 .front .panel-top .pane-user-login #edit-pass,
 .front .container-full .pane-user-login #edit-name,
@@ -758,32 +756,31 @@ p {
   overflow: hidden;
   *zoom: 1;
 }
-/* line 60, ../../../../../../../../../../Library/Ruby/Gems/1.8/gems/compass-0.12.2/frameworks/compass/stylesheets/compass/typography/lists/_horizontal-list.scss */
+/* line 62, ../../../../../../../../../../Users/eoinkilfeather/.rvm/gems/ruby-2.0.0-p195/gems/compass-core-1.0.1/stylesheets/compass/typography/lists/_horizontal-list.scss */
 .item-list ul.add-resource li {
   list-style-image: none;
   list-style-type: none;
   margin-left: 0;
   white-space: nowrap;
-  display: inline;
   float: left;
   padding-left: 4px;
   padding-right: 4px;
 }
-/* line 48, ../../../../../../../../../../Library/Ruby/Gems/1.8/gems/compass-0.12.2/frameworks/compass/stylesheets/compass/typography/lists/_horizontal-list.scss */
-.item-list ul.add-resource li:first-child, .item-list ul.add-resource li.first {
+/* line 49, ../../../../../../../../../../Users/eoinkilfeather/.rvm/gems/ruby-2.0.0-p195/gems/compass-core-1.0.1/stylesheets/compass/typography/lists/_horizontal-list.scss */
+.item-list ul.add-resource li:first-child {
   padding-left: 0;
 }
-/* line 49, ../../../../../../../../../../Library/Ruby/Gems/1.8/gems/compass-0.12.2/frameworks/compass/stylesheets/compass/typography/lists/_horizontal-list.scss */
+/* line 50, ../../../../../../../../../../Users/eoinkilfeather/.rvm/gems/ruby-2.0.0-p195/gems/compass-core-1.0.1/stylesheets/compass/typography/lists/_horizontal-list.scss */
 .item-list ul.add-resource li:last-child {
   padding-right: 0;
 }
-/* line 50, ../../../../../../../../../../Library/Ruby/Gems/1.8/gems/compass-0.12.2/frameworks/compass/stylesheets/compass/typography/lists/_horizontal-list.scss */
+/* line 52, ../../../../../../../../../../Users/eoinkilfeather/.rvm/gems/ruby-2.0.0-p195/gems/compass-core-1.0.1/stylesheets/compass/typography/lists/_horizontal-list.scss */
 .item-list ul.add-resource li.last {
   padding-right: 0;
 }
 /* line 183, ../sass/storyscope.scss */
 .item-list ul.add-resource li {
-  border-right: solid 2px #cdcccb;
+  border-right: solid 2px #CDCCCB;
   padding-right: 1em;
   margin-right: 1em;
 }
@@ -800,22 +797,21 @@ article .block.list-properties .item-list ul {
   overflow: hidden;
   *zoom: 1;
 }
-/* line 49, ../../../../../../../../../../Library/Ruby/Gems/1.8/gems/compass-0.12.2/frameworks/compass/stylesheets/compass/typography/lists/_inline-block-list.scss */
+/* line 49, ../../../../../../../../../../Users/eoinkilfeather/.rvm/gems/ruby-2.0.0-p195/gems/compass-core-1.0.1/stylesheets/compass/typography/lists/_inline-block-list.scss */
 article .block.list-properties .item-list ul li {
   list-style-image: none;
   list-style-type: none;
   margin-left: 0;
-  display: -moz-inline-stack;
   display: inline-block;
   vertical-align: middle;
   *vertical-align: auto;
-  zoom: 1;
+  *zoom: 1;
   *display: inline;
   white-space: nowrap;
 }
 /* line 196, ../sass/storyscope.scss */
 article .block.list-properties .item-list ul li {
-  background-color: #e5e5e5;
+  background-color: #E5E5E5;
   padding: 0.5em 1em;
   margin: 0.25em;
 }
@@ -824,7 +820,7 @@ article .block.generate-resources .item-list ul, article .block.view-resources .
   list-style: none;
   padding-left: 0;
 }
-/* line 11, ../../../../../../../../../../Library/Ruby/Gems/1.8/gems/compass-0.12.2/frameworks/compass/stylesheets/compass/typography/lists/_bullets.scss */
+/* line 11, ../../../../../../../../../../Users/eoinkilfeather/.rvm/gems/ruby-2.0.0-p195/gems/compass-core-1.0.1/stylesheets/compass/typography/lists/_bullets.scss */
 article .block.generate-resources .item-list ul li, article .block.view-resources .item-list ul li {
   list-style-image: none;
   list-style-type: none;
@@ -832,7 +828,7 @@ article .block.generate-resources .item-list ul li, article .block.view-resource
 }
 /* line 209, ../sass/storyscope.scss */
 article .block.generate-resources .item-list ul li a, article .block.view-resources .item-list ul li a {
-  background-color: #cdcccb;
+  background-color: #CDCCCB;
   padding: 0.75em;
   margin: 0.25em;
   display: block;
@@ -841,7 +837,7 @@ article .block.generate-resources .item-list ul li a, article .block.view-resour
 }
 /* line 217, ../sass/storyscope.scss */
 article .block.generate-resources .item-list ul li a.dec-story:hover, article .block.view-resources .item-list ul li a.dec-story:hover {
-  background-color: #f9cc67;
+  background-color: #F9CC67;
 }
 /* line 218, ../sass/storyscope.scss */
 article .block.generate-resources .item-list ul li a.dec-object:hover, article .block.view-resources .item-list ul li a.dec-object:hover {
@@ -849,11 +845,11 @@ article .block.generate-resources .item-list ul li a.dec-object:hover, article .
 }
 /* line 219, ../sass/storyscope.scss */
 article .block.generate-resources .item-list ul li a.dec-tagged-event:hover, article .block.view-resources .item-list ul li a.dec-tagged-event:hover {
-  background-color: #7ac953;
+  background-color: #7AC953;
 }
 /* line 220, ../sass/storyscope.scss */
 article .block.generate-resources .item-list ul li a.dec-plot:hover, article .block.view-resources .item-list ul li a.dec-plot:hover {
-  background-color: #3fa9f5;
+  background-color: #3FA9F5;
 }
 /* line 221, ../sass/storyscope.scss */
 article .block.generate-resources .item-list ul li a.dec-narrative:hover, article .block.view-resources .item-list ul li a.dec-narrative:hover {
@@ -861,11 +857,11 @@ article .block.generate-resources .item-list ul li a.dec-narrative:hover, articl
 }
 /* line 222, ../sass/storyscope.scss */
 article .block.generate-resources .item-list ul li a.dec-visualisation:hover, article .block.view-resources .item-list ul li a.dec-visualisation:hover {
-  background-color: #fcb816;
+  background-color: #FCB816;
 }
 /* line 223, ../sass/storyscope.scss */
 article .block.generate-resources .item-list ul li a.dec-reference:hover, article .block.view-resources .item-list ul li a.dec-reference:hover {
-  background-color: #00a99d;
+  background-color: #00A99D;
 }
 /* line 228, ../sass/storyscope.scss */
 article .block.view-resources .item-list ul li {
@@ -899,7 +895,7 @@ article .block p.manage-facets a {
 .panel .resource-container > .container-inner:nth-child(2) {
   padding-left: 18px;
   margin: 10px 0;
-  border-left: solid 1px #cdcccb;
+  border-left: solid 1px #CDCCCB;
 }
 
 /* line 261, ../sass/storyscope.scss */
@@ -923,10 +919,10 @@ article .block p.manage-facets a {
   background-color: orange;
 }
 
-/* line 277, ../sass/storyscope.scss */
+/* line 276, ../sass/storyscope.scss */
 .resource-container li .article-inner,
 .resource-container article .article-inner {
-  border-top: solid 2px #4e4e4e;
+  border-top: solid 2px #4E4E4E;
   margin: 0 0 0.5em;
   padding: 0.5em;
 }
@@ -942,10 +938,10 @@ article .block p.manage-facets a {
   border-left: none;
 }
 
-/* line 298, ../sass/storyscope.scss */
+/* line 297, ../sass/storyscope.scss */
 li.node-object-story > .article-inner,
 article.node-object-story > .article-inner {
-  border-color: #f9cc67;
+  border-color: #F9CC67;
   background-color: rgba(249, 204, 103, 0.1);
   position: relative;
   min-height: 135px;
@@ -954,31 +950,31 @@ article.node-object-story > .article-inner {
 /* line 304, ../sass/storyscope.scss */
 li.node-object-story > .article-inner p.type-identifier,
 article.node-object-story > .article-inner p.type-identifier {
-  color: #f9cc67;
+  color: #F9CC67;
 }
 /* line 307, ../sass/storyscope.scss */
 li.node-object-story > .article-inner p.object-story-dossier,
 article.node-object-story > .article-inner p.object-story-dossier {
-  color: #f9cc67;
+  color: #F9CC67;
 }
 
 /* line 311, ../sass/storyscope.scss */
 #stories {
-  color: #f9cc67;
+  color: #F9CC67;
 }
 
-/* line 315, ../sass/storyscope.scss */
+/* line 314, ../sass/storyscope.scss */
 li.node-dossier > .article-inner,
 article.node-dossier > .article-inner {
-  border-color: #f17ba9;
+  border-color: #F17BA9;
 }
 /* line 317, ../sass/storyscope.scss */
 li.node-dossier > .article-inner p.type-identifier,
 article.node-dossier > .article-inner p.type-identifier {
-  color: #f17ba9;
+  color: #F17BA9;
 }
 
-/* line 322, ../sass/storyscope.scss */
+/* line 321, ../sass/storyscope.scss */
 li.node-object > .article-inner,
 article.node-object > .article-inner {
   border-color: #e2903d;
@@ -995,97 +991,97 @@ article.node-object > .article-inner p.type-identifier {
   color: #e2903d;
 }
 
-/* line 335, ../sass/storyscope.scss */
+/* line 334, ../sass/storyscope.scss */
 li.node-event > .article-inner,
 article.node-event > .article-inner {
-  border-color: #7ac953;
+  border-color: #7AC953;
   background-color: rgba(122, 201, 83, 0.05);
   min-height: 95px;
 }
 /* line 339, ../sass/storyscope.scss */
 li.node-event > .article-inner p.type-identifier,
 article.node-event > .article-inner p.type-identifier {
-  color: #7ac953;
+  color: #7AC953;
 }
 
 /* line 343, ../sass/storyscope.scss */
 #events {
-  color: #7ac953;
+  color: #7AC953;
 }
 
-/* line 347, ../sass/storyscope.scss */
+/* line 346, ../sass/storyscope.scss */
 li.node-source-event > .article-inner,
 article.node-source-event > .article-inner {
-  border-color: #7ac953;
+  border-color: #7AC953;
 }
 /* line 349, ../sass/storyscope.scss */
 li.node-source-event > .article-inner p.type-identifier,
 article.node-source-event > .article-inner p.type-identifier {
-  color: #7ac953;
+  color: #7AC953;
 }
 
-/* line 354, ../sass/storyscope.scss */
+/* line 353, ../sass/storyscope.scss */
 li.node-plot > .article-inner,
 article.node-plot > .article-inner {
-  border-color: #3fa9f5;
+  border-color: #3FA9F5;
 }
 /* line 356, ../sass/storyscope.scss */
 li.node-plot > .article-inner p.type-identifier,
 article.node-plot > .article-inner p.type-identifier {
-  color: #3fa9f5;
+  color: #3FA9F5;
 }
 
-/* line 361, ../sass/storyscope.scss */
+/* line 360, ../sass/storyscope.scss */
 li.node-story > .article-inner,
 article.node-story > .article-inner {
-  border-color: #3fa9f5;
+  border-color: #3FA9F5;
   background-color: rgba(63, 169, 245, 0.05);
 }
 /* line 364, ../sass/storyscope.scss */
 li.node-story > .article-inner p.type-identifier,
 article.node-story > .article-inner p.type-identifier {
-  color: #3fa9f5;
+  color: #3FA9F5;
 }
 
 /* line 368, ../sass/storyscope.scss */
 #narratives {
-  color: #3fa9f5;
+  color: #3FA9F5;
 }
 
 /* line 371, ../sass/storyscope.scss */
 article.node-plot-description > .article-inner {
-  border-color: #3fa9f5;
+  border-color: #3FA9F5;
 }
 /* line 373, ../sass/storyscope.scss */
 article.node-plot-description > .article-inner p.type-identifier {
-  color: #3fa9f5;
+  color: #3FA9F5;
 }
 
 /* line 377, ../sass/storyscope.scss */
 article.node-plot-element > .article-inner {
-  border-color: #a35ebc;
+  border-color: #A35EBC;
 }
 /* line 379, ../sass/storyscope.scss */
 article.node-plot-element > .article-inner p.type-identifier {
-  color: #a35ebc;
+  color: #A35EBC;
 }
 
 /* line 383, ../sass/storyscope.scss */
 article.node-section > .article-inner {
-  border-color: #a35ebc;
+  border-color: #A35EBC;
 }
 /* line 385, ../sass/storyscope.scss */
 article.node-section > .article-inner p.type-identifier {
-  color: #a35ebc;
+  color: #A35EBC;
 }
 
 /* line 389, ../sass/storyscope.scss */
 article.node-plot-description > .article-inner {
-  border-color: #3fa9f5;
+  border-color: #3FA9F5;
 }
 /* line 391, ../sass/storyscope.scss */
 article.node-plot-description > .article-inner p.type-identifier {
-  color: #3fa9f5;
+  color: #3FA9F5;
 }
 
 /* line 395, ../sass/storyscope.scss */
@@ -1099,27 +1095,27 @@ article.node-narrative-microsite > .article-inner p.type-identifier {
 
 /* line 401, ../sass/storyscope.scss */
 article.node-story-visualisation > .article-inner {
-  border-color: #fcb816;
+  border-color: #FCB816;
 }
 /* line 403, ../sass/storyscope.scss */
 article.node-story-visualisation > .article-inner p.type-identifier {
-  color: #a1a3a6;
+  color: #A1A3A6;
 }
 
 /* line 408, ../sass/storyscope.scss */
 article.node-reference > .article-inner {
-  border-color: #00a99d;
+  border-color: #00A99D;
   background-color: rgba(0, 169, 157, 0.05);
 }
-/* line 412, ../sass/storyscope.scss */
+/* line 411, ../sass/storyscope.scss */
 article.node-reference > .article-inner span.label,
 article.node-reference > .article-inner p.type-identifier {
-  color: #00a99d;
+  color: #00A99D;
 }
 
 /* line 416, ../sass/storyscope.scss */
 #references {
-  color: #00a99d;
+  color: #00A99D;
 }
 
 /* line 425, ../sass/storyscope.scss */
@@ -1161,7 +1157,7 @@ article p.suggest {
 
 /* line 452, ../sass/storyscope.scss */
 .view-dossier-object-stories .more-link a {
-  color: #f9cc67 !important;
+  color: #F9CC67 !important;
 }
 /* line 457, ../sass/storyscope.scss */
 .view-dossier-object-stories .node-object-story .article-inner {
@@ -1179,17 +1175,17 @@ article p.suggest {
 
 /* line 474, ../sass/storyscope.scss */
 .view-dossier-events .more-link a {
-  color: #7ac953 !important;
+  color: #7AC953 !important;
 }
 
 /* line 481, ../sass/storyscope.scss */
 .view-dossier-references .more-link a {
-  color: #00a99d !important;
+  color: #00A99D !important;
 }
 
 /* line 488, ../sass/storyscope.scss */
 .view-dossier-stories .more-link a {
-  color: #3fa9f5 !important;
+  color: #3FA9F5 !important;
 }
 
 /* line 493, ../sass/storyscope.scss */
@@ -1228,7 +1224,7 @@ p.suggest span:after {
   -webkit-transform: rotate(45deg);
   transform: rotate(45deg);
 }
-/* line 529, ../sass/storyscope.scss */
+/* line 528, ../sass/storyscope.scss */
 .view-footer p.suggest, .view-header p.suggest {
   float: right;
   display: block;
@@ -1245,7 +1241,7 @@ p.add-event a:hover {
   text-decoration: underline;
   border: none;
 }
-/* line 544, ../sass/storyscope.scss */
+/* line 543, ../sass/storyscope.scss */
 .view-footer p.add-event a, .view-header p.add-event a {
   float: right;
   display: block;
@@ -1257,7 +1253,7 @@ p.add-event:hover span {
 
 /* line 555, ../sass/storyscope.scss */
 .node-object-story p.add-event a {
-  color: #f9cc67;
+  color: #F9CC67;
 }
 
 /* line 558, ../sass/storyscope.scss */
@@ -1279,7 +1275,7 @@ p.remove-event a:hover {
   opacity: 0.55;
   border: none;
 }
-/* line 574, ../sass/storyscope.scss */
+/* line 573, ../sass/storyscope.scss */
 .view-footer p.remove-event a, .view-header p.remove-event a {
   float: right;
   display: block;
@@ -1314,9 +1310,9 @@ p.button a:hover {
   border: none;
   */
   color: #545658;
-  border-bottom: solid 1px #cdcccb;
+  border-bottom: solid 1px #CDCCCB;
 }
-/* line 611, ../sass/storyscope.scss */
+/* line 610, ../sass/storyscope.scss */
 .view-footer p.button a, .view-header p.button a {
   float: right;
   display: block;
@@ -1324,22 +1320,22 @@ p.button a:hover {
 
 /* line 620, ../sass/storyscope.scss */
 div.button a {
-  background-color: #a6cef3;
-  border: solid 1px #8cbae4;
+  background-color: #A6CEF3;
+  border: solid 1px #8CBAE4;
   padding: 0.5em 1em;
   margin: 0.25em 0.25em 0.5em;
-  color: #4e4e4e;
+  color: #4E4E4E;
 }
 /* line 626, ../sass/storyscope.scss */
 div.button a:visited {
-  color: #4e4e4e;
+  color: #4E4E4E;
 }
 /* line 629, ../sass/storyscope.scss */
 div.button a:hover {
-  background-color: #a1a3a6;
+  background-color: #A1A3A6;
   color: white;
 }
-/* line 634, ../sass/storyscope.scss */
+/* line 633, ../sass/storyscope.scss */
 .view-footer div.button a, .view-header div.button a {
   float: right;
   display: block;
@@ -1356,25 +1352,25 @@ div.button a:hover {
 }
 /* line 652, ../sass/storyscope.scss */
 .node-type-object .pane-content .add-resource li a {
-  background-color: #a6cef3;
-  border: solid 1px #8cbae4;
+  background-color: #A6CEF3;
+  border: solid 1px #8CBAE4;
   padding: 0.5em 1em;
-  color: #4e4e4e;
+  color: #4E4E4E;
 }
 /* line 657, ../sass/storyscope.scss */
 .node-type-object .pane-content .add-resource li a:visited {
-  color: #4e4e4e;
+  color: #4E4E4E;
 }
 /* line 660, ../sass/storyscope.scss */
 .node-type-object .pane-content .add-resource li a:hover {
-  background-color: #a1a3a6;
+  background-color: #A1A3A6;
   color: white;
 }
-/* line 665, ../sass/storyscope.scss */
+/* line 664, ../sass/storyscope.scss */
 .view-footer .node-type-object .pane-content .add-resource li a, .view-header .node-type-object .pane-content .add-resource li a {
   float: right;
   display: block;
-  color: #4e4e4e;
+  color: #4E4E4E;
 }
 
 /* line 675, ../sass/storyscope.scss */
@@ -1404,7 +1400,7 @@ div.button a:hover {
 .view-mode-image_and_properties .view-empty {
   padding-top: 15px;
 }
-/* line 701, ../sass/storyscope.scss */
+/* line 698, ../sass/storyscope.scss */
 .view-mode-image_and_properties .field .field-items,
 .view-mode-image_and_properties .field .freebase-link,
 .view-mode-image_and_properties .field .agent,
@@ -1451,31 +1447,31 @@ div.button a:hover {
 }
 /* line 739, ../sass/storyscope.scss */
 .node-type-object-story .pane-content .add-resource li a {
-  background-color: #a6cef3;
-  border: solid 1px #8cbae4;
+  background-color: #A6CEF3;
+  border: solid 1px #8CBAE4;
   padding: 0.5em 1em;
-  color: #4e4e4e;
+  color: #4E4E4E;
 }
 /* line 744, ../sass/storyscope.scss */
 .node-type-object-story .pane-content .add-resource li a:visited {
-  color: #4e4e4e;
+  color: #4E4E4E;
 }
 /* line 747, ../sass/storyscope.scss */
 .node-type-object-story .pane-content .add-resource li a:hover {
-  background-color: #a1a3a6;
+  background-color: #A1A3A6;
   color: white;
 }
-/* line 752, ../sass/storyscope.scss */
+/* line 751, ../sass/storyscope.scss */
 .view-footer .node-type-object-story .pane-content .add-resource li a, .view-header .node-type-object-story .pane-content .add-resource li a {
   float: right;
   display: block;
-  color: #4e4e4e;
+  color: #4E4E4E;
 }
 
-/* line 764, ../sass/storyscope.scss */
+/* line 763, ../sass/storyscope.scss */
 .node-type-dossier .middle-2-1,
 .node-type-dossier .middle-4-1 {
-  border-right: solid 1px #cdcccb;
+  border-right: solid 1px #CDCCCB;
 }
 /* line 767, ../sass/storyscope.scss */
 .node-type-dossier .panel-pane > .button {
@@ -1484,7 +1480,7 @@ div.button a:hover {
 
 /* line 772, ../sass/storyscope.scss */
 #main {
-  border-top: solid 1px #cdcccb;
+  border-top: solid 1px #CDCCCB;
 }
 
 /* line 775, ../sass/storyscope.scss */
@@ -1519,8 +1515,8 @@ div.button a:hover {
 #views-exposed-form-dossier-object-stories-add-existing-search-api-object-stories-add-to-section .views-exposed-widget .form-text,
 #views-exposed-form-ca-search-page-1 .views-exposed-widget .form-text {
   background-color: #f7f7f7;
-  -webkit-box-shadow: none;
   -moz-box-shadow: none;
+  -webkit-box-shadow: none;
   box-shadow: none;
   -webkit-appearance: none;
   border: none;
@@ -1555,7 +1551,7 @@ div.button a:hover {
   padding: 0.5em 0  0.45em 0.5em;
   height: 14px;
   width: 70%;
-  border: 1px solid #cdcccb;
+  border: 1px solid #CDCCCB;
 }
 /* line 821, ../sass/storyscope.scss */
 #views-exposed-form-dossier-events-page .views-exposed-widget .form-text:focus,
@@ -1653,10 +1649,10 @@ div.button a:hover {
 #views-exposed-form-dossier-object-stories-add-existing-search-api-object-stories-add-to-section .views-exposed-widget .form-submit,
 #views-exposed-form-ca-search-page-1 .views-exposed-widget .form-submit {
   margin-top: 0px;
-  border: 1px solid #cdcccb;
+  border: 1px solid #CDCCCB;
   display: block;
   float: left;
-  background: transparent url('../images/search.png?1376496628') 50% 50% no-repeat;
+  background: transparent url('../images/search.png?1410704755') 50% 50% no-repeat;
   width: 28px;
   min-height: 27px;
   text-indent: -99em;
@@ -1741,7 +1737,7 @@ div.button a:hover {
 /* line 908, ../sass/storyscope.scss */
 .node-type-object .node-object_story-form #edit-media-select-widget .selected-media img,
 .node-type-object-story .node-object_story-form #edit-media-select-widget .selected-media img {
-  border: 5px solid #4e4e4e;
+  border: 5px solid #4E4E4E;
 }
 /* line 914, ../sass/storyscope.scss */
 .node-type-object .resource-container,
@@ -1775,7 +1771,7 @@ div.button a:hover {
 .node-type-object-story .panel .container-inner.middle-2-1 .panel-pane {
   padding-bottom: 15px;
 }
-/* line 933, ../sass/storyscope.scss */
+/* line 932, ../sass/storyscope.scss */
 .node-type-object .middle-wrapper .container-inner.middle-2-1 .panel-pane .pane-title,
 .node-type-object .middle-wrapper .container-inner.middle-2-1 .panel-pane .field-label,
 .node-type-object .panel .container-inner.middle-2-1 .panel-pane .pane-title,
@@ -1788,7 +1784,7 @@ div.button a:hover {
   font-size: 0.9em;
   margin: 0;
 }
-/* line 941, ../sass/storyscope.scss */
+/* line 938, ../sass/storyscope.scss */
 .node-type-object .middle-wrapper .container-inner.middle-2-1 .panel-pane .field-items,
 .node-type-object .middle-wrapper .container-inner.middle-2-1 .panel-pane .agent,
 .node-type-object .middle-wrapper .container-inner.middle-2-1 .panel-pane .freebase-link,
@@ -1873,7 +1869,7 @@ div.button a:hover {
 .node-type-object-story .panel .container-inner.middle-2-1 .pane-object-image-slideshow-panel-pane-1 {
   padding-top: 10px;
 }
-/* line 982, ../sass/storyscope.scss */
+/* line 981, ../sass/storyscope.scss */
 .node-type-object .middle-wrapper .container-inner.middle-2-2,
 .node-type-object .middle-wrapper .middle-4-2,
 .node-type-object .panel .container-inner.middle-2-2,
@@ -1915,10 +1911,10 @@ div.button a:hover {
 .node-type-object .panel .panel-bottom,
 .node-type-object-story .middle-wrapper .panel-bottom,
 .node-type-object-story .panel .panel-bottom {
-  border-top: solid #cdcccb 1px;
+  border-top: solid #CDCCCB 1px;
 }
 
-/* line 1002, ../sass/storyscope.scss */
+/* line 999, ../sass/storyscope.scss */
 .node-object .entity-field-collection-item .content div.field-name-field-object-creator-name,
 .node-object .entity-field-collection-item .content div.field-name-field-object-creator-culture,
 .node-object .entity-field-collection-item .content div.field-name-field-creator-birth-date,
@@ -1933,7 +1929,7 @@ div.button a:hover {
 
 /* line 1011, ../sass/storyscope.scss */
 .node-object.view-mode-full .content-container {
-  border-top: solid 1px #cdcccb;
+  border-top: solid 1px #CDCCCB;
   margin-top: 1em;
 }
 /* line 1015, ../sass/storyscope.scss */
@@ -1942,7 +1938,7 @@ div.button a:hover {
 }
 /* line 1018, ../sass/storyscope.scss */
 .node-object.view-mode-full .media-container {
-  background-color: #4e4e4e;
+  background-color: #4E4E4E;
   color: #fff;
 }
 /* line 1021, ../sass/storyscope.scss */
@@ -1979,13 +1975,13 @@ div.button a:hover {
 /*Objects in Media Slider*/
 /* line 1051, ../sass/storyscope.scss */
 .node-object.view-mode-slide .article-inner {
-  background-color: #4e4e4e;
+  background-color: #4E4E4E;
   overflow: auto;
   color: white;
   padding-top: 0;
   border: 0;
 }
-/* line 1058, ../sass/storyscope.scss */
+/* line 1057, ../sass/storyscope.scss */
 .node-object.view-mode-slide .article-inner .field-name-field-image,
 .node-object.view-mode-slide .article-inner .field-name-field-media {
   float: left;
@@ -2006,7 +2002,7 @@ div.button a:hover {
 .node-story.view-mode-full .media-resources ul {
   list-style: none;
 }
-/* line 11, ../../../../../../../../../../Library/Ruby/Gems/1.8/gems/compass-0.12.2/frameworks/compass/stylesheets/compass/typography/lists/_bullets.scss */
+/* line 11, ../../../../../../../../../../Users/eoinkilfeather/.rvm/gems/ruby-2.0.0-p195/gems/compass-core-1.0.1/stylesheets/compass/typography/lists/_bullets.scss */
 .node-story.view-mode-full .media-resources ul li {
   list-style-image: none;
   list-style-type: none;
@@ -2036,13 +2032,13 @@ div.button a:hover {
 .node-reference.view-mode-full p.pdf {
   background: transparent url(../images/pdf.png) 0 50% no-repeat;
   padding: 5em 0 3em 10em;
-  border-top: solid 1px #cdcccb;
+  border-top: solid 1px #CDCCCB;
 }
 /* line 1097, ../sass/storyscope.scss */
 .node-reference.view-mode-full p.pdf a.button {
-  border: solid 1px #cdcccb;
+  border: solid 1px #CDCCCB;
   border-radius: 10px;
-  box-shadow: 1px 1px #cdcccb;
+  box-shadow: 1px 1px #CDCCCB;
   padding: 0.25em 1em;
   margin-left: 2em;
 }
@@ -2061,7 +2057,7 @@ div.button a:hover {
 /* Source Events*/
 /* line 1121, ../sass/storyscope.scss */
 .events-count {
-  color: #cdcccb;
+  color: #CDCCCB;
 }
 
 /* line 1124, ../sass/storyscope.scss */
@@ -2113,14 +2109,14 @@ p.events-display-date {
 .node-type-event .panel .middle-wrapper .middle-2-1 .panel-pane .freebase-link a {
   color: white;
 }
-/* line 1178, ../sass/storyscope.scss */
+/* line 1177, ../sass/storyscope.scss */
 .node-type-event .panel .middle-wrapper .middle-2-1 .panel-pane .pane-title,
 .node-type-event .panel .middle-wrapper .middle-2-1 .panel-pane .field-label {
   color: #97B5C9;
   font-size: 0.9em;
   margin: 0;
 }
-/* line 1185, ../sass/storyscope.scss */
+/* line 1183, ../sass/storyscope.scss */
 .node-type-event .panel .middle-wrapper .middle-2-1 .panel-pane .field-items,
 .node-type-event .panel .middle-wrapper .middle-2-1 .panel-pane .agent,
 .node-type-event .panel .middle-wrapper .middle-2-1 .panel-pane .freebase-link {
@@ -2163,11 +2159,11 @@ p.events-display-date {
 .node-type-event .panel .middle-wrapper .entity-field-collection-item .content div {
   display: inline-block;
   margin-right: 2px;
-  color: #a1a3a6;
+  color: #A1A3A6;
 }
 /* line 1224, ../sass/storyscope.scss */
 .node-type-event .panel .middle-wrapper .middle-2-2 {
-  border-left: solid #cdcccb 1px;
+  border-left: solid #CDCCCB 1px;
   float: right;
 }
 
@@ -2175,7 +2171,7 @@ p.events-display-date {
 .container-inner .middle-2-2 {
   margin: 1em 0;
   padding: 0.5em 1em 1em;
-  background-color: #7ac953;
+  background-color: #7AC953;
   color: #fff;
 }
 /* line 1236, ../sass/storyscope.scss */
@@ -2231,7 +2227,7 @@ p.events-display-date {
 .view-event-details.view-display-id-dossier_object_story_child_event_detail .article-inner .resource-container .container-inner .field-name-body .field-items .field-item p {
   margin: 0;
 }
-/* line 1279, ../sass/storyscope.scss */
+/* line 1278, ../sass/storyscope.scss */
 .view-source-event-instances .article-inner .resource-container .container-inner .field-collection-item-field-fb-value .field-name-field-amount,
 .view-source-event-instances .article-inner .resource-container .container-inner .field-collection-item-field-fb-value .field-name-field-fb-currency-topic,
 .view-event-details.view-display-id-dossier_object_story_child_event_detail .article-inner .resource-container .container-inner .field-collection-item-field-fb-value .field-name-field-amount,
@@ -2281,7 +2277,7 @@ p.events-display-date {
 /* line 1316, ../sass/storyscope.scss */
 .facet-management table caption {
   font-size: 1.2em;
-  color: #a0a0a0;
+  color: #A0A0A0;
   text-align: left;
 }
 /* line 1322, ../sass/storyscope.scss */
@@ -2290,7 +2286,7 @@ p.events-display-date {
 }
 /* line 1324, ../sass/storyscope.scss */
 .facet-management table.facets-unused tr td {
-  border-bottom: solid 1px #cdcccb;
+  border-bottom: solid 1px #CDCCCB;
 }
 /* line 1326, ../sass/storyscope.scss */
 .facet-management table.facets-unused tr td:last-child {
@@ -2304,27 +2300,27 @@ p.events-display-date {
 /* Visualisations */
 /* line 1345, ../sass/storyscope.scss */
 .event-timeline {
-  background: url('../images/timeline.png?1381921137') 50% 50% no-repeat;
+  background: url('../images/timeline.png?1410704755') 50% 50% no-repeat;
   height: 137px;
   width: 215px;
 }
 
 /* line 1352, ../sass/storyscope.scss */
 .event-map {
-  background: url('../images/map.png?1381921137') 50% 50% no-repeat;
+  background: url('../images/map.png?1410704755') 50% 50% no-repeat;
   height: 137px;
   width: 215px;
 }
 
 /* line 1359, ../sass/storyscope.scss */
 .event-grid {
-  background: url('../images/grid.png?1381921137') 50% 50% no-repeat;
+  background: url('../images/grid.png?1410704755') 50% 50% no-repeat;
   height: 137px;
   width: 215px;
 }
 
 /* Visualisations [deprecated]*/
-/* line 1368, ../sass/storyscope.scss */
+/* line 1367, ../sass/storyscope.scss */
 .plot-container fieldset.facet-container,
 .plot-container fieldset.plot_description_vis_fieldset {
   margin: 0 0 1em;
@@ -2356,7 +2352,7 @@ p.events-display-date {
   list-style: none;
   padding: 0;
 }
-/* line 11, ../../../../../../../../../../Library/Ruby/Gems/1.8/gems/compass-0.12.2/frameworks/compass/stylesheets/compass/typography/lists/_bullets.scss */
+/* line 11, ../../../../../../../../../../Users/eoinkilfeather/.rvm/gems/ruby-2.0.0-p195/gems/compass-core-1.0.1/stylesheets/compass/typography/lists/_bullets.scss */
 .node-story-visualisation .exhibit-collectionView-body ol li {
   list-style-image: none;
   list-style-type: none;
@@ -2364,14 +2360,14 @@ p.events-display-date {
 }
 /* line 1391, ../sass/storyscope.scss */
 .node-story-visualisation .exhibit-collectionView-body ol li > div {
-  border-top: solid 1px #7ac953;
+  border-top: solid 1px #7AC953;
   margin: 0 0 0.5em;
   padding-top: 0.5em;
 }
 /* line 1395, ../sass/storyscope.scss */
 .node-story-visualisation .exhibit-collectionView-body ol li > div > div:first-child {
   margin-bottom: 0.5em;
-  font-weight: normal!important;
+  font-weight: normal !important;
 }
 /* line 1401, ../sass/storyscope.scss */
 .node-story-visualisation .exhibit-collectionView-body ol li > div a {
@@ -2381,7 +2377,7 @@ p.events-display-date {
 }
 /* line 1410, ../sass/storyscope.scss */
 .node-story-visualisation .elements-container h2, .node-story-visualisation .elements-container .exhibit-collectionView-body ol li > div > div:first-child, .node-story-visualisation .exhibit-collectionView-body ol .elements-container li > div > div:first-child {
-  color: #4e4e4e;
+  color: #4E4E4E;
   font-size: 1.07692em;
   line-height: 1.28571em;
 }
@@ -2393,7 +2389,7 @@ p.events-display-date {
 /* line 1417, ../sass/storyscope.scss */
 .node-story-visualisation .elements-container article h3 {
   margin: 0;
-  color: #4e4e4e;
+  color: #4E4E4E;
   font-size: 0.92308em;
   line-height: 1.5em;
 }
@@ -2403,12 +2399,12 @@ p.events-display-date {
 }
 /* line 1426, ../sass/storyscope.scss */
 .node-story-visualisation .elements-container .events:nth-child(2n + 1) article {
-  background-color: #e5e5e5;
+  background-color: #E5E5E5;
   border-top: solid 2px transparent;
 }
 /* line 1430, ../sass/storyscope.scss */
 .node-story-visualisation .elements-container .events:nth-child(2n + 2) article {
-  border-top: solid 2px #e5e5e5;
+  border-top: solid 2px #E5E5E5;
 }
 
 /* line 1435, ../sass/storyscope.scss */
@@ -2475,7 +2471,7 @@ p.events-display-date {
 .node-type-plot-element .panel-top .pane-content ul {
   list-style: none;
   padding-left: 0;
-  border-right: solid 1px #cdcccb;
+  border-right: solid 1px #CDCCCB;
 }
 /* line 1492, ../sass/storyscope.scss */
 .node-type-plot-element .panel-top .pane-content ul li {
@@ -2537,7 +2533,7 @@ p.events-display-date {
   border-left: none;
   float: left;
   width: 25%;
-  border-left: solid 1px #cdcccb;
+  border-left: solid 1px #CDCCCB;
 }
 /* line 1544, ../sass/storyscope.scss */
 .node-type-plot-element .middle-wrapper .middle-2-2 .view-empty {
@@ -2590,14 +2586,14 @@ p.events-display-date {
  */
 /* line 1592, ../sass/storyscope.scss */
 .page-field-collection-field-narrative-set-edit h2.pane-title, .page-field-collection-field-narrative-set-edit .node-story-visualisation .exhibit-collectionView-body ol li > div > div.pane-title:first-child, .node-story-visualisation .exhibit-collectionView-body ol .page-field-collection-field-narrative-set-edit li > div > div.pane-title:first-child {
-  color: #a0a0a0;
+  color: #A0A0A0;
 }
 /* line 1596, ../sass/storyscope.scss */
 .page-field-collection-field-narrative-set-edit .pane-field-collection-form-buttons .form-submit {
-  background-color: #e5e5e5;
+  background-color: #E5E5E5;
   padding: 0.25em 2em 0.25em 0.5em;
   font-weight: bold;
-  color: #4e4e4e;
+  color: #4E4E4E;
 }
 
 /* Basic Styling for Editing Narratives */
@@ -2678,7 +2674,7 @@ p.events-display-date {
 
 /* line 1665, ../sass/storyscope.scss */
 .survey-link {
-  border: 1px solid #7ac953;
+  border: 1px solid #7AC953;
   margin: 0 0 0.5em;
   background-color: #eee;
   padding: 0.5em 1em;
@@ -2687,16 +2683,16 @@ p.events-display-date {
 }
 /* line 1672, ../sass/storyscope.scss */
 .survey-link:visited {
-  border: 1px solid #7ac953;
+  border: 1px solid #7AC953;
 }
 /* line 1675, ../sass/storyscope.scss */
 .survey-link:link {
   color: #e2903d;
-  border: 1px solid #7ac953;
+  border: 1px solid #7AC953;
 }
 /* line 1679, ../sass/storyscope.scss */
 .survey-link:hover {
-  background-color: #7ac953;
+  background-color: #7AC953;
   border-color: #e2903d;
   color: #fff;
 }
@@ -2951,7 +2947,7 @@ p.events-display-date {
 .node-event-form .field-type-text-with-summary.form-wrapper .off {
   top: -51px;
 }
-/* line 1893, ../sass/storyscope.scss */
+/* line 1892, ../sass/storyscope.scss */
 .node-event-form .form-field-name-field-event-activity.form-wrapper,
 .node-event-form .field-name-body.form-wrapper {
   width: 98%;
@@ -2966,7 +2962,7 @@ p.events-display-date {
   float: left;
   width: 48%;
 }
-/* line 1909, ../sass/storyscope.scss */
+/* line 1904, ../sass/storyscope.scss */
 .node-event-form .form-field-name-field-fb-agent.form-wrapper,
 .node-event-form .form-field-name-field-fb-location.form-wrapper,
 .node-event-form .form-field-name-field-fb-genre.form-wrapper,
@@ -2983,12 +2979,12 @@ p.events-display-date {
 .node-event-form .group-event-properties .form-wrapper {
   width: 100%;
 }
-/* line 1923, ../sass/storyscope.scss */
+/* line 1922, ../sass/storyscope.scss */
 .node-event-form .form-field-name-field-fb-value .field-multiple-drag,
 .node-event-form .form-field-name-field-fb-value .form-submit {
   display: none;
 }
-/* line 1931, ../sass/storyscope.scss */
+/* line 1930, ../sass/storyscope.scss */
 .node-event-form .form-field-name-field-fb-value input,
 .node-event-form .form-field-name-field-fb-value label {
   width: 65px;
@@ -3024,7 +3020,7 @@ p.events-display-date {
 .node-object-form .field-name-body.form-wrapper {
   width: 98%;
 }
-/* line 1967, ../sass/storyscope.scss */
+/* line 1955, ../sass/storyscope.scss */
 .node-object-form .form-field-name-field-image.form-wrapper,
 .node-object-form .form-field-name-field-media.form-wrapper,
 .node-object-form .form-field-name-field-video-item.form-wrapper,
@@ -3083,7 +3079,7 @@ p.events-display-date {
   width: 80%;
 }
 
-/* line 2038, ../sass/storyscope.scss */
+/* line 2034, ../sass/storyscope.scss */
 .node-reference-form .field-name-body.form-wrapper,
 .node-reference-form .form-field-name-field-reference-text.form-wrapper,
 .node-reference-form .form-field-name-field-reference-source-text.form-wrapper,
@@ -3095,7 +3091,7 @@ p.events-display-date {
   min-height: 125px;
 }
 
-/* line 2050, ../sass/storyscope.scss */
+/* line 2048, ../sass/storyscope.scss */
 .node-event-form,
 .node-object-form,
 .node-reference-form {
@@ -3113,7 +3109,7 @@ p.events-display-date {
 .node-reference-form div.message {
   display: none;
 }
-/* line 2063, ../sass/storyscope.scss */
+/* line 2062, ../sass/storyscope.scss */
 .node-event-form .form-field-name-field-fb-value .field-multiple-drag,
 .node-event-form .form-field-name-field-fb-value .form-submit,
 .node-event-form .form-field-name-field-fb-classification .field-multiple-drag,
@@ -3251,7 +3247,7 @@ p.events-display-date {
 .node-object-form .form-wrapper,
 .node-reference-form .form-wrapper {
   position: relative;
-  border-top: solid #cdcccb 1px;
+  border-top: solid #CDCCCB 1px;
   float: left;
   padding: 1em 0;
 }
@@ -3293,7 +3289,7 @@ p.events-display-date {
   padding: 0;
   border-top: none;
 }
-/* line 2166, ../sass/storyscope.scss */
+/* line 2165, ../sass/storyscope.scss */
 .node-event-form .fieldset-wrapper .form-wrapper,
 .node-event-form fieldset.form-wrapper,
 .node-object-form .fieldset-wrapper .form-wrapper,
@@ -3399,7 +3395,7 @@ p.events-display-date {
 .node-reference-form .field-multiple-table tbody .form-submit {
   background-color: white;
   border: none;
-  color: #cdcccb;
+  color: #CDCCCB;
   padding: 0;
 }
 /* line 2232, ../sass/storyscope.scss */
@@ -3409,7 +3405,7 @@ p.events-display-date {
   margin-right: 15px;
   border: none;
 }
-/* line 2238, ../sass/storyscope.scss */
+/* line 2236, ../sass/storyscope.scss */
 .node-event-form .field-multiple-table tbody .field-name-field-object-dimension-value.form-wrapper,
 .node-event-form .field-multiple-table tbody .field-name-field-object-dimension-unit.form-wrapper,
 .node-event-form .field-multiple-table tbody .field-name-field-object-dimension-label.form-wrapper,
@@ -3439,7 +3435,7 @@ p.events-display-date {
 .node-reference-form .form-submit.ajax-processed {
   background-color: white;
   border: none;
-  color: #cdcccb;
+  color: #CDCCCB;
   padding: 0;
 }
 /* line 2259, ../sass/storyscope.scss */
@@ -3506,7 +3502,7 @@ p.events-display-date {
   left: 0;
   top: 0;
 }
-/* line 2308, ../sass/storyscope.scss */
+/* line 2307, ../sass/storyscope.scss */
 .view-object-media-slideshow .media-vimeo-video,
 .view-object-media-slideshow .media-youtube-outer-wrapper {
   position: inherit;
@@ -3530,7 +3526,7 @@ p.events-display-date {
 }
 /* line 2328, ../sass/storyscope.scss */
 .node-section-form .fieldset-wrapper .form-wrapper .fieldset-description {
-  color: #a0a0a0;
+  color: #A0A0A0;
   font-size: 0.95em !important;
 }
 /* line 2334, ../sass/storyscope.scss */
@@ -3539,12 +3535,12 @@ p.events-display-date {
 }
 /* line 2337, ../sass/storyscope.scss */
 .node-section-form .form-item .description {
-  color: #a0a0a0;
+  color: #A0A0A0;
   font-size: 0.95em !important;
 }
 /* line 2344, ../sass/storyscope.scss */
 .node-section-form .text-format-wrapper .description {
-  color: #a0a0a0;
+  color: #A0A0A0;
   font-size: 0.95em !important;
 }
 
@@ -3559,7 +3555,7 @@ p.events-display-date {
   right: 10px;
   top: 25px;
   background-color: white;
-  border: 1px solid #cdcccb;
+  border: 1px solid #CDCCCB;
   z-index: 5000;
   padding: 15px 15px 20px 25px;
   box-shadow: 0px 2px 15px rgba(25, 25, 25, 0.5);
@@ -3585,7 +3581,7 @@ p.events-display-date {
 .off {
   border-left: 5px solid transparent;
   border-right: 5px solid transparent;
-  border-top: 5px solid #a0a0a0;
+  border-top: 5px solid #A0A0A0;
   margin: 0 0 0 8px;
   top: 7px;
   right: 41px;
@@ -3598,34 +3594,34 @@ p.events-display-date {
   color: #edae6f;
 }
 
-/* line 2400, ../sass/storyscope.scss */
+/* line 2399, ../sass/storyscope.scss */
 .story-section-pager,
 .narrative-set-pager {
   list-style-type: none;
   padding-left: 0;
 }
-/* line 5, ../../../../../../../../../../Library/Ruby/Gems/1.8/gems/compass-0.12.2/frameworks/compass/stylesheets/compass/typography/lists/_inline-list.scss */
+/* line 6, ../../../../../../../../../../Users/eoinkilfeather/.rvm/gems/ruby-2.0.0-p195/gems/compass-core-1.0.1/stylesheets/compass/typography/lists/_inline-list.scss */
 .story-section-pager, .story-section-pager li,
 .narrative-set-pager,
 .narrative-set-pager li {
-  margin: 0px;
-  padding: 0px;
+  margin: 0;
+  padding: 0;
   display: inline;
 }
 /* line 2404, ../sass/storyscope.scss */
 .story-section-pager li a,
 .narrative-set-pager li a {
-  background: #cdcccb;
+  background: #CDCCCB;
   padding: 0.25em 0.5em;
   margin-right: 5px;
-  color: #4e4e4e;
+  color: #4E4E4E;
 }
-/* line 24, ../../../../../../../../../../Library/Ruby/Gems/1.8/gems/compass-0.12.2/frameworks/compass/stylesheets/compass/typography/links/_link-colors.scss */
+/* line 24, ../../../../../../../../../../Users/eoinkilfeather/.rvm/gems/ruby-2.0.0-p195/gems/compass-core-1.0.1/stylesheets/compass/typography/links/_link-colors.scss */
 .story-section-pager li a:hover,
 .narrative-set-pager li a:hover {
-  color: #e5e5e5;
+  color: #E5E5E5;
 }
-/* line 2410, ../sass/storyscope.scss */
+/* line 2409, ../sass/storyscope.scss */
 .story-section-pager li a.active, .story-section-pager li a:hover,
 .narrative-set-pager li a.active,
 .narrative-set-pager li a:hover {
@@ -3634,7 +3630,7 @@ p.events-display-date {
 /* line 2413, ../sass/storyscope.scss */
 .story-section-pager li a.active,
 .narrative-set-pager li a.active {
-  color: #e5e5e5;
+  color: #E5E5E5;
 }
 
 /* Add existing events page styling tweaks */
@@ -3645,7 +3641,7 @@ p.events-display-date {
   padding-bottom: 15px;
 }
 
-/* line 2441, ../sass/storyscope.scss */
+/* line 2429, ../sass/storyscope.scss */
 #views-exposed-form-object-story-events-add-existing-search-api-page-add-event-dossier-context-internal,
 #views-exposed-form-dossier-events-add-existing-search-api-page-add-event-search-internal,
 #views-exposed-form-dossier-object-stories-add-existing-search-api-page-add-object-story-internal,
@@ -3687,11 +3683,11 @@ p.events-display-date {
 }
 /* line 2462, ../sass/storyscope.scss */
 .item-list .facetapi-facetapi-links .leaf a {
-  color: #4e4e4e;
+  color: #4E4E4E;
 }
 /* line 2465, ../sass/storyscope.scss */
 .item-list .facetapi-facetapi-links a.facetapi-limit-link {
-  color: #a1a3a6;
+  color: #A1A3A6;
 }
 
 /* line 2469, ../sass/storyscope.scss */
@@ -3702,7 +3698,7 @@ p.events-display-date {
 /* line 2472, ../sass/storyscope.scss */
 .underline {
   width: 100%;
-  border-bottom: solid 2px #cdcccb;
+  border-bottom: solid 2px #CDCCCB;
   position: absolute;
   bottom: 0;
 }
@@ -3722,7 +3718,7 @@ p.events-display-date {
 .pane-facetapi .pane-content ul li {
   list-style: none;
 }
-/* line 2494, ../sass/storyscope.scss */
+/* line 2491, ../sass/storyscope.scss */
 .region-sidebar-second h2.block-title, .region-sidebar-second .node-story-visualisation .exhibit-collectionView-body ol li > div > div.block-title:first-child, .node-story-visualisation .exhibit-collectionView-body ol .region-sidebar-second li > div > div.block-title:first-child,
 .region-sidebar-second h2.pane-title,
 .region-sidebar-second .node-story-visualisation .exhibit-collectionView-body ol li > div > div.pane-title:first-child,
@@ -3759,7 +3755,7 @@ p.events-display-date {
   margin-top: 0;
   margin-bottom: 10px;
   padding-bottom: 10px;
-  border-bottom: solid 2px #cdcccb;
+  border-bottom: solid 2px #CDCCCB;
 }
 
 /* line 2513, ../sass/storyscope.scss */
@@ -3777,7 +3773,7 @@ div.tabs .button {
 }
 /* line 2525, ../sass/storyscope.scss */
 div.tabs .button a:link {
-  color: #4e4e4e;
+  color: #4E4E4E;
   background-color: #a6cef3;
   border: solid 1px #8cbae4;
   padding: 0.4em 1em;
@@ -4033,7 +4029,7 @@ div.tabs .button a:hover {
 /* Similarity search item detail */
 /* line 2750, ../sass/storyscope.scss */
 .similarity-search-item-header {
-  background-color: #4e4e4e;
+  background-color: #4E4E4E;
   overflow: auto;
   color: white;
   padding-top: 0;
@@ -4234,7 +4230,7 @@ div.tabs .button a:hover {
 }
 /* line 2931, ../sass/storyscope.scss */
 .pane-storyscope-content-dossier-start-new-story .pane-content ul li:first-child a {
-  color: #4e4e4e;
+  color: #4E4E4E;
 }
 
 /* line 2936, ../sass/storyscope.scss */
@@ -4250,12 +4246,12 @@ div.tabs .button a:hover {
   width: auto !important;
 }
 
-/* line 2947, ../sass/storyscope.scss */
+/* line 2946, ../sass/storyscope.scss */
 .field-slideshow-wrapper,
 .view-object-media-slideshow {
   text-align: center;
 }
-/* line 2952, ../sass/storyscope.scss */
+/* line 2951, ../sass/storyscope.scss */
 .field-slideshow-wrapper .field-slideshow-pager a,
 .field-slideshow-wrapper .field-slideshow-pager .views-slideshow-pager-field-item,
 .field-slideshow-wrapper .views-slideshow-pager-fields a,
@@ -4273,7 +4269,7 @@ div.tabs .button a:hover {
   width: 0;
   height: 0;
 }
-/* line 2962, ../sass/storyscope.scss */
+/* line 2961, ../sass/storyscope.scss */
 .field-slideshow-wrapper .field-slideshow-pager a img,
 .field-slideshow-wrapper .field-slideshow-pager a iframe,
 .field-slideshow-wrapper .field-slideshow-pager .views-slideshow-pager-field-item img,
@@ -4292,7 +4288,7 @@ div.tabs .button a:hover {
 .view-object-media-slideshow .views-slideshow-pager-fields .views-slideshow-pager-field-item iframe {
   display: none;
 }
-/* line 2967, ../sass/storyscope.scss */
+/* line 2966, ../sass/storyscope.scss */
 .field-slideshow-wrapper .field-slideshow-pager a.activeSlide,
 .field-slideshow-wrapper .field-slideshow-pager .views-slideshow-pager-field-item.active,
 .field-slideshow-wrapper .views-slideshow-pager-fields a.activeSlide,
@@ -4310,7 +4306,7 @@ div.tabs .button a:hover {
   height: 0;
   margin: 10px;
 }
-/* line 2977, ../sass/storyscope.scss */
+/* line 2976, ../sass/storyscope.scss */
 .field-slideshow-wrapper .field-slideshow-pager a.activeSlide img,
 .field-slideshow-wrapper .field-slideshow-pager a.activeSlide iframe,
 .field-slideshow-wrapper .field-slideshow-pager .views-slideshow-pager-field-item.active img,
@@ -4467,10 +4463,10 @@ div.tabs .button a:hover {
 
 /* line 3092, ../sass/storyscope.scss */
 #block-feedback-form .feedback-link {
-  color: #cdcccb !important;
+  color: #CDCCCB !important;
 }
 
-/* line 3098, ../sass/storyscope.scss */
+/* line 3097, ../sass/storyscope.scss */
 .section-getting-started #highlighted,
 .section-getting-started .tabs {
   display: none;
@@ -4480,7 +4476,7 @@ div.tabs .button a:hover {
   float: left;
   width: 50%;
 }
-/* line 3106, ../sass/storyscope.scss */
+/* line 3105, ../sass/storyscope.scss */
 .section-getting-started .field-name-field-dossier-stories .field-item .node-story,
 .section-getting-started .field-name-field-dossier-stories .field-item .field-name-body .field-item {
   width: 100% !important;
@@ -4497,7 +4493,7 @@ div.tabs .button a:hover {
   font-size: 1.5em !important;
   line-height: 1.3em !important;
   margin-bottom: 5px !important;
-  color: #7ac953;
+  color: #7AC953;
   font-weight: normal !important;
   font-family: Arial, Helvetica, "Nimbus Sans L", sans-serif !important;
 }
@@ -4534,7 +4530,7 @@ div.tabs .button a:hover {
   opacity: 0.75;
   border: none;
 }
-/* line 3162, ../sass/storyscope.scss */
+/* line 3161, ../sass/storyscope.scss */
 .view-footer .node-section-form .panel-middle-3 .draggable .form-submit, .view-header .node-section-form .panel-middle-3 .draggable .form-submit {
   float: right;
   display: block;
@@ -4577,7 +4573,7 @@ div.tabs .button a:hover {
   font-size: 0.9em;
   margin: 0;
 }
-/* line 3207, ../sass/storyscope.scss */
+/* line 3204, ../sass/storyscope.scss */
 .node-section-form .panel-middle-3 .form-field-type-field-collection .node-object .field-items,
 .node-section-form .panel-middle-3 .form-field-type-field-collection .node-object .agent,
 .node-section-form .panel-middle-3 .form-field-type-field-collection .node-object .freebase-link,
@@ -4587,7 +4583,7 @@ div.tabs .button a:hover {
   right: -32%;
   width: 68%;
 }
-/* line 3214, ../sass/storyscope.scss */
+/* line 3213, ../sass/storyscope.scss */
 .node-section-form .panel-middle-3 .form-field-type-field-collection .node-object .field-name-field-image .field-items,
 .node-section-form .panel-middle-3 .form-field-type-field-collection .node-object .field-name-field-media .field-items {
   top: 0;
@@ -4654,4 +4650,15 @@ div.tabs .button a:hover {
 /* line 3266, ../sass/storyscope.scss */
 .node-type-object-story .middle-wrapper .container-inner.middle-2-1 .pane-object-stories-panel-pane-1 .view-object-stories .view-content .node-object-story .article-inner {
   border: none;
+}
+
+/* line 3275, ../sass/storyscope.scss */
+.field-name-field-media .field-item {
+  float: left;
+  padding: 10px;
+}
+
+/* line 3281, ../sass/storyscope.scss */
+.pane-node-field-fb-tags {
+  clear: left;
 }

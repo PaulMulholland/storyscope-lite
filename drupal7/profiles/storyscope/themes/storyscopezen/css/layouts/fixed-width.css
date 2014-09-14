@@ -11,7 +11,7 @@
 /*
  * Center the page.
  */
-/* line 43, ../../sass/layouts/fixed-width.scss */
+/* line 42, ../../sass/layouts/fixed-width.scss */
 #page,
 .region-bottom {
   /* If you want to make the page a fixed width and centered in the viewport,
@@ -24,7 +24,7 @@
 /*
  * Apply the shared properties of grid items in a single, efficient ruleset.
  */
-/* line 61, ../../sass/layouts/fixed-width.scss */
+/* line 56, ../../sass/layouts/fixed-width.scss */
 #header,
 #content,
 #navigation,
@@ -41,14 +41,14 @@
 /*
  * Containers for grid items and flow items.
  */
-/* line 71, ../../sass/layouts/fixed-width.scss */
+/* line 69, ../../sass/layouts/fixed-width.scss */
 #header,
 #main,
 #footer {
   *position: relative;
   *zoom: 1;
 }
-/* line 52, ../../sass-extensions/zen-grids/stylesheets/zen/_grids.scss */
+/* line 51, ../../sass-extensions/zen-grids/stylesheets/zen/_grids.scss */
 #header:before, #header:after,
 #main:before,
 #main:after,

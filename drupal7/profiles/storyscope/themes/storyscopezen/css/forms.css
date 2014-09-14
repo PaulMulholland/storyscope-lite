@@ -7,7 +7,7 @@
   /* Wrapper for a form element (or group of form elements) and its label */
   margin: 1em 0;
 }
-/* line 14, ../sass/forms.scss */
+/* line 12, ../sass/forms.scss */
 .form-item input.error,
 .form-item textarea.error,
 .form-item select.error {
@@ -36,7 +36,7 @@
   /* The descriptive help text (separate from the label) */
   font-size: 0.85em;
 }
-/* line 37, ../sass/forms.scss */
+/* line 36, ../sass/forms.scss */
 .form-checkboxes .form-item, .form-radios .form-item {
   /* Pack groups of checkboxes and radio buttons closer together */
   margin: 0;
@@ -48,7 +48,7 @@
   /* The submit button */
 }
 
-/* line 47, ../sass/forms.scss */
+/* line 46, ../sass/forms.scss */
 .container-inline div,
 .container-inline label {
   /* Inline labels and form divs */
@@ -63,15 +63,14 @@
 /* line 55, ../sass/forms.scss */
 a.button {
   /* Buttons used by contrib modules like Media */
-  -webkit-appearance: button;
   -moz-appearance: button;
-  appearance: button;
+  -webkit-appearance: button;
 }
 
 /*
  * Password confirmation
  */
-/* line 64, ../sass/forms.scss */
+/* line 63, ../sass/forms.scss */
 .password-parent,
 .confirm-parent {
   margin: 0;
@@ -105,7 +104,7 @@ a.button {
   margin-bottom: 0;
   /* Position OpenID's ul next to the rest of the links. */
 }
-/* line 94, ../sass/forms.scss */
+/* line 93, ../sass/forms.scss */
 html.js #user-login-form li.openid-link,
 #user-login-form li.openid-link {
   /* The "Log in using OpenID" link. */
@@ -151,14 +150,14 @@ form tr.even {
 form table .item-list ul {
   margin: 0;
 }
-/* line 134, ../sass/forms.scss */
+/* line 133, ../sass/forms.scss */
 form tr.odd,
 form tr.even {
   background: transparent;
   border-bottom: 0;
 }
 
-/* line 144, ../sass/forms.scss */
+/* line 143, ../sass/forms.scss */
 .lt-ie8 tr.even th,
 .lt-ie8 tr.even td,
 .lt-ie8 tr.odd th,

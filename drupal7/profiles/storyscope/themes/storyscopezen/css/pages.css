@@ -23,7 +23,7 @@ body {
 #skip-link {
   margin: 0;
 }
-/* line 34, ../sass/pages.scss */
+/* line 33, ../sass/pages.scss */
 #skip-link a,
 #skip-link a:visited {
   display: block;
@@ -67,13 +67,13 @@ body {
   clip: rect(1px 1px 1px 1px);
   clip: rect(1px, 1px, 1px, 1px);
 }
-/* line 70, ../sass/pages.scss */
+/* line 69, ../sass/pages.scss */
 #site-name a:link,
 #site-name a:visited {
   color: #000;
   text-decoration: none;
 }
-/* line 76, ../sass/pages.scss */
+/* line 75, ../sass/pages.scss */
 #site-name a:hover,
 #site-name a:focus {
   text-decoration: underline;
@@ -123,7 +123,7 @@ h1.title {
   margin: 0 0 0.5em;
 }
 
-/* line 132, ../sass/pages.scss */
+/* line 127, ../sass/pages.scss */
 h2.node-title,
 h2.block-title,
 h2.pane-title,
@@ -165,7 +165,7 @@ div.status {
   /* Normal priority messages */
 }
 
-/* line 158, ../sass/pages.scss */
+/* line 157, ../sass/pages.scss */
 div.warning,
 tr.warning {
   /* Medium priority messages */
@@ -173,7 +173,7 @@ tr.warning {
   /* Drupal core uses: 1px solid #f0c020 */
 }
 
-/* line 163, ../sass/pages.scss */
+/* line 162, ../sass/pages.scss */
 div.error,
 tr.error {
   /* High priority messages. See also the .error declaration below. */
