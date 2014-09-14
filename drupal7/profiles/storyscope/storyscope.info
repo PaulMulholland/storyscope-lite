@@ -36,6 +36,7 @@ dependencies[] = views_ui
 dependencies[] = annertech_panels
 dependencies[] = storyscope_panels 
 dependencies[] = panels_node_dossier
+dependencies[] = panels_node_story
 
 ;Storyscope Manipulation
 dependencies[] = storyscope_listings
