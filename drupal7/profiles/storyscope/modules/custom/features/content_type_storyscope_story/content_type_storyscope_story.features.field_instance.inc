@@ -94,11 +94,8 @@ function content_type_storyscope_story_field_default_field_instances() {
       ),
       'teaser' => array(
         'label' => 'hidden',
-        'module' => 'text',
-        'settings' => array(
-          'trim_length' => 100,
-        ),
-        'type' => 'text_trimmed',
+        'settings' => array(),
+        'type' => 'hidden',
         'weight' => 0,
       ),
     ),
@@ -177,7 +174,7 @@ function content_type_storyscope_story_field_default_field_instances() {
         'settings' => array(
           'audio_playlist' => 0,
           'colorbox_caption' => 'title',
-          'colorbox_gallery' => 'page',
+          'colorbox_gallery' => 'none',
           'colorbox_gallery_custom' => '',
           'colorbox_view_mode' => 'colorbox',
           'file_view_mode' => 'media_small',

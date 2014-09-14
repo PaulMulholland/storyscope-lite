@@ -32,6 +32,7 @@ function views_dossier_stories_views_default_views() {
   $handler->display->display_options['pager']['options']['offset'] = '0';
   $handler->display->display_options['style_plugin'] = 'default';
   $handler->display->display_options['row_plugin'] = 'node';
+  $handler->display->display_options['row_options']['links'] = FALSE;
   /* Relationship: Entity Reference: Referencing entity */
   $handler->display->display_options['relationships']['reverse_field_stories_node']['id'] = 'reverse_field_stories_node';
   $handler->display->display_options['relationships']['reverse_field_stories_node']['table'] = 'node';
@@ -73,9 +74,6 @@ function views_dossier_stories_views_default_views() {
   $handler->display->display_options['filters']['type']['value'] = array(
     'story' => 'story',
   );
-
-  /* Display: Block */
-  $handler = $view->new_display('block', 'Block', 'dossier_stories_panel_pane');
   $export['dossier_stories'] = $view;
 
   return $export;

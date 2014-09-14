@@ -115,7 +115,7 @@ function panels_node_dossier_default_page_manager_handlers() {
     $pane->access = array();
     $pane->configuration = array(
       'override_pager_settings' => 0,
-      'use_pager' => 1,
+      'use_pager' => 0,
       'nodes_per_page' => '0',
       'pager_id' => '0',
       'offset' => '0',
@@ -129,8 +129,8 @@ function panels_node_dossier_default_page_manager_handlers() {
       'context' => array(
         0 => '',
       ),
-      'override_title' => 0,
-      'override_title_text' => '',
+      'override_title' => 1,
+      'override_title_text' => 'Dossier Stories',
     );
     $pane->cache = array();
     $pane->style = array(

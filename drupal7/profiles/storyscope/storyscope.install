@@ -220,7 +220,7 @@ function storyscope_install() {
   // Set Pathauto patterns
   variable_set('pathauto_node_pattern', '[node:menu-link:parents:join-path]/[node:title]');
   variable_set('pathauto_node_news_item_pattern', 'news/[node:title]');
-  variable_set('pathauto_node_object_item_pattern', 'objects/[node:nid]');
+
   variable_set('pathauto_update_action', '0');
 
   // Disable auto redirects of all url aliases for a node to one alias.

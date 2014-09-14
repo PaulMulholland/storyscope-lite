@@ -1,0 +1,19 @@
+<?php
+/**
+ * Alows us to begin adding buttons to a particular view - this is called from template.php
+ */
+ 
+function storyscope_listings_get_view_header_footer($view) {
+  $header_footer_html = array();
+  switch ($view->name) {
+    case 'dossier_stories':
+		drupal_set_message('dossier_stories');
+        $add_path = 'dossiers/' . $view->args[0] . '/stories/add';
+        $header_footer_html = theme('create_new_button', array('path' => $add_path, 'text' => t('Create new story'), 'destination' => $destination_path));
+      }
+      break;
+  	  
+	return $header_footer_html;
+}
+
+

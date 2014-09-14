@@ -37,6 +37,9 @@ dependencies[] = annertech_panels
 dependencies[] = storyscope_panels 
 dependencies[] = panels_node_dossier
 
+;Storyscope Manipulation
+dependencies[] = storyscope_listings
+
 ; Other essentials
 dependencies[] = backup_migrate
 dependencies[] = field_collection
@@ -48,6 +51,8 @@ dependencies[] = entityreference
 
 ; Media modules
 dependencies[] = media
+dependencies[] = media_colorbox
+dependencies[] = colorbox
 
 ; RDF
 dependencies[] = rdf
