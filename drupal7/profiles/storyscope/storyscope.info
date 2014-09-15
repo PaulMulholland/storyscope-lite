@@ -45,6 +45,7 @@ dependencies[] = storyscope_listings
 dependencies[] = backup_migrate
 dependencies[] = field_collection
 dependencies[] = libraries
+dependencies[] = strongarm
 
 ; Entity related modules.
 dependencies[] = entity
@@ -70,6 +71,9 @@ dependencies[] = content_type_storyscope_story
 ;Custom Views
 dependencies[] = views_dossiers
 dependencies[] = views_dossier_stories
+
+;Custom Configuration
+dependencies[] = strongarm_file_entity_settings
 
 ;Freebase Suggest
 dependencies[] = jquery_freebase
