@@ -46,6 +46,7 @@ dependencies[] = backup_migrate
 dependencies[] = field_collection
 dependencies[] = libraries
 dependencies[] = strongarm
+dependencies[] = diff
 
 ; Entity related modules.
 dependencies[] = entity
@@ -56,6 +57,7 @@ dependencies[] = media
 dependencies[] = media_colorbox
 dependencies[] = colorbox
 dependencies[] = media_vimeo
+dependencies[] = file_entity
 
 ; RDF
 dependencies[] = rdf
