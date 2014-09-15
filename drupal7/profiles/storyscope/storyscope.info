@@ -54,6 +54,7 @@ dependencies[] = entityreference
 dependencies[] = media
 dependencies[] = media_colorbox
 dependencies[] = colorbox
+dependencies[] = media_vimeo
 
 ; RDF
 dependencies[] = rdf
