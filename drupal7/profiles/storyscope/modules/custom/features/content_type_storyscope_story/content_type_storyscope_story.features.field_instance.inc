@@ -208,12 +208,13 @@ function content_type_storyscope_story_field_default_field_instances() {
       'settings' => array(
         'allowed_schemes' => array(
           'public' => 'public',
+          'vimeo' => 'vimeo',
         ),
         'allowed_types' => array(
           'audio' => 0,
           'default' => 0,
           'image' => 'image',
-          'video' => 0,
+          'video' => 'video',
         ),
         'progress_indicator' => 'throbber',
       ),
