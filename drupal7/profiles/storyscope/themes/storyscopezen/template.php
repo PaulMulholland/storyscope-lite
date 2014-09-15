@@ -57,7 +57,36 @@ function storyscopezen_preprocess_page(&$variables, $hook) {
   }
 }
 
+/**
+* Overrides the theme_field for field_fb_tags to make it clickable.
+*/
+function storyscopezen_field__field_fb_tags($variables) {
+	$output = '';
 
+	foreach ($variables['items'] as $item) {
+		$fcid = key($item['entity']['field_collection_item']);
+		if (!empty($item['entity']['field_collection_item'][$fcid]['field_mid'][0]['#markup'])) {
+			$mid = $item['entity']['field_collection_item'][$fcid]['field_mid'][0]['#markup'];
+		}
+		if (!empty($item['entity']['field_collection_item'][$fcid]['field_topic'][0]['#markup'])) {
+			$topic = $item['entity']['field_collection_item'][$fcid]['field_topic'][0]['#markup'];
+		}
+		if (!empty($mid) && !empty($topic)) {
+			$relative_mid = end(explode("/", $mid));
+			$output .= '<li class="tags">';
+			$tags_link = l($topic, "tag/m/" . $relative_mid, array('attributes' => array('target'=>'_self')));
+			$output .= $tags_link . '</li>';
+			//$output .= '<div class="tags freebase-link">' . $topic . '</div>';
+		}
+		elseif (empty($mid) && !empty($topic)) {
+      $output .= '<li class="tags freebase-link">' . $topic . '</li>';
+    }
+
+	}
+	// Render the top-level DIV.
+	$output = '<ul class="' . $variables['classes'] . '"' . $variables['attributes'] . '>' . $output . '</ul>';
+	return $output;
+}
 /**
 * Devel hook for testing
 *
