@@ -48,5 +48,4 @@ features[variable][] = features_default_export_path
 features[variable][] = install_profile
 features[variable][] = media__file_extensions
 features[variable][] = site_frontpage
-features[variable][] = site_name
 features[variable][] = theme_default
