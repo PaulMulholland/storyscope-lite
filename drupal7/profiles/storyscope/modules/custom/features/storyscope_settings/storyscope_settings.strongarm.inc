@@ -34,6 +34,20 @@ function storyscope_settings_strongarm() {
   $strongarm = new stdClass();
   $strongarm->disabled = FALSE; /* Edit this to true to make a default strongarm disabled initially */
   $strongarm->api_version = 1;
+  $strongarm->name = 'pathauto_node_dossier_pattern';
+  $strongarm->value = 'dossier/[node:nid]';
+  $export['pathauto_node_dossier_pattern'] = $strongarm;
+
+  $strongarm = new stdClass();
+  $strongarm->disabled = FALSE; /* Edit this to true to make a default strongarm disabled initially */
+  $strongarm->api_version = 1;
+  $strongarm->name = 'pathauto_node_story_pattern';
+  $strongarm->value = 'story/[node:nid]';
+  $export['pathauto_node_story_pattern'] = $strongarm;
+
+  $strongarm = new stdClass();
+  $strongarm->disabled = FALSE; /* Edit this to true to make a default strongarm disabled initially */
+  $strongarm->api_version = 1;
   $strongarm->name = 'site_frontpage';
   $strongarm->value = 'dossiers';
   $export['site_frontpage'] = $strongarm;

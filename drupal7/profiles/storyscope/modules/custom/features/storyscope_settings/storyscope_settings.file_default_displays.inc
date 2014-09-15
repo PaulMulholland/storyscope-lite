@@ -21,7 +21,7 @@ function storyscope_settings_file_default_displays() {
     'colorbox_image_style' => '',
     'colorbox_gallery' => 'post',
     'colorbox_gallery_custom' => '',
-    'colorbox_caption' => 'auto',
+    'colorbox_caption' => 'node_title',
     'colorbox_caption_custom' => '',
   );
   $export['image__default__file_field_colorbox'] = $file_display;
@@ -91,7 +91,7 @@ function storyscope_settings_file_default_displays() {
     'fixed_height' => '',
     'colorbox_gallery' => 'post',
     'colorbox_gallery_custom' => '',
-    'colorbox_caption' => 'mediafield',
+    'colorbox_caption' => 'title',
     'audio_playlist' => 0,
   );
   $export['image__default__file_field_media_colorbox'] = $file_display;

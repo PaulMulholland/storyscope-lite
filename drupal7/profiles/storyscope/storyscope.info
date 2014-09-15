@@ -47,6 +47,8 @@ dependencies[] = field_collection
 dependencies[] = libraries
 dependencies[] = strongarm
 dependencies[] = diff
+dependencies[] = token
+dependencies[] = pathauto
 
 ; Entity related modules.
 dependencies[] = entity

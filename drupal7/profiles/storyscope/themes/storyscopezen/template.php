@@ -36,13 +36,15 @@ function storyscopezen_preprocess_page(&$variables, $hook) {
   }
   // Add inline 'create new' buttons with title on certain pages.
   if (!empty($variables['page']['#views_contextual_links_info']['views_ui']['view']->name)) {
+  	
     $view_name = $variables['page']['#views_contextual_links_info']['views_ui']['view']->name;
     // We only need this inline create new button on certain views, so list them here.
     $create_new_views = array(
-      'dossier_stories',
+      'dossier_stories_panel_pane',
     );
     // Create and add in the button
     if (in_array($view_name, $create_new_views)) {
+    	drupal_set_message($view_name);
       $view = views_get_view($view_name);
       $view_display = $variables['page']['#views_contextual_links_info']['views_ui']['view_display_id'];
       $view->set_display($view_display);
