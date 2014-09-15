@@ -1,13 +1,13 @@
 <?php
 /**
  * @file
- * strongarm_file_entity_settings.file_default_displays.inc
+ * storyscope_settings.file_default_displays.inc
  */
 
 /**
  * Implements hook_file_default_displays().
  */
-function strongarm_file_entity_settings_file_default_displays() {
+function storyscope_settings_file_default_displays() {
   $export = array();
 
   $file_display = new stdClass();

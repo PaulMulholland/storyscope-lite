@@ -1,7 +1,0 @@
-<?php
-/**
- * @file
- * Code for the Strongarm File Entity Settings feature.
- */
-
-include_once 'strongarm_file_entity_settings.features.inc';

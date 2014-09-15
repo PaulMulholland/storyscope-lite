@@ -27,6 +27,9 @@ dependencies[] = rdf
 dependencies[] = update
 dependencies[] = trigger
 
+;Advanced Help
+dependencies[] = advanced_help
+
 ; Views & Panels
 dependencies[] = ctools
 dependencies[] = panels
@@ -37,9 +40,6 @@ dependencies[] = annertech_panels
 dependencies[] = storyscope_panels 
 dependencies[] = panels_node_dossier
 dependencies[] = panels_node_story
-
-;Storyscope Manipulation
-dependencies[] = storyscope_listings
 
 ; Other essentials
 dependencies[] = backup_migrate
@@ -64,16 +64,19 @@ dependencies[] = rdf
 dependencies[] = devel 
 dependencies[] = devel_generate 
 
-; Custom Content features
+;Storyscope Manipulation
+dependencies[] = storyscope_listings
+
+;Storyscope Custom Content features
 dependencies[] = content_type_storyscope_dossier
 dependencies[] = content_type_storyscope_story
 
-;Custom Views
+;Storyscope Custom Views
 dependencies[] = views_dossiers
 dependencies[] = views_dossier_stories
 
-;Custom Configuration
-dependencies[] = strongarm_file_entity_settings
+;Storyscope Custom Configuration
+dependencies[] = storyscope_settings
 
 ;Freebase Suggest
 dependencies[] = jquery_freebase
