@@ -92,6 +92,7 @@ function storyscopezen_field__field_fb_tags($variables) {
 *
 *Sends Form ID to message.
 */
+/*
 function storyscopezen_form_alter(&$form, &$form_state, $form_id) {
   $print = '<pre>' . print_r($form, TRUE) . '</pre>';
   if (module_exists('devel')) {
@@ -110,6 +111,6 @@ function storyscopezen_form_alter(&$form, &$form_state, $form_id) {
   	$form['field_freebase_location_title']['#type'] = 'hidden';
   }
 }
-
+*/
 
 
