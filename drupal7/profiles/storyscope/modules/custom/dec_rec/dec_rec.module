@@ -4341,15 +4341,16 @@ function save_tag_event_results($tag, $event_array) {
 	$del_query = "delete from tag_event_id where tag = '".$tag."';";
 	db_query($del_query);
 	//save to tag - event_id table
-	$list_items =  array();
-	foreach($event_array as $event) {
-		$list_items[] = "('".$tag."','".$event."')";
-	}
-	$values_list = implode(",",$list_items);
-	$query = "INSERT INTO tag_event_id (tag, event_id) VALUES ".$values_list." ON DUPLICATE KEY UPDATE tag = VALUES(tag), event_id = VALUES(event_id);";
-
-	db_query($query);
-		
+	if(!empty($event_array)) {
+		$list_items =  array();
+		foreach($event_array as $event) {
+			$list_items[] = "('".$tag."','".$event."')";
+		}
+		$values_list = implode(",",$list_items);
+		$query = "INSERT INTO tag_event_id (tag, event_id) VALUES ".$values_list." ON DUPLICATE KEY UPDATE tag = VALUES(tag), event_id = VALUES(event_id);";
+	
+		db_query($query);
+	}	
 }
 
 // ALTER TABLE tag_notable_types
