@@ -883,6 +883,7 @@ function dec_tag_timeline($topic = '/m/01qwfk', $attribute = FALSE) {
 	$header = create_timeline_header($topic);
 
 	$timeline_array = translate_events_for_timeline($output, $header);
+
 	return $timeline_array;
 }
 
@@ -1091,6 +1092,7 @@ function translate_events_for_timeline($events, $header) {
 		return $output;
 	}
 	$list = array();
+
 	foreach($events as $event) {
 		$entry = array();
 // 		$entry['text'] = produce_event_table_for_timeline($event);
@@ -1105,7 +1107,12 @@ function translate_events_for_timeline($events, $header) {
 			$entry['tag'] = $event['activity']['0'];
 		}
 		if(is_array($event['title'])) {
-			$entry['headline'] = l($event['title']['0']['1'],'tag'.$event['title']['0']['0']);
+			if(is_array($event['title']['0'])) {
+				$entry['headline'] = l($event['title']['0']['1'],'tag'.$event['title']['0']['0']);
+			}
+			else {
+				$entry['headline'] = $event['title']['0'];
+			}
 			if($image = check_freebase_saved_image($event['title']['0']['0'])) {
 				$entry['asset'] = array('media'=> $image, 
 					'caption'=> produce_event_table_for_timeline($event),
@@ -1336,6 +1343,10 @@ LEFT JOIN tag_name ON tag_name.tag = event_value_table.value;";
 			//cache topic info
 			$handle = background_process_start_locked('dontrunconcurrently','check_topic_name_image_description', $event_id);
 		
+		}
+		elseif($event_type == 'exhibition_creation') {
+			$output_with_titles[$event_id][0] = get_event_label($event_id, '/exhibitions/exhibition').' at '
+					.get_event_label($event_id, '/exhibitions/exhibition_run/venue');
 		}
 		elseif($event_type == 'award_won') {
 			$output_with_titles[$event_id][0] = get_event_label_with_event_attribute_name($event_id, 'agent').' won '
@@ -1694,28 +1705,28 @@ function triples_of_a_tag($topic) {
 	}
 	
 	if(in_array("/exhibitions/exhibition", $types)) {
-		//exhibition details
-		$result = fb_exhibition_details($topic, $result);
+		//exhibition details - fact version
+// 		$result = fb_exhibition_details($topic, $result);
 	}
 	
 	if(in_array("/exhibitions/exhibition_subject", $types)) {
-		//subject of exhibition
-		$result = fb_exhibition_subject_exhibition($topic, $result);
+		//subject of exhibition - fact version
+// 		$result = fb_exhibition_subject_exhibition($topic, $result);
 	}
 	
 	if(in_array("/exhibitions/exhibition_producer", $types)) {
-		//subject of exhibition
-		$result = fb_exhibition_producer_exhibition($topic, $result);
+		//subject of exhibition - fact version
+// 		$result = fb_exhibition_producer_exhibition($topic, $result);
 	}
 
 	if(in_array("/exhibitions/exhibit", $types)) {
-		//subject of exhibition
-		$result = fb_exhibit_exhibition($topic, $result);
+		//subject of exhibition - fact version
+// 		$result = fb_exhibit_exhibition($topic, $result);
 	}
 
 	if(in_array("/exhibitions/exhibition_curator", $types)) {
-		//subject of exhibition
-		$result = fb_exhibition_curator_exhibition($topic, $result);
+		//subject of exhibition - fact version
+// 		$result = fb_exhibition_curator_exhibition($topic, $result);
 	}
 	
 	//saving
@@ -1935,7 +1946,7 @@ function fb_deceased_person_death_date_location($topic = '/m/071k7_', $result = 
 
 
 /**
- * Retrieve subjects, event type, producer, exhibits, curator of an exhibition
+ * Retrieve subjects, event type, producer, exhibits, curator of an exhibition - fact version
  */
 function fb_exhibition_details($topic = '/m/0hdzz0h', $result = array("triples"=>array(),"names"=>array())) {
 	$triples = array();
@@ -1991,7 +2002,7 @@ function fb_exhibition_details($topic = '/m/0hdzz0h', $result = array("triples"=
 }
 
 /**
- * Retrieve exhibition of exhibition subject
+ * Retrieve exhibition of exhibition subject - fact version
  */
 function fb_exhibition_subject_exhibition($topic = '/m/03y2s9', $result = array("triples"=>array(),"names"=>array())) {
 	$triples = array();
@@ -2015,7 +2026,7 @@ function fb_exhibition_subject_exhibition($topic = '/m/03y2s9', $result = array(
 }
 
 /**
- * Retrieve exhibition of exhibition producer
+ * Retrieve exhibition of exhibition producer - fact version
  */
 function fb_exhibition_producer_exhibition($topic = '/m/02vz3d', $result = array("triples"=>array(),"names"=>array())) {
 	$triples = array();
@@ -2039,7 +2050,7 @@ function fb_exhibition_producer_exhibition($topic = '/m/02vz3d', $result = array
 }
 
 /**
- * Retrieve exhibition of exhibit
+ * Retrieve exhibition of exhibit - fact version
  */
 function fb_exhibit_exhibition($topic = '/m/0hd_4hm', $result = array("triples"=>array(),"names"=>array())) {
 	$triples = array();
@@ -2063,7 +2074,7 @@ function fb_exhibit_exhibition($topic = '/m/0hd_4hm', $result = array("triples"=
 }
 
 /**
- * Retrieve exhibition of exhibition curator
+ * Retrieve exhibition of exhibition curator - fact version
  */
 function fb_exhibition_curator_exhibition($topic = '/m/0hd_0bn', $result = array("triples"=>array(),"names"=>array())) {
 	$triples = array();
@@ -3370,7 +3381,7 @@ LEFT JOIN tag_name ON tag_name.tag = events.value;";
 			}
 		}
 	}
-	
+
 	if($for_timeline) {
 		if(isset($output['end_time']) && !isset($output['start_time'])) {
 			$output['start_time'] = $output['end_time'];
@@ -3386,6 +3397,11 @@ LEFT JOIN tag_name ON tag_name.tag = events.value;";
 		//cache topic info
 		$handle = background_process_start_locked('dontrunconcurrently','check_topic_name_image_description', $event_id);
 		
+	}
+	//*
+	elseif($event_type == 'exhibition_creation') {
+		$output['title'][] = get_event_label($event_id, '/exhibitions/exhibition').' at '
+				.get_event_label($event_id, '/exhibitions/exhibition_run/venue');
 	}
 	elseif($event_type == 'award_won') {
 		if(in_array('/award/award', $topic_types)) {
@@ -4495,7 +4511,7 @@ function fb_person_studying($topic, $previous_output = array("events"=>array(),"
 	if(!isset($resultarray["result"][0])) {
 		return $previous_output;
 	}
-	$topic_event_links = array();
+
 	$topic_name_pairs = array();
 
 	foreach($resultarray["result"][0]["/people/person/education"] as $result) {
@@ -4520,13 +4536,11 @@ function fb_person_studying($topic, $previous_output = array("events"=>array(),"
 	
 	$topic_name_pairs = get_topic_name_pairs(array('/education/education/student','/education/education/institution','/education/education/degree','/education/education/specialization','/education/education/minor'),$result,$topic_name_pairs);
 	$topic_name_pairs = add_top_level_pair($result, $topic_name_pairs);
-	$topic_event_links[] = array($topic, 'education history', $result["mid"]);
 	
 	}
 
 	return array("events"=>array_merge($output, $previous_output["events"]),
-			"names"=>array_merge($topic_name_pairs, $previous_output["names"]),
-			"links"=>array_merge($topic_event_links, $previous_output["links"]));
+			"names"=>array_merge($topic_name_pairs, $previous_output["names"]));
 }
 
 /**
@@ -4556,7 +4570,7 @@ function fb_person_living_at_location($topic, $previous_output = array("events"=
 	if(!isset($resultarray["result"][0])) {
 		return $previous_output;
 	}
-	$topic_event_links = array();
+
 	$topic_name_pairs = array();
 
 	foreach($resultarray["result"][0]["/people/person/places_lived"] as $result) {
@@ -4568,13 +4582,11 @@ function fb_person_living_at_location($topic, $previous_output = array("events"=
 
 	$topic_name_pairs = get_topic_name_pairs(array('/people/place_lived/location','/people/place_lived/person'),$result,$topic_name_pairs);
 	$topic_name_pairs = add_top_level_pair($result, $topic_name_pairs);
-	$topic_event_links[] = array($topic, 'Places lived', $result["mid"]);
 	
 	}
 
 	return array("events"=>array_merge($output, $previous_output["events"]),
-			"names"=>array_merge($topic_name_pairs, $previous_output["names"]),
-			"links"=>array_merge($topic_event_links, $previous_output["links"]));
+			"names"=>array_merge($topic_name_pairs, $previous_output["names"]));
 }
 
 /**
@@ -4651,7 +4663,7 @@ function fb_topic_creating_object($topic, $previous_output = array("events"=>arr
 	if(!isset($resultarray["result"][0])) {
 		return $previous_output;
 	}
-	$topic_event_links = array();
+
 	$topic_name_pairs = array();
 
 	foreach($resultarray["result"][0]["/visual_art/visual_artist/artworks"] as $result) {
@@ -4696,13 +4708,11 @@ function fb_topic_creating_object($topic, $previous_output = array("events"=>arr
 		
 		$topic_name_pairs = get_topic_name_pairs(array("/visual_art/artwork/artist","/visual_art/artwork/art_subject","/visual_art/artwork/art_form","/visual_art/artwork/art_genre","/visual_art/artwork/media","/visual_art/artwork/support","/visual_art/artwork/period_or_movement","/visual_art/artwork/locations","/visual_art/artwork/owners","/visual_art/artwork/editions","/visual_art/artwork/edition_of","/visual_art/artwork/belongs_to_series","/exhibitions/exhibit/exhibitions_displayed_in"),$result,$topic_name_pairs);
 		$topic_name_pairs = add_top_level_pair($result, $topic_name_pairs);
-		$topic_event_links[] = array($topic, 'Objects created', $result["mid"]);
 
 	}
 
 	return array("events"=>array_merge($output, $previous_output["events"]),
-			"names"=>array_merge($topic_name_pairs, $previous_output["names"]),
-			"links"=>array_merge($topic_event_links, $previous_output["links"]));
+			"names"=>array_merge($topic_name_pairs, $previous_output["names"]));
 }
 
 /**
@@ -4750,7 +4760,6 @@ function fb_topic_publishing($topic, $previous_output = array("events"=>array(),
 	if(!isset($resultarray["result"][0])) {
 		return $previous_output;
 	}	
-	$topic_event_links = array();
 	$topic_name_pairs = array();
 
 	foreach($resultarray["result"][0]["/book/author/works_written"] as $result) {
@@ -4776,7 +4785,6 @@ function fb_topic_publishing($topic, $previous_output = array("events"=>array(),
 		$topic_name_pairs = get_topic_name_pairs(array("/book/written_work/author","/book/written_work/editor","/book/written_work/date_of_first_publication",
 				"/book/written_work/school_or_movement","/book/written_work/part_of_series","/book/written_work/previous_in_series","/book/written_work/next_in_series"),$result,$topic_name_pairs);
 		$topic_name_pairs = add_top_level_pair($result, $topic_name_pairs);
-		$topic_event_links[] = array($topic, 'Books authored', $result["mid"]);
 		
 		//add inferred locations for artwork creation
 		$location_result = locations_for_authorship_date($output[$result["mid"]]["/book/written_work/author"][0], $output[$result["mid"]]["/book/written_work/date_of_first_publication"]);
@@ -4791,8 +4799,7 @@ function fb_topic_publishing($topic, $previous_output = array("events"=>array(),
 	}
 	
 	return array("events"=>array_merge($output, $previous_output["events"]),
-			"names"=>array_merge($topic_name_pairs, $previous_output["names"]),
-			"links"=>array_merge($topic_event_links, $previous_output["links"]));	
+			"names"=>array_merge($topic_name_pairs, $previous_output["names"]));	
 }
 
 /**
@@ -4826,7 +4833,7 @@ function fb_topic_organization_member($topic, $previous_output = array("events"=
 	if(!isset($resultarray["result"][0])) {
 		return $previous_output;
 	}	
-	$topic_event_links = array();
+
 	$topic_name_pairs = array();
 
 	foreach($resultarray["result"][0]["/organization/organization_member/member_of"] as $result) {
@@ -4845,18 +4852,125 @@ function fb_topic_organization_member($topic, $previous_output = array("events"=
 
 		$topic_name_pairs = get_topic_name_pairs(array("/organization/organization_membership/member", "/organization/organization_membership/organization"),$result,$topic_name_pairs);
 		$topic_name_pairs = add_top_level_pair($result, $topic_name_pairs);
-		$topic_event_links[] = array($topic, 'Membership of organizations', $result["mid"]);
 
 	}
 
 	return array("events"=>array_merge($output, $previous_output["events"]),
-			"names"=>array_merge($topic_name_pairs, $previous_output["names"]),
-			"links"=>array_merge($topic_event_links, $previous_output["links"]));
+			"names"=>array_merge($topic_name_pairs, $previous_output["names"]));
 }
 
 /**
- * Retrieve exhibition data of an exhibition producer//****here no date info
+ * Retrieve exhibition data of related concept - includes exhibition run data
  */
+//"/exhibitions/exhibition_producer/exhibitions_produced","/exhibitions/exhibition_curator/exhibitions_curated"
+//"/exhibitions/exhibition_subject/exhibitions_created_about_this_subject",
+//fb_topic_exhibition_related_concept('/m/0f896_',array("events"=>array(),"names"=>array()),"/exhibitions/exhibition_producer/exhibitions_produced")
+//fb_topic_exhibition_related_concept('/m/01qwfk',array("events"=>array(),"names"=>array()),"/exhibitions/exhibition_producer/exhibitions_produced")
+//fb_topic_exhibition_related_concept('/m/06c8bx',array("events"=>array(),"names"=>array()),"/exhibitions/exhibition_curator/exhibitions_curated")
+//fb_topic_exhibition_related_concept("/m/014wxs",array("events"=>array(),"names"=>array()),"/exhibitions/exhibition_subject/exhibitions_created_about_this_subject")
+//fb_topic_exhibition_related_concept("/m/03wh6f",array("events"=>array(),"names"=>array()),"/exhibitions/exhibit/exhibitions_displayed_in")
+function fb_topic_exhibition_related_concept($topic, $previous_output = array("events"=>array(),"names"=>array(), "links"=>array()), $topic_relation = "/exhibitions/exhibition_producer/exhibitions_produced") {
+	$query = array(array(
+  "mid"=> $topic,
+  "name"=> null,
+  $topic_relation=> array(array(
+    "mid"=> null,
+    "name"=> null,
+    "/exhibitions/exhibition/produced_by"=> array(array(
+      "name"=> null,
+      "mid"=> null,
+      "optional"=> "optional"
+    )),
+    "/exhibitions/exhibition/venues"=> array(array(
+      "mid"=> null,
+      "/exhibitions/exhibition_run/venue"=> array(
+        "name"=> null,
+        "mid"=> null
+      ),
+      "/exhibitions/exhibition_run/opened_on"=> null,
+      "/exhibitions/exhibition_run/closed_on"=> null,
+      "optional"=> "optional"
+    )),
+    "/exhibitions/exhibition/exhibition_types"=> array(array(
+      "name"=> null,
+      "mid"=> null,
+      "optional"=> "optional"
+    )),
+    "/exhibitions/exhibition/exhibits"=> array(array(
+      "name"=> null,
+      "mid"=> null,
+      "optional"=> "optional"
+    )),
+    "/exhibitions/exhibition/curators"=> array(array(
+      "name"=> null,
+      "mid"=> null,
+      "optional"=> "optional"
+    )),
+    "/exhibitions/exhibition/subjects"=> array(array(
+      "name"=> null,
+      "mid"=> null,
+      "optional"=> "optional"
+    ))
+  ))
+));
+
+	$resultarray = execute_mql_event_query($query);
+	$output = array();
+	if(!isset($resultarray["result"][0])) {
+		return $previous_output;
+	}
+	
+	$topic_name_pairs = array();
+	//list of exhibitions
+	foreach($resultarray["result"][0][$topic_relation] as $exhibition) {
+		//find out if exhibition with venue
+		if(empty($exhibition['/exhibitions/exhibition/venues'])) {
+			$key = $exhibition['mid'];
+
+			//if non-venue exhibition
+			$output[$key]["activity"] = "exhibition_creation";
+			$output[$key]["/exhibitions/exhibition/produced_by"] = get_values($exhibition["/exhibitions/exhibition/produced_by"]);
+			$output[$key]["/exhibitions/exhibition/curators"] = get_values($exhibition["/exhibitions/exhibition/curators"]);
+			$output[$key]["/exhibitions/exhibition/exhibition_types"] = get_values($exhibition["/exhibitions/exhibition/exhibition_types"]);
+			$output[$key]["/exhibitions/exhibition/exhibits"] = get_values($exhibition["/exhibitions/exhibition/exhibits"]);
+			$output[$key]["/exhibitions/exhibition/subjects"] = get_values($exhibition["/exhibitions/exhibition/subjects"]);
+			$output[$key]["/exhibitions/exhibition"] = check_array_is_returned($exhibition["mid"]);
+			
+			$topic_name_pairs = get_topic_name_pairs(array("/exhibitions/exhibition/produced_by","/exhibitions/exhibition/exhibition_types","/exhibitions/exhibition/exhibits","/exhibitions/exhibition/curators","/exhibitions/exhibition/subjects"),$exhibition,$topic_name_pairs);
+			$topic_name_pairs = add_top_level_pair($exhibition, $topic_name_pairs);
+
+		}
+		else {
+			foreach($exhibition['/exhibitions/exhibition/venues'] as $venue) {
+				$key = $venue['mid'];
+				
+				//details of the exhibition
+				$output[$key]["activity"] = "exhibition_creation";
+				$output[$key]["/exhibitions/exhibition/produced_by"] = get_values($exhibition["/exhibitions/exhibition/produced_by"]);
+				$output[$key]["/exhibitions/exhibition/curators"] = get_values($exhibition["/exhibitions/exhibition/curators"]);
+				$output[$key]["/exhibitions/exhibition/exhibition_types"] = get_values($exhibition["/exhibitions/exhibition/exhibition_types"]);
+				$output[$key]["/exhibitions/exhibition/exhibits"] = get_values($exhibition["/exhibitions/exhibition/exhibits"]);
+				$output[$key]["/exhibitions/exhibition/subjects"] = get_values($exhibition["/exhibitions/exhibition/subjects"]);
+				$output[$key]["/exhibitions/exhibition"] = check_array_is_returned($exhibition["mid"]);
+				
+				//details of the exhibition run 
+				$output[$key]["/exhibitions/exhibition_run/opened_on"] = $venue["/exhibitions/exhibition_run/opened_on"];
+				$output[$key]["/exhibitions/exhibition_run/closed_on"] = $venue["/exhibitions/exhibition_run/closed_on"];
+				$output[$key]["/exhibitions/exhibition_run/venue"] = check_array_is_returned($venue["/exhibitions/exhibition_run/venue"]["mid"]);
+				
+				$topic_name_pairs = get_topic_name_pairs(array("/exhibitions/exhibition_run/venue"),$venue,$topic_name_pairs);
+				
+			}
+			$topic_name_pairs = get_topic_name_pairs(array("/exhibitions/exhibition/produced_by","/exhibitions/exhibition/exhibition_types","/exhibitions/exhibition/exhibits","/exhibitions/exhibition/curators","/exhibitions/exhibition/subjects"),$exhibition,$topic_name_pairs);
+			$topic_name_pairs = add_top_level_pair($exhibition, $topic_name_pairs);
+			$topic_event_links[] = array($topic, 'Exhibitions', $exhibition["mid"]);
+			
+		}
+	}
+	return array("events"=>array_merge($output, $previous_output["events"]),
+			"names"=>array_merge($topic_name_pairs, $previous_output["names"]));
+}
+
 function fb_topic_exhibition_producer($topic, $previous_output = array("events"=>array(),"names"=>array(), "links"=>array())) {
 	$query = array(array(
   "mid"=> $topic,
@@ -4891,11 +5005,15 @@ function fb_topic_exhibition_producer($topic, $previous_output = array("events"=
 	
 	$resultarray = execute_mql_event_query($query);
 
+	if(isset($resultarray["result"][0]["/exhibitions/exhibition_producer/exhibitions_produced"][0]['/exhibitions/exhibition/venues'][0])) {
+		return $previous_output;
+	}
+
 	$output = array();
 	if(!isset($resultarray["result"][0])) {
 		return $previous_output;
 	}
-	$topic_event_links = array();
+
 	$topic_name_pairs = array();
 
 	foreach($resultarray["result"][0]["/exhibitions/exhibition_producer/exhibitions_produced"] as $result) {
@@ -4921,13 +5039,11 @@ function fb_topic_exhibition_producer($topic, $previous_output = array("events"=
 
 		$topic_name_pairs = get_topic_name_pairs(array("/exhibitions/exhibition/produced_by","/exhibitions/exhibition/venues","/exhibitions/exhibition/exhibition_types","/exhibitions/exhibition/exhibits","/exhibitions/exhibition/curators","/exhibitions/exhibition/subjects"),$result,$topic_name_pairs);
 		$topic_name_pairs = add_top_level_pair($result, $topic_name_pairs);
-		$topic_event_links[] = array($topic, 'Exhibitions produced', $result["mid"]);
 	
 	}
 	
 	return array("events"=>array_merge($output, $previous_output["events"]),
-			"names"=>array_merge($topic_name_pairs, $previous_output["names"]),
-			"links"=>array_merge($topic_event_links, $previous_output["links"]));
+			"names"=>array_merge($topic_name_pairs, $previous_output["names"]));
 }
 
 /**
@@ -4971,7 +5087,7 @@ function fb_topic_exhibition_curator($topic, $previous_output = array("events"=>
 	if(!isset($resultarray["result"][0])) {
 		return $previous_output;
 	}	
-	$topic_event_links = array();
+
 	$topic_name_pairs = array();
 
 	foreach($resultarray["result"][0]["/exhibitions/exhibition_curator/exhibitions_curated"] as $result) {
@@ -4999,12 +5115,10 @@ function fb_topic_exhibition_curator($topic, $previous_output = array("events"=>
 
 		$topic_name_pairs = get_topic_name_pairs(array("/exhibitions/exhibition/produced_by","/exhibitions/exhibition/venues","/exhibitions/exhibition/exhibition_types","/exhibitions/exhibition/exhibits","/exhibitions/exhibition/curators","/exhibitions/exhibition/subjects"),$result,$topic_name_pairs);
 		$topic_name_pairs = add_top_level_pair($result, $topic_name_pairs);
-		$topic_event_links[] = array($topic, 'Exhibitions curated', $result["mid"]);
 	}
 	
 	return array("events"=>array_merge($output, $previous_output["events"]),
-			"names"=>array_merge($topic_name_pairs, $previous_output["names"]),
-			"links"=>array_merge($topic_event_links, $previous_output["links"]));
+			"names"=>array_merge($topic_name_pairs, $previous_output["names"]));
 }
 
 /**
@@ -5049,7 +5163,6 @@ function fb_topic_exhibition_subject($topic, $previous_output = array("events"=>
 	if(!isset($resultarray["result"][0])) {
 		return $previous_output;
 	}
-	$topic_event_links = array();
 	$topic_name_pairs = array();
 
 	foreach($resultarray["result"][0]["/exhibitions/exhibition_subject/exhibitions_created_about_this_subject"] as $result) {
@@ -5075,13 +5188,11 @@ function fb_topic_exhibition_subject($topic, $previous_output = array("events"=>
 		
 		$topic_name_pairs = get_topic_name_pairs(array("/exhibitions/exhibition/produced_by","/exhibitions/exhibition/venues","/exhibitions/exhibition/exhibition_types","/exhibitions/exhibition/exhibits","/exhibitions/exhibition/curators","/exhibitions/exhibition/subjects"),$result,$topic_name_pairs);
 		$topic_name_pairs = add_top_level_pair($result, $topic_name_pairs);
-		$topic_event_links[] = array($topic, 'Subject of exhibition', $result["mid"]);
 
 	}
 	
 	return array("events"=>array_merge($output, $previous_output["events"]),
-			"names"=>array_merge($topic_name_pairs, $previous_output["names"]),
-			"links"=>array_merge($topic_event_links, $previous_output["links"]));
+			"names"=>array_merge($topic_name_pairs, $previous_output["names"]));
 }
 
 /**
@@ -5115,7 +5226,7 @@ function fb_topic_art_owner($topic, $previous_output = array("events"=>array(),"
 	if(!isset($resultarray["result"][0])) {
 		return $previous_output;
 	}	
-	$topic_event_links = array();
+
 	$topic_name_pairs = array();
 
 	foreach($resultarray["result"][0]["/visual_art/art_owner/artworks_owned"] as $result) {
@@ -5127,7 +5238,6 @@ function fb_topic_art_owner($topic, $previous_output = array("events"=>array(),"
 
 		$topic_name_pairs = get_topic_name_pairs(array("/visual_art/artwork_owner_relationship/owner","/visual_art/artwork_owner_relationship/artwork"),$result,$topic_name_pairs);
 		$topic_name_pairs = add_top_level_pair($result, $topic_name_pairs);
-		$topic_event_links[] = array($topic, 'Objects owned', $result["mid"]);
 		
 		//add inferred locations for artwork creation
 		$location_result = locations_for_artwork_ownership_date($output[$result["mid"]]["/visual_art/artwork_owner_relationship/owner"][0], $output[$result["mid"]]["/visual_art/artwork_owner_relationship/date_acquired"], $output[$result["mid"]]["/visual_art/artwork_owner_relationship/last_date_owned"]);
@@ -5141,14 +5251,13 @@ function fb_topic_art_owner($topic, $previous_output = array("events"=>array(),"
 	}
 	
 	return array("events"=>array_merge($output, $previous_output["events"]),
-			"names"=>array_merge($topic_name_pairs, $previous_output["names"]),
-			"links"=>array_merge($topic_event_links, $previous_output["links"]));
+			"names"=>array_merge($topic_name_pairs, $previous_output["names"]));
 }
 
 /**
  * Retrieve award history of an award winner
  */
-function fb_topic_award_winner($topic, $previous_output = array("events"=>array(),"names"=>array(), "links"=>array())) {
+function fb_topic_award_winner($topic, $previous_output = array("events"=>array(),"names"=>array())) {
 	$query = array(array(
   "mid"=> $topic,
   "/award/award_winner/awards_won"=> array(array(
@@ -5181,7 +5290,7 @@ function fb_topic_award_winner($topic, $previous_output = array("events"=>array(
 	if(!isset($resultarray["result"][0])) {
 		return $previous_output;
 	}	
-	$topic_event_links = array();
+
 	$topic_name_pairs = array();
 
 	foreach($resultarray["result"][0]["/award/award_winner/awards_won"] as $result) {
@@ -5214,8 +5323,7 @@ function fb_topic_award_winner($topic, $previous_output = array("events"=>array(
 	
 	}
 	return array("events"=>array_merge($output, $previous_output["events"]),
-			"names"=>array_merge($topic_name_pairs, $previous_output["names"]),
-			"links"=>array_merge($topic_event_links, $previous_output["links"]));
+			"names"=>array_merge($topic_name_pairs, $previous_output["names"]));
 }
 
 /**
@@ -5249,7 +5357,7 @@ function fb_topic_award_nominee($topic, $previous_output = array("events"=>array
 	if(!isset($resultarray["result"][0])) {
 		return $previous_output;
 	}	
-	$topic_event_links = array();
+
 	$topic_name_pairs = array();
 	foreach($resultarray["result"][0]["/award/award_nominee/award_nominations"] as $result) {
 		$output[$result["mid"]]["activity"] = "award_nomination";
@@ -5267,7 +5375,6 @@ function fb_topic_award_nominee($topic, $previous_output = array("events"=>array
 
 		$topic_name_pairs = get_topic_name_pairs(array("/award/award_nomination/award","/award/award_nomination/nominated_for","/award/award_nomination/award_nominee","/award/award_nomination/ceremony"),$result,$topic_name_pairs);
 		$topic_name_pairs = add_top_level_pair($result, $topic_name_pairs);
-		$topic_event_links[] = array($topic, 'Award nominations', $result["mid"]);
 		
 		//add locations for award or ceremony
 		$location_result = locations_for_ceremony_award($output[$result["mid"]]["/award/award_nomination/ceremony"], $output[$result["mid"]]["/award/award_nomination/award"]);
@@ -5281,13 +5388,12 @@ function fb_topic_award_nominee($topic, $previous_output = array("events"=>array
 	}
 	
 	return array("events"=>array_merge($output, $previous_output["events"]),
-			"names"=>array_merge($topic_name_pairs, $previous_output["names"]),
-			"links"=>array_merge($topic_event_links, $previous_output["links"]));
+			"names"=>array_merge($topic_name_pairs, $previous_output["names"]));
 }
 
 
 /**
- * artworks, their artists and times
+ * artworks, their artists and times - test function
  */
 function artwork_artist_begun_completed() {
 	$query = "SELECT event_artist_artwork_begun_table.artist, event_artist_artwork_begun_table.artwork, event_artist_artwork_begun_table.begun, event_completed_table.completed
@@ -5642,7 +5748,7 @@ function fb_artwork_created($topic, $previous_output = array("events"=>array(),"
 	if(!isset($resultarray["result"][0])) {
 		return $previous_output;
 	}
-	$topic_event_links = array();
+
 	$topic_name_pairs = array();
 	foreach($resultarray["result"] as $result) {
 		$output[$result["mid"]]["activity"] = "object_creation";
@@ -5687,13 +5793,11 @@ function fb_artwork_created($topic, $previous_output = array("events"=>array(),"
 
 		$topic_name_pairs = get_topic_name_pairs(array("/visual_art/artwork/artist","/visual_art/artwork/art_subject","/visual_art/artwork/art_form","/visual_art/artwork/art_genre","/visual_art/artwork/media","/visual_art/artwork/support","/visual_art/artwork/period_or_movement","/visual_art/artwork/locations","/visual_art/artwork/owners","/visual_art/artwork/editions","/visual_art/artwork/edition_of","/visual_art/artwork/belongs_to_series","/exhibitions/exhibit/exhibitions_displayed_in"),$result,$topic_name_pairs);
 		$topic_name_pairs = add_top_level_pair($result, $topic_name_pairs);
-		$topic_event_links[] = array($topic, 'Object creation details', $result["mid"]);
 
 	}
 	
 	return array("events"=>array_merge($output, $previous_output["events"]),
-			"names"=>array_merge($topic_name_pairs, $previous_output["names"]),
-			"links"=>array_merge($topic_event_links, $previous_output["links"]));
+			"names"=>array_merge($topic_name_pairs, $previous_output["names"]));
 	
 }
 
@@ -5723,7 +5827,6 @@ function fb_artwork_located($topic, $previous_output = array("events"=>array(),"
 		return $previous_output;
 	}
 
-	$topic_event_links = array();
 	$topic_name_pairs = array();
 	foreach($resultarray["result"][0]["/visual_art/artwork/locations"] as $result) {
 		$output[$result["mid"]]["activity"] = "object_location";
@@ -5734,13 +5837,11 @@ function fb_artwork_located($topic, $previous_output = array("events"=>array(),"
 
 		$topic_name_pairs = get_topic_name_pairs(array("/visual_art/artwork_location_relationship/artwork","/visual_art/artwork_location_relationship/location"),$result,$topic_name_pairs);
 		$topic_name_pairs = add_top_level_pair($result, $topic_name_pairs);
-		$topic_event_links[] = array($topic, 'Object locations', $result["mid"]);
 
 	}
 
 	return array("events"=>array_merge($output, $previous_output["events"]),
-			"names"=>array_merge($topic_name_pairs, $previous_output["names"]),
-			"links"=>array_merge($topic_event_links, $previous_output["links"]));
+			"names"=>array_merge($topic_name_pairs, $previous_output["names"]));
 
 }
 
@@ -5775,7 +5876,6 @@ function fb_object_owned($topic, $previous_output = array("events"=>array(),"nam
 	if(!isset($resultarray["result"][0])) {
 		return $previous_output;
 	}
-	$topic_event_links = array();
 	$topic_name_pairs = array();
 	
 	foreach($resultarray["result"][0]["/visual_art/artwork/owners"] as $result) {
@@ -5787,7 +5887,6 @@ function fb_object_owned($topic, $previous_output = array("events"=>array(),"nam
 
 		$topic_name_pairs = get_topic_name_pairs(array("/visual_art/artwork_owner_relationship/owner","/visual_art/artwork_owner_relationship/artwork"),$result,$topic_name_pairs);
 		$topic_name_pairs = add_top_level_pair($result, $topic_name_pairs);
-		$topic_event_links[] = array($topic, 'Object ownership history', $result["mid"]);
 		
 		//add inferred locations for artwork creation
 		$location_result = locations_for_artwork_ownership_date($output[$result["mid"]]["/visual_art/artwork_owner_relationship/owner"][0], $output[$result["mid"]]["/visual_art/artwork_owner_relationship/date_acquired"], $output[$result["mid"]]["/visual_art/artwork_owner_relationship/last_date_owned"]);
@@ -5801,8 +5900,7 @@ function fb_object_owned($topic, $previous_output = array("events"=>array(),"nam
 	}
 	
 	return array("events"=>array_merge($output, $previous_output["events"]),
-			"names"=>array_merge($topic_name_pairs, $previous_output["names"]),
-			"links"=>array_merge($topic_event_links, $previous_output["links"]));
+			"names"=>array_merge($topic_name_pairs, $previous_output["names"]));
 }
 
 /**
@@ -5836,7 +5934,6 @@ function fb_object_award_nominated_work($topic, $previous_output = array("events
 	if(!isset($resultarray["result"][0])) {
 		return $previous_output;
 	}
-	$topic_event_links = array();
 	$topic_name_pairs = array();
 
 	foreach($resultarray["result"][0]["/award/award_nominated_work/award_nominations"] as $result) {
@@ -5855,7 +5952,6 @@ function fb_object_award_nominated_work($topic, $previous_output = array("events
 
 		$topic_name_pairs = get_topic_name_pairs(array("/award/award_nomination/award","/award/award_nomination/nominated_for","/award/award_nomination/award_nominee","/award/award_nomination/ceremony"),$result,$topic_name_pairs);
 		$topic_name_pairs = add_top_level_pair($result, $topic_name_pairs);
-		$topic_event_links[] = array($topic, 'Award nominations for object', $result["mid"]);
 		
 		//add locations for award or ceremony
 		$location_result = locations_for_ceremony_award($output[$result["mid"]]["/award/award_nomination/ceremony"], $output[$result["mid"]]["/award/award_nomination/award"]);
@@ -5868,8 +5964,7 @@ function fb_object_award_nominated_work($topic, $previous_output = array("events
 	}
 	
 	return array("events"=>array_merge($output, $previous_output["events"]),
-			"names"=>array_merge($topic_name_pairs, $previous_output["names"]),
-			"links"=>array_merge($topic_event_links, $previous_output["links"]));
+			"names"=>array_merge($topic_name_pairs, $previous_output["names"]));
 }
 
 /**
@@ -5908,7 +6003,6 @@ function fb_object_award_winning_work($topic, $previous_output = array("events"=
 	if(!isset($resultarray["result"][0])) {
 		return $previous_output;
 	}
-	$topic_event_links = array();
 	$topic_name_pairs = array();
 
 	foreach($resultarray["result"][0]["/award/award_winning_work/awards_won"] as $result) {
@@ -5929,7 +6023,6 @@ function fb_object_award_winning_work($topic, $previous_output = array("events"=
 
 		$topic_name_pairs = get_topic_name_pairs(array("/award/award_honor/award","/award/award_honor/honored_for","/award/award_honor/award_winner","/award/award_honor/ceremony","/award/award_honor/achievement_level"),$result,$topic_name_pairs);
 		$topic_name_pairs = add_top_level_pair($result, $topic_name_pairs);
-		$topic_event_links[] = array($topic, 'Awards won for object', $result["mid"]);
 		
 		//add locations for award or ceremony
 		$location_result = locations_for_ceremony_award($output[$result["mid"]]["/award/award_honor/ceremony"], $output[$result["mid"]]["/award/award_honor/award"]);
@@ -5942,8 +6035,7 @@ function fb_object_award_winning_work($topic, $previous_output = array("events"=
 	}
 
 	return array("events"=>array_merge($output, $previous_output["events"]),
-			"names"=>array_merge($topic_name_pairs, $previous_output["names"]),
-			"links"=>array_merge($topic_event_links, $previous_output["links"]));
+			"names"=>array_merge($topic_name_pairs, $previous_output["names"]));
 }
 
 /**
@@ -5987,7 +6079,7 @@ function fb_object_exhibited($topic, $previous_output = array("events"=>array(),
 	if(!isset($resultarray["result"][0])) {
 		return $previous_output;
 	}
-	$topic_event_links = array();
+
 	$topic_name_pairs = array();
 
 	foreach($resultarray["result"][0]["/exhibitions/exhibit/exhibitions_displayed_in"] as $result) {
@@ -6014,17 +6106,17 @@ function fb_object_exhibited($topic, $previous_output = array("events"=>array(),
 
 		$topic_name_pairs = get_topic_name_pairs(array("/exhibitions/exhibition/produced_by","/exhibitions/exhibition/venues","/exhibitions/exhibition/exhibition_types","/exhibitions/exhibition/exhibits","/exhibitions/exhibition/curators","/exhibitions/exhibition/subjects"),$result,$topic_name_pairs);
 		$topic_name_pairs = add_top_level_pair($result, $topic_name_pairs);
-		$topic_event_links[] = array($topic, 'Object exhibition history', $result["mid"]);
 	}
 
 	return array("events"=>array_merge($output, $previous_output["events"]),
-			"names"=>array_merge($topic_name_pairs, $previous_output["names"]),
-			"links"=>array_merge($topic_event_links, $previous_output["links"]));
+			"names"=>array_merge($topic_name_pairs, $previous_output["names"]));
 }
 
 /**
  * Retrieve exhibition data for topic that is an exhibition//****here no date info
 */
+//fb_exhibition_production_of_the_exhibition("/m/052tvg1")
+//fb_exhibition_production_of_the_exhibition
 function fb_exhibition_production_of_the_exhibition($topic, $previous_output = array("events"=>array(),"names"=>array(), "links"=>array())) {
 	$query = array(array(
   "mid"=> $topic,
@@ -6048,53 +6140,121 @@ function fb_exhibition_production_of_the_exhibition($topic, $previous_output = a
     "/exhibitions/exhibition/subjects"=> array(array(
       "name"=> null,"mid"=> null,
       "optional"=> "optional"
-    ))
+    )),
+	"/exhibitions/exhibition/venues"=> array(array(
+		"mid"=> null,
+		"/exhibitions/exhibition_run/venue"=> array(
+			"name"=> null,
+			"mid"=> null
+		),
+		"/exhibitions/exhibition_run/opened_on"=> null,
+		"/exhibitions/exhibition_run/closed_on"=> null,
+		"optional"=> "optional"
+	)),
  ));
+	
+	//
 	$resultarray = execute_mql_event_query($query);
-
 	$output = array();
 	if(!isset($resultarray["result"][0])) {
 		return $previous_output;
 	}
-	$topic_event_links = array();
-	$topic_name_pairs = array();
 	
-	foreach($resultarray["result"] as $result) {
-
-		$output[$result["mid"]]["activity"] = "exhibition_creation";
-		$output[$result["mid"]]["/exhibitions/exhibition/produced_by"] = get_values($result["/exhibitions/exhibition/produced_by"]);
-		$output[$result["mid"]]["/exhibitions/exhibition/curators"] = get_values($result["/exhibitions/exhibition/curators"]);
-// 		array_merge(get_values($result["/exhibitions/exhibition/produced_by"]),
-// 				get_values($result["/exhibitions/exhibition/curators"]));
-		
-		$output[$result["mid"]]["/exhibitions/exhibition/exhibition_types"] = get_values($result["/exhibitions/exhibition/exhibition_types"]);
-		$output[$result["mid"]]["/exhibitions/exhibition/exhibits"] = get_values($result["/exhibitions/exhibition/exhibits"]);
-		$output[$result["mid"]]["/exhibitions/exhibition/subjects"] = get_values($result["/exhibitions/exhibition/subjects"]);
-		$output[$result["mid"]]["/exhibitions/exhibition"] = check_array_is_returned($result["mid"]);
-		
-// 		$output[$result["mid"]]["tags"] =
-// 		array_merge(
-// // 		removed because a pointer to a connecting node
-// // 				get_values($result["/exhibitions/exhibition/venues"]),
-// 				get_values($result["/exhibitions/exhibition/exhibition_types"]),
-// 				get_values($result["/exhibitions/exhibition/exhibits"]),
-// 				get_values($result["/exhibitions/exhibition/subjects"]),
-// 				check_array_is_returned($result["mid"]));
-		
-		$topic_name_pairs = get_topic_name_pairs(array("/exhibitions/exhibition/produced_by","/exhibitions/exhibition/venues","/exhibitions/exhibition/exhibition_types","/exhibitions/exhibition/exhibits","/exhibitions/exhibition/curators","/exhibitions/exhibition/subjects"),$result,$topic_name_pairs);
-		$topic_name_pairs = add_top_level_pair($result, $topic_name_pairs);
-		$topic_event_links[] = array($topic, 'Exhibition creation details', $result["mid"]);
-
+	$topic_name_pairs = array();
+	//list of exhibitions
+	foreach($resultarray["result"] as $exhibition) {
+		//find out if exhibition with venue
+		if(empty($exhibition['/exhibitions/exhibition/venues'])) {
+			$key = $exhibition['mid'];
+	
+			//if non-venue exhibition
+			$output[$key]["activity"] = "exhibition_creation";
+			$output[$key]["/exhibitions/exhibition/produced_by"] = get_values($exhibition["/exhibitions/exhibition/produced_by"]);
+			$output[$key]["/exhibitions/exhibition/curators"] = get_values($exhibition["/exhibitions/exhibition/curators"]);
+			$output[$key]["/exhibitions/exhibition/exhibition_types"] = get_values($exhibition["/exhibitions/exhibition/exhibition_types"]);
+			$output[$key]["/exhibitions/exhibition/exhibits"] = get_values($exhibition["/exhibitions/exhibition/exhibits"]);
+			$output[$key]["/exhibitions/exhibition/subjects"] = get_values($exhibition["/exhibitions/exhibition/subjects"]);
+			$output[$key]["/exhibitions/exhibition"] = check_array_is_returned($exhibition["mid"]);
+				
+			$topic_name_pairs = get_topic_name_pairs(array("/exhibitions/exhibition/produced_by","/exhibitions/exhibition/venues","/exhibitions/exhibition/exhibition_types","/exhibitions/exhibition/exhibits","/exhibitions/exhibition/curators","/exhibitions/exhibition/subjects"),$exhibition,$topic_name_pairs);
+			$topic_name_pairs = add_top_level_pair($exhibition, $topic_name_pairs);
+	
+		}
+		else {
+			foreach($exhibition['/exhibitions/exhibition/venues'] as $venue) {
+				$key = $venue['mid'];
+	
+				//details of the exhibition
+				$output[$key]["activity"] = "exhibition_creation";
+				$output[$key]["/exhibitions/exhibition/produced_by"] = get_values($exhibition["/exhibitions/exhibition/produced_by"]);
+				$output[$key]["/exhibitions/exhibition/curators"] = get_values($exhibition["/exhibitions/exhibition/curators"]);
+				$output[$key]["/exhibitions/exhibition/exhibition_types"] = get_values($exhibition["/exhibitions/exhibition/exhibition_types"]);
+				$output[$key]["/exhibitions/exhibition/exhibits"] = get_values($exhibition["/exhibitions/exhibition/exhibits"]);
+				$output[$key]["/exhibitions/exhibition/subjects"] = get_values($exhibition["/exhibitions/exhibition/subjects"]);
+				$output[$key]["/exhibitions/exhibition"] = check_array_is_returned($exhibition["mid"]);
+	
+				//details of the exhibition run
+				$output[$key]["/exhibitions/exhibition_run/opened_on"] = $venue["/exhibitions/exhibition_run/opened_on"];
+				$output[$key]["/exhibitions/exhibition_run/closed_on"] = $venue["/exhibitions/exhibition_run/closed_on"];
+				$output[$key]["/exhibitions/exhibition_run/venue"] = check_array_is_returned($venue["/exhibitions/exhibition_run/venue"]["mid"]);
+	
+	
+			}
+			$topic_name_pairs = get_topic_name_pairs(array("/exhibitions/exhibition/produced_by","/exhibitions/exhibition/venues","/exhibitions/exhibition/exhibition_types","/exhibitions/exhibition/exhibits","/exhibitions/exhibition/curators","/exhibitions/exhibition/subjects"),$exhibition,$topic_name_pairs);
+			$topic_name_pairs = add_top_level_pair($exhibition, $topic_name_pairs);
+				
+		}
 	}
+	return array("events"=>array_merge($output, $previous_output["events"]),
+			"names"=>array_merge($topic_name_pairs, $previous_output["names"]));
+	
+	
+	
+	//
+// 	$resultarray = execute_mql_event_query($query);
+
+// 	$output = array();
+// 	if(!isset($resultarray["result"][0])) {
+// 		return $previous_output;
+// 	}
+// 	$topic_event_links = array();
+// 	$topic_name_pairs = array();
+	
+// 	foreach($resultarray["result"] as $result) {
+
+// 		$output[$result["mid"]]["activity"] = "exhibition_creation";
+// 		$output[$result["mid"]]["/exhibitions/exhibition/produced_by"] = get_values($result["/exhibitions/exhibition/produced_by"]);
+// 		$output[$result["mid"]]["/exhibitions/exhibition/curators"] = get_values($result["/exhibitions/exhibition/curators"]);
+// // 		array_merge(get_values($result["/exhibitions/exhibition/produced_by"]),
+// // 				get_values($result["/exhibitions/exhibition/curators"]));
+		
+// 		$output[$result["mid"]]["/exhibitions/exhibition/exhibition_types"] = get_values($result["/exhibitions/exhibition/exhibition_types"]);
+// 		$output[$result["mid"]]["/exhibitions/exhibition/exhibits"] = get_values($result["/exhibitions/exhibition/exhibits"]);
+// 		$output[$result["mid"]]["/exhibitions/exhibition/subjects"] = get_values($result["/exhibitions/exhibition/subjects"]);
+// 		$output[$result["mid"]]["/exhibitions/exhibition"] = check_array_is_returned($result["mid"]);
+		
+// // 		$output[$result["mid"]]["tags"] =
+// // 		array_merge(
+// // // 		removed because a pointer to a connecting node
+// // // 				get_values($result["/exhibitions/exhibition/venues"]),
+// // 				get_values($result["/exhibitions/exhibition/exhibition_types"]),
+// // 				get_values($result["/exhibitions/exhibition/exhibits"]),
+// // 				get_values($result["/exhibitions/exhibition/subjects"]),
+// // 				check_array_is_returned($result["mid"]));
+		
+// 		$topic_name_pairs = get_topic_name_pairs(array("/exhibitions/exhibition/produced_by","/exhibitions/exhibition/venues","/exhibitions/exhibition/exhibition_types","/exhibitions/exhibition/exhibits","/exhibitions/exhibition/curators","/exhibitions/exhibition/subjects"),$result,$topic_name_pairs);
+// 		$topic_name_pairs = add_top_level_pair($result, $topic_name_pairs);
+// 		$topic_event_links[] = array($topic, 'Exhibition creation details', $result["mid"]);
+
+// 	}
 	
 	return array("events"=>array_merge($output, $previous_output["events"]),
-			"names"=>array_merge($topic_name_pairs, $previous_output["names"]),
-			"links"=>array_merge($topic_event_links, $previous_output["links"]));
+			"names"=>array_merge($topic_name_pairs, $previous_output["names"]));
 		
 }
 
 /**
- * Retrieve exhibition run data for topic that is an exhibition
+ * Retrieve exhibition run data for topic that is an exhibition - no longer needed
 */
 function fb_exhibition_held_at_venue($topic, $previous_output = array("events"=>array(),"names"=>array(), "links"=>array())) {
 
@@ -6119,7 +6279,7 @@ function fb_exhibition_held_at_venue($topic, $previous_output = array("events"=>
 	if(!isset($resultarray["result"][0])) {
 		return $previous_output;
 	}
-	$topic_event_links = array();
+
 	$topic_name_pairs = array();
 	
 	foreach($resultarray["result"][0]["/exhibitions/exhibition/venues"] as $result) {
@@ -6134,13 +6294,11 @@ function fb_exhibition_held_at_venue($topic, $previous_output = array("events"=>
 		
 		$topic_name_pairs = get_topic_name_pairs(array("/exhibitions/exhibition_run/exhibition","/exhibitions/exhibition_run/venue"),$result,$topic_name_pairs);
 		$topic_name_pairs = add_top_level_pair($result, $topic_name_pairs);
-		$topic_event_links[] = array($topic, 'Exhibition runs', $result["mid"]);
 	}
 	
 
 	return array("events"=>array_merge($output, $previous_output["events"]),
-			"names"=>array_merge($topic_name_pairs, $previous_output["names"]),
-			"links"=>array_merge($topic_event_links, $previous_output["links"]));
+			"names"=>array_merge($topic_name_pairs, $previous_output["names"]));
 }
 
 /**
@@ -6217,7 +6375,7 @@ function fb_exhibition_creation_of_object($topic, $previous_output = array("even
 	if(!isset($resultarray["result"][0])) {
 		return $previous_output;
 	}
-	$topic_event_links = array();
+
 	$topic_name_pairs = array();
 
 	foreach($resultarray["result"][0]["/exhibitions/exhibition/exhibits"] as $result) {
@@ -6262,12 +6420,11 @@ function fb_exhibition_creation_of_object($topic, $previous_output = array("even
 		
 		$topic_name_pairs = get_topic_name_pairs(array("/visual_art/artwork/artist","/visual_art/artwork/art_subject","/visual_art/artwork/art_form","/visual_art/artwork/art_genre","/visual_art/artwork/media","/visual_art/artwork/support","/visual_art/artwork/period_or_movement","/visual_art/artwork/locations","/visual_art/artwork/owners","/visual_art/artwork/editions","/visual_art/artwork/edition_of","/visual_art/artwork/belongs_to_series","/exhibitions/exhibit/exhibitions_displayed_in"),$result,$topic_name_pairs);
 		$topic_name_pairs = add_top_level_pair($result, $topic_name_pairs);
-		$topic_event_links[] = array($topic, 'Objects created', $result["mid"]);
+
 	}
 
 	return array("events"=>array_merge($output, $previous_output["events"]),
-			"names"=>array_merge($topic_name_pairs, $previous_output["names"]),
-			"links"=>array_merge($topic_event_links, $previous_output["links"]));
+			"names"=>array_merge($topic_name_pairs, $previous_output["names"]));
 }
 
 /**
@@ -6275,19 +6432,47 @@ function fb_exhibition_creation_of_object($topic, $previous_output = array("even
 */
 function fb_venue_of_exhibitions($topic, $previous_output = array("events"=>array(),"names"=>array(), "links"=>array())) {
 	$query = array(array(
-			"mid"=> $topic,"name"=>null,
-			"/exhibitions/exhibition_venue/exhibitions_at_this_venue"=> array(array(
-					"mid"=> null,
-					"/exhibitions/exhibition_run/exhibition"=> array(
-							"name"=> null,"mid"=> null
-					),
-					"/exhibitions/exhibition_run/venue"=> array(
-							"name"=> null,"mid"=> null
-					),
-					"/exhibitions/exhibition_run/opened_on"=> null,
-					"/exhibitions/exhibition_run/closed_on"=> null
-			))
-	));
+  "mid"=> $topic,
+  "name"=> null,
+  "/exhibitions/exhibition_venue/exhibitions_at_this_venue"=> array(array(
+    "mid"=> null,
+    "/exhibitions/exhibition_run/exhibition"=> array(
+      "name"=> null,
+      "mid"=> null,
+      "/exhibitions/exhibition/produced_by"=> array(array(
+        "name"=> null,
+        "mid"=> null,
+        "optional"=> "optional"
+      )),
+      "/exhibitions/exhibition/exhibition_types"=> array(array(
+        "name"=> null,
+        "mid"=> null,
+        "optional"=> "optional"
+      )),
+      "/exhibitions/exhibition/exhibits"=> array(array(
+        "name"=> null,
+        "mid"=> null,
+        "optional"=> "optional"
+      )),
+      "/exhibitions/exhibition/curators"=> array(array(
+        "name"=> null,
+        "mid"=> null,
+        "optional"=> "optional"
+      )),
+      "/exhibitions/exhibition/subjects"=> array(array(
+        "name"=> null,
+        "mid"=> null,
+        "optional"=> "optional"
+      ))
+    ),
+    "/exhibitions/exhibition_run/venue"=> array(
+      "name"=> null,
+      "mid"=> null
+    ),
+    "/exhibitions/exhibition_run/opened_on"=> null,
+    "/exhibitions/exhibition_run/closed_on"=> null
+  ))
+));
 
 	$resultarray = execute_mql_event_query($query);
 
@@ -6295,28 +6480,33 @@ function fb_venue_of_exhibitions($topic, $previous_output = array("events"=>arra
 	if(!isset($resultarray["result"][0])) {
 		return $previous_output;
 	}
-	$topic_event_links = array();
 	$topic_name_pairs = array();
 
-	foreach($resultarray["result"][0]["/exhibitions/exhibition_venue/exhibitions_at_this_venue"] as $result) {
+	foreach($resultarray["result"][0]["/exhibitions/exhibition_venue/exhibitions_at_this_venue"] as $venue) {
+		$venue_key = $venue["mid"];
 	
-		$output[$result["mid"]]["activity"] = "exhibition_run";
-		$output[$result["mid"]]["/exhibitions/exhibition_run/opened_on"] = $result["/exhibitions/exhibition_run/opened_on"];
-		$output[$result["mid"]]["/exhibitions/exhibition_run/closed_on"] = $result["/exhibitions/exhibition_run/closed_on"];		
-// 		$output[$result["mid"]]["tags"] = array_merge(check_array_is_returned($result["/exhibitions/exhibition_run/exhibition"]["mid"]),
-// 						check_array_is_returned($result["/exhibitions/exhibition_run/venue"]["mid"]));
-		$output[$result["mid"]]["/exhibitions/exhibition_run/venue"] = check_array_is_returned($result["/exhibitions/exhibition_run/venue"]["mid"]);
-		$output[$result["mid"]]["/exhibitions/exhibition_run/exhibition"] = check_array_is_returned($result["/exhibitions/exhibition_run/exhibition"]["mid"]);
+		$output[$venue_key]["activity"] = "exhibition_creation";
+		$output[$venue_key]["/exhibitions/exhibition_run/opened_on"] = $venue["/exhibitions/exhibition_run/opened_on"];
+		$output[$venue_key]["/exhibitions/exhibition_run/closed_on"] = $venue["/exhibitions/exhibition_run/closed_on"];		
+		$output[$venue_key]["/exhibitions/exhibition_run/venue"] = check_array_is_returned($venue["/exhibitions/exhibition_run/venue"]["mid"]);
 		
-		$topic_name_pairs = get_topic_name_pairs(array("/exhibitions/exhibition_run/exhibition","/exhibitions/exhibition_run/venue"),$result,$topic_name_pairs);
-		$topic_name_pairs = add_top_level_pair($result, $topic_name_pairs);
-		$topic_event_links[] = array($topic, 'exhibitions held', $result["mid"]);
+		$topic_name_pairs = get_topic_name_pairs(array("/exhibitions/exhibition_run/exhibition","/exhibitions/exhibition_run/venue"),$venue,$topic_name_pairs);
+		$topic_name_pairs = add_top_level_pair($venue, $topic_name_pairs);
+		
+		$exhibition = $venue["/exhibitions/exhibition_run/exhibition"];
+		$output[$venue_key]["/exhibitions/exhibition/produced_by"] = get_values($exhibition["/exhibitions/exhibition/produced_by"]);
+		$output[$venue_key]["/exhibitions/exhibition/curators"] = get_values($exhibition["/exhibitions/exhibition/curators"]);
+		$output[$venue_key]["/exhibitions/exhibition/exhibition_types"] = get_values($exhibition["/exhibitions/exhibition/exhibition_types"]);
+		$output[$venue_key]["/exhibitions/exhibition/exhibits"] = get_values($exhibition["/exhibitions/exhibition/exhibits"]);
+		$output[$venue_key]["/exhibitions/exhibition/subjects"] = get_values($exhibition["/exhibitions/exhibition/subjects"]);
+		$output[$venue_key]["/exhibitions/exhibition"] = check_array_is_returned($exhibition["mid"]);
+		
+		$topic_name_pairs = get_topic_name_pairs(array("/exhibitions/exhibition/produced_by","/exhibitions/exhibition/venue","/exhibitions/exhibition/exhibition_types","/exhibitions/exhibition/exhibits","/exhibitions/exhibition/curators","/exhibitions/exhibition/subjects"),$exhibition,$topic_name_pairs);
+		$topic_name_pairs = add_top_level_pair($exhibition, $topic_name_pairs);
 	}
 
-
 	return array("events"=>array_merge($output, $previous_output["events"]),
-			"names"=>array_merge($topic_name_pairs, $previous_output["names"]),
-			"links"=>array_merge($topic_event_links, $previous_output["links"]));
+			"names"=>array_merge($topic_name_pairs, $previous_output["names"]));
 }
 
 /**
@@ -6355,7 +6545,6 @@ function fb_award_having_prize_winner($topic, $previous_output = array("events"=
 	if(!isset($resultarray["result"][0])) {
 		return $previous_output;
 	}
-	$topic_event_links = array();
 	$topic_name_pairs = array();
 
 	foreach($resultarray["result"][0]["/award/award_category/winners"] as $result) {
@@ -6376,7 +6565,6 @@ function fb_award_having_prize_winner($topic, $previous_output = array("events"=
 		
 		$topic_name_pairs = get_topic_name_pairs(array("/award/award_honor/award","/award/award_honor/honored_for","/award/award_honor/award_winner","/award/award_honor/ceremony","/award/award_honor/achievement_level"),$result,$topic_name_pairs);
 		$topic_name_pairs = add_top_level_pair($result, $topic_name_pairs);
-		$topic_event_links[] = array($topic, 'Award winners', $result["mid"]);
 		
 		//add locations for award or ceremony
 		$location_result = locations_for_ceremony_award($output[$result["mid"]]["/award/award_honor/ceremony"], $output[$result["mid"]]["/award/award_honor/award"]);
@@ -6392,8 +6580,7 @@ function fb_award_having_prize_winner($topic, $previous_output = array("events"=
 	
 	
 	return array("events"=>array_merge($output, $previous_output["events"]),
-			"names"=>array_merge($topic_name_pairs, $previous_output["names"]),
-			"links"=>array_merge($topic_event_links, $previous_output["links"]));
+			"names"=>array_merge($topic_name_pairs, $previous_output["names"]));
 }
 
 /**
@@ -6427,7 +6614,7 @@ function fb_award_having_nominee($topic, $previous_output = array("events"=>arra
 	if(!isset($resultarray["result"][0])) {
 		return $previous_output;
 	}
-	$topic_event_links = array();
+
 	$topic_name_pairs = array();
 
 	foreach($resultarray["result"][0]["/award/award_category/nominees"] as $result) {
@@ -6447,7 +6634,6 @@ function fb_award_having_nominee($topic, $previous_output = array("events"=>arra
 
 		$topic_name_pairs = get_topic_name_pairs(array("/award/award_nomination/award","/award/award_nomination/nominated_for","/award/award_nomination/award_nominee","/award/award_nomination/ceremony"),$result,$topic_name_pairs);
 		$topic_name_pairs = add_top_level_pair($result, $topic_name_pairs);
-		$topic_event_links[] = array($topic, 'Award nominees', $result["mid"]);
 		
 		//add locations for award or ceremony
 		$location_result = locations_for_ceremony_award($output[$result["mid"]]["/award/award_nomination/ceremony"], $output[$result["mid"]]["/award/award_nomination/award"]);
@@ -6460,8 +6646,7 @@ function fb_award_having_nominee($topic, $previous_output = array("events"=>arra
 	}
 	
 	return array("events"=>array_merge($output, $previous_output["events"]),
-			"names"=>array_merge($topic_name_pairs, $previous_output["names"]),
-			"links"=>array_merge($topic_event_links, $previous_output["links"]));
+			"names"=>array_merge($topic_name_pairs, $previous_output["names"]));
 }
 
 /**
@@ -6515,7 +6700,7 @@ function fb_institution_having_graduates($topic, $previous_output = array("event
 	if(!isset($resultarray["result"][0])) {
 		return $previous_output;
 	}
-	$topic_event_links = array();
+
 	$topic_name_pairs = array();
 
 	foreach($resultarray["result"][0]["/education/educational_institution/students_graduates"] as $result) {
@@ -6540,13 +6725,11 @@ function fb_institution_having_graduates($topic, $previous_output = array("event
 	
 	$topic_name_pairs = get_topic_name_pairs(array('/education/education/student','/education/education/institution','/education/education/degree','/education/education/specialization','/education/education/minor'),$result,$topic_name_pairs);
 	$topic_name_pairs = add_top_level_pair($result, $topic_name_pairs);
-	$topic_event_links[] = array($topic, 'Students', $result["mid"]);
 	
 	}
 
 	return array("events"=>array_merge($output, $previous_output["events"]),
-			"names"=>array_merge($topic_name_pairs, $previous_output["names"]),
-			"links"=>array_merge($topic_event_links, $previous_output["links"]));
+			"names"=>array_merge($topic_name_pairs, $previous_output["names"]));
 	
 }
 
@@ -6583,7 +6766,7 @@ function fb_organisation_having_members($topic, $previous_output = array("events
 	if(!isset($resultarray["result"][0])) {
 		return $previous_output;
 	}
-	$topic_event_links = array();
+
 	$topic_name_pairs = array();
 
 	foreach($resultarray["result"][0]["/organization/membership_organization/members"] as $result) {
@@ -6602,13 +6785,11 @@ function fb_organisation_having_members($topic, $previous_output = array("events
 			
 	$topic_name_pairs = get_topic_name_pairs(array("/organization/organization_membership/member","/organization/organization_membership/organization"),$result,$topic_name_pairs);
 	$topic_name_pairs = add_top_level_pair($result, $topic_name_pairs);
-	$topic_event_links[] = array($topic, 'Members', $result["mid"]);
 	}
 	
 
 	return array("events"=>array_merge($output, $previous_output["events"]),
-			"names"=>array_merge($topic_name_pairs, $previous_output["names"]),
-			"links"=>array_merge($topic_event_links, $previous_output["links"]));
+			"names"=>array_merge($topic_name_pairs, $previous_output["names"]));
 	
 }
 
@@ -6686,7 +6867,6 @@ function fb_topic_artwork_subject($topic, $previous_output = array("events"=>arr
 	if(!isset($resultarray["result"][0])) {
 		return $previous_output;
 	}
-	$topic_event_links = array();
 	$topic_name_pairs = array();
 
 	foreach($resultarray["result"][0]["/visual_art/art_subject/artwork_on_the_subject"] as $result) {
@@ -6721,7 +6901,6 @@ function fb_topic_artwork_subject($topic, $previous_output = array("events"=>arr
 	
 		$topic_name_pairs = get_topic_name_pairs(array("/visual_art/artwork/artist","/visual_art/artwork/art_subject","/visual_art/artwork/art_form","/visual_art/artwork/art_genre","/visual_art/artwork/media","/visual_art/artwork/support","/visual_art/artwork/period_or_movement","/visual_art/artwork/locations","/visual_art/artwork/owners","/visual_art/artwork/editions","/visual_art/artwork/edition_of","/visual_art/artwork/belongs_to_series","/exhibitions/exhibit/exhibitions_displayed_in"),$result,$topic_name_pairs);
 		$topic_name_pairs = add_top_level_pair($result, $topic_name_pairs);
-		$topic_event_links[] = array($topic, 'Subject of works', $result["mid"]);
 		
 		//add inferred locations for artwork creation
 		$location_result = locations_for_artwork_creation_date($output[$result["mid"]]["/visual_art/artwork"][0], $output[$result["mid"]]["/visual_art/artwork/artist"][0], $output[$result["mid"]]["/visual_art/artwork/date_begun"], $output[$result["mid"]]["/visual_art/artwork/date_completed"]);
@@ -6734,8 +6913,7 @@ function fb_topic_artwork_subject($topic, $previous_output = array("events"=>arr
 	}
 
 	return array("events"=>array_merge($output, $previous_output["events"]),
-			"names"=>array_merge($topic_name_pairs, $previous_output["names"]),
-			"links"=>array_merge($topic_event_links, $previous_output["links"]));
+			"names"=>array_merge($topic_name_pairs, $previous_output["names"]));
 }
 
 /**
@@ -6812,7 +6990,6 @@ function fb_period_movement_creating_object($topic, $previous_output = array("ev
 	if(!isset($resultarray["result"][0])) {
 		return $previous_output;
 	}
-	$topic_event_links = array();
 	$topic_name_pairs = array();
 	
 	foreach($resultarray["result"][0]["/visual_art/art_period_movement/associated_artworks"] as $result) {
@@ -6857,12 +7034,10 @@ function fb_period_movement_creating_object($topic, $previous_output = array("ev
 		
 		$topic_name_pairs = get_topic_name_pairs(array("/visual_art/artwork/artist","/visual_art/artwork/art_subject","/visual_art/artwork/art_form","/visual_art/artwork/art_genre","/visual_art/artwork/media","/visual_art/artwork/support","/visual_art/artwork/period_or_movement","/visual_art/artwork/locations","/visual_art/artwork/owners","/visual_art/artwork/editions","/visual_art/artwork/edition_of","/visual_art/artwork/belongs_to_series","/exhibitions/exhibit/exhibitions_displayed_in"),$result,$topic_name_pairs);
 		$topic_name_pairs = add_top_level_pair($result, $topic_name_pairs);
-		$topic_event_links[] = array($topic, 'Objects created', $result["mid"]);
 	}
 	
 	return array("events"=>array_merge($output, $previous_output["events"]),
-			"names"=>array_merge($topic_name_pairs, $previous_output["names"]),
-			"links"=>array_merge($topic_event_links, $previous_output["links"]));	
+			"names"=>array_merge($topic_name_pairs, $previous_output["names"]));	
 }
 
 /**
@@ -6918,7 +7093,7 @@ function fb_period_movement_creating_publication($topic, $previous_output = arra
 	if(!isset($resultarray["result"][0])) {
 		return $previous_output;
 	}
-	$topic_event_links = array();
+
 	$topic_name_pairs = array();
 	
 	foreach($resultarray["result"][0]["/book/school_or_movement/associated_works"] as $result) {
@@ -6944,7 +7119,6 @@ function fb_period_movement_creating_publication($topic, $previous_output = arra
 		$topic_name_pairs = get_topic_name_pairs(array("/book/written_work/author","/book/written_work/editor","/book/written_work/date_of_first_publication",
 				"/book/written_work/school_or_movement","/book/written_work/part_of_series","/book/written_work/previous_in_series","/book/written_work/next_in_series"),$result,$topic_name_pairs);
 		$topic_name_pairs = add_top_level_pair($result, $topic_name_pairs);
-		$topic_event_links[] = array($topic, 'Books authored', $result["mid"]);
 	
 		//add inferred locations for artwork creation
 		$location_result = locations_for_authorship_date($output[$result["mid"]]["/book/written_work/author"][0], $output[$result["mid"]]["/book/written_work/date_of_first_publication"]);
@@ -6957,8 +7131,7 @@ function fb_period_movement_creating_publication($topic, $previous_output = arra
 	}
 	
 	return array("events"=>array_merge($output, $previous_output["events"]),
-			"names"=>array_merge($topic_name_pairs, $previous_output["names"]),
-			"links"=>array_merge($topic_event_links, $previous_output["links"]));
+			"names"=>array_merge($topic_name_pairs, $previous_output["names"]));
 }
 
 /**
@@ -6987,7 +7160,6 @@ function fb_event_happening_of_the_event($topic = '/m/03fyn', $previous_output =
 	if(!isset($resultarray["result"][0])) {
 		return $previous_output;
 	}
-	$topic_event_links = array();
 	$topic_name_pairs = array();
 
 	foreach($resultarray["result"] as $result) {
@@ -7005,13 +7177,11 @@ function fb_event_happening_of_the_event($topic = '/m/03fyn', $previous_output =
 
 		$topic_name_pairs = get_topic_name_pairs(array("/time/event/people_involved","/time/event/locations"),$result,$topic_name_pairs);
 		$topic_name_pairs = add_top_level_pair($result, $topic_name_pairs);
-		$topic_event_links[] = array($topic, 'event', $result["mid"]);
 
 	}
 
 return array("events"=>array_merge($output, $previous_output["events"]),
-		"names"=>array_merge($topic_name_pairs, $previous_output["names"]),
-		"links"=>array_merge($topic_event_links, $previous_output["links"]));	
+		"names"=>array_merge($topic_name_pairs, $previous_output["names"]));	
 }
 
 /**
@@ -7125,29 +7295,30 @@ function new_event_space_of_a_topic($topic = "/m/01qwfk", $reload = FALSE) {
 	
 	//changed to facts
 	//**type: /exhibitions/exhibition_producer
-// 	if(in_array("/exhibitions/exhibition_producer", $types)) {
-// 		$res[] = "/exhibitions/exhibition_producer";
-	//producer of exhibition
+	if(in_array("/exhibitions/exhibition_producer", $types)) {
+		$res[] = "/exhibitions/exhibition_producer";
+	//producer of exhibition - event version
 // 		$result = fb_topic_exhibition_producer($topic, $result);
-// 	}
+		$result = fb_topic_exhibition_related_concept($topic, $result,"/exhibitions/exhibition_producer/exhibitions_produced");
+	}
 	
 	//changed to facts
 	//**type: /exhibitions/exhibition_curator
-// 	if(in_array("/exhibitions/exhibition_curator", $types)) {
-// 		$res[] = "/exhibitions/exhibition_curator";
-		//exhibition curator
+	if(in_array("/exhibitions/exhibition_curator", $types)) {
+		$res[] = "/exhibitions/exhibition_curator";
+		//exhibition curator - event version
 // 		$result = fb_topic_exhibition_curator($topic, $result);
-		
-// 	}
+		$result = fb_topic_exhibition_related_concept($topic, $result,"/exhibitions/exhibition_curator/exhibitions_curated");
+	}
 	
 	//changed to facts
 	//**type: /exhibitions/exhibition_subject
-// 	if(in_array("/exhibitions/exhibition_subject", $types)) {
-// 		$res[] = "/exhibitions/exhibition_subject";
-		//exhibition subject
+	if(in_array("/exhibitions/exhibition_subject", $types)) {
+		$res[] = "/exhibitions/exhibition_subject";
+		//exhibition subject - event version
 // 		$result = fb_topic_exhibition_subject($topic, $result);
-		
-// 	}
+		fb_topic_exhibition_related_concept($topic, $result,"/exhibitions/exhibition_subject/exhibitions_created_about_this_subject");
+	}
 	
 	
 	//**type: /visual_art/art_owner
@@ -7205,11 +7376,12 @@ function new_event_space_of_a_topic($topic = "/m/01qwfk", $reload = FALSE) {
 
 	//changed to facts
 	//**type: /exhibitions/exhibit
-// 	if(in_array("/exhibitions/exhibit", $types)) {
-// 		$res[] = "/exhibitions/exhibit";
-		//object exhibited
+	if(in_array("/exhibitions/exhibit", $types)) {
+		$res[] = "/exhibitions/exhibit";
+		//object exhibited - event version
 // 		$result = fb_object_exhibited($topic, $result);
-// 	}
+		fb_topic_exhibition_related_concept($topic, $result,"/exhibitions/exhibit/exhibitions_displayed_in");
+	}
 	
 	//**type: /exhibitions/exhibition
 	if(in_array("/exhibitions/exhibition", $types)) {
@@ -7217,10 +7389,10 @@ function new_event_space_of_a_topic($topic = "/m/01qwfk", $reload = FALSE) {
 		
 		//changed to facts
 		//production of the exhibition
-// 		$result = fb_exhibition_production_of_the_exhibition($topic, $result);
+		$result = fb_exhibition_production_of_the_exhibition($topic, $result);
 
 		//exhibition held at venue
-		$result = fb_exhibition_held_at_venue($topic, $result);
+// 		$result = fb_exhibition_held_at_venue($topic, $result);
 
 		//creation of exhibited objects
 		$result = fb_exhibition_creation_of_object($topic, $result);
