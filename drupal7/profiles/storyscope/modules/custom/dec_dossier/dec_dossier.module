@@ -1,0 +1,40 @@
+<?php
+
+
+
+/**
+ * function dec_dossier_menu
+ */
+
+function dec_dossier_menu(){
+//      $items['admin/config/services/dec_rec'] = array(
+// 	 'title' => 'SemRecommender service',
+// 	 'description' => 'Configure the location of the SemRecommender service used by StoryScope.',
+// 	 'page callback' => 'drupal_get_form',
+// 	 'page arguments' => array('dec_rec_form_config'),
+// 	 'access callback' => 'user_access',
+// 	 'access arguments' => array('administer site configuration'),
+//      );
+     $items['rectest/%/%'] = array(
+	 'title' => 'Recommender service',
+	 'description' => 'Recommender service used by StoryScope.',
+	 'page callback' => 'dec_rec_test',
+     'page arguments' => array(1,2),
+	'access callback' => TRUE,
+     );
+     $items['storytag/%'] = array(
+	 'title' => 'Explain tag',
+	 'description' => 'Explain tag.',
+	 'page callback' => 'event_space_of_a_topic',
+     'page arguments' => array(1),
+	'access callback' => TRUE,
+     );
+
+     return $items;
+}
+
+
+
+
+  
+ 

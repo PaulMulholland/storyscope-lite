@@ -1,0 +1,7 @@
+<?php
+/**
+ * @file
+ * Code for the Storyscope Settings feature.
+ */
+
+include_once 'storyscope_settings.features.inc';

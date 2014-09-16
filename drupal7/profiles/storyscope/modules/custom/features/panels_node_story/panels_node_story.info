@@ -1,0 +1,10 @@
+name = Panels node Story
+description = Nicer layout for a Story Node
+core = 7.x
+package = Panels
+dependencies[] = ctools
+dependencies[] = page_manager
+features[ctools][] = page_manager:pages_default:1
+features[features_api][] = api:2
+features[page_manager_handlers][] = node_view_panel_context_2
+project path = profiles/storyscope/modules/custom/features

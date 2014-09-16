@@ -1,0 +1,13 @@
+name = Content Type Storyscope Dossier
+core = 7.x
+package = Storyscope Content Types
+dependencies[] = content_type_storyscope_story
+dependencies[] = entityreference
+dependencies[] = features
+dependencies[] = text
+features[features_api][] = api:2
+features[field_base][] = field_stories
+features[field_instance][] = node-dossier-body
+features[field_instance][] = node-dossier-field_stories
+features[node][] = dossier
+project path = profiles/storyscope/modules/custom/features

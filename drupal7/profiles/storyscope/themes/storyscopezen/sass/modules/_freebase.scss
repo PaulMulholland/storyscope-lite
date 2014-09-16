@@ -1,0 +1,35 @@
+/* Freebase popup */
+
+.freebase-popup {
+  border: 1px solid $dark-gray;
+  cursor: pointer;
+  color: $dark-gray;
+  p {
+    padding: 0;
+    margin: 0;
+  }
+  .popup-exit {
+    float: right;
+    font-weight: bold;
+    color: $dark-gray;
+    padding: 0.5em;
+  }
+  .popup-link {
+    padding: 1em;
+    a {
+      font-style: italic;
+      font-weight: bold;
+    }
+  }
+  .popup-title {
+    background: $light-gray;
+    padding: 1em;
+  }
+  .popup-type {
+    padding: 1em;
+  }
+  .popup-text {
+    padding: 1em;
+    color: #fff;   
+  }
+}

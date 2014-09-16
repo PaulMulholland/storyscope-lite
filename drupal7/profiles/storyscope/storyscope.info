@@ -1,0 +1,95 @@
+name = Storyscope Profile
+description = "Installs a Storyscope 'Lite' instance"
+version = VERSION
+core = 7.x
+
+; These are only enabled on install
+dependencies[] = block
+dependencies[] = comment
+dependencies[] = contextual
+dependencies[] = dashboard
+dependencies[] = help
+dependencies[] = image
+dependencies[] = list
+dependencies[] = menu
+dependencies[] = number
+dependencies[] = options
+dependencies[] = path
+dependencies[] = taxonomy
+dependencies[] = dblog
+dependencies[] = search
+dependencies[] = shortcut
+dependencies[] = toolbar
+dependencies[] = overlay
+dependencies[] = field_ui
+dependencies[] = file
+dependencies[] = rdf
+dependencies[] = update
+dependencies[] = trigger
+
+;Advanced Help
+dependencies[] = advanced_help
+
+; Views & Panels
+dependencies[] = ctools
+dependencies[] = panels
+dependencies[] = page_manager
+dependencies[] = views_content
+dependencies[] = views_ui
+dependencies[] = annertech_panels
+dependencies[] = storyscope_panels 
+dependencies[] = panels_node_dossier
+dependencies[] = panels_node_story
+
+; Other essentials
+dependencies[] = backup_migrate
+dependencies[] = field_collection
+dependencies[] = libraries
+dependencies[] = strongarm
+dependencies[] = diff
+dependencies[] = token
+dependencies[] = pathauto
+
+; Entity related modules.
+dependencies[] = entity
+dependencies[] = entityreference
+
+; Media modules
+dependencies[] = media
+dependencies[] = media_colorbox
+dependencies[] = colorbox
+dependencies[] = media_vimeo
+dependencies[] = file_entity
+
+; RDF
+dependencies[] = rdf
+
+; Development modules
+dependencies[] = devel 
+dependencies[] = devel_generate 
+
+;Storyscope Manipulation
+dependencies[] = storyscope_listings
+
+;Storyscope Custom Content features
+dependencies[] = content_type_storyscope_dossier
+dependencies[] = content_type_storyscope_story
+
+;Storyscope Custom Views
+dependencies[] = views_dossiers
+dependencies[] = views_dossier_stories
+
+;Storyscope Custom Configuration
+dependencies[] = storyscope_settings
+
+;Freebase Suggest
+dependencies[] = jquery_freebase
+dependencies[] = storyscope_freebase
+
+;Recommender Modules
+dependencies[] = progress
+dependencies[] = background_process
+dependencies[] = dec_rec
+dependencies[] = dec_dossier
+
+
