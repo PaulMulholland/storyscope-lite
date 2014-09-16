@@ -1,0 +1,11 @@
+#Ignore the fbimages directory
+drupal7/fbimages/*
+
+# Ignore configuration files that may contain sensitive information.
+drupal7/sites/*/settings*.php
+
+# Ignore paths that contain user-generated content.
+drupal7/sites/*/files
+drupal7/sites/*/private
+.sass-cache
+.DS_Store
