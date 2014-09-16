@@ -4915,6 +4915,7 @@ function fb_topic_exhibition_related_concept($topic, $previous_output = array("e
 ));
 
 	$resultarray = execute_mql_event_query($query);
+
 	$output = array();
 	if(!isset($resultarray["result"][0])) {
 		return $previous_output;
@@ -7317,7 +7318,7 @@ function new_event_space_of_a_topic($topic = "/m/01qwfk", $reload = FALSE) {
 		$res[] = "/exhibitions/exhibition_subject";
 		//exhibition subject - event version
 // 		$result = fb_topic_exhibition_subject($topic, $result);
-		fb_topic_exhibition_related_concept($topic, $result,"/exhibitions/exhibition_subject/exhibitions_created_about_this_subject");
+		$result = fb_topic_exhibition_related_concept($topic, $result,"/exhibitions/exhibition_subject/exhibitions_created_about_this_subject");
 	}
 	
 	
