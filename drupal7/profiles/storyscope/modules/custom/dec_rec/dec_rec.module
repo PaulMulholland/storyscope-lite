@@ -1356,9 +1356,13 @@ LEFT JOIN tag_name ON tag_name.tag = event_value_table.value;";
 			$output_with_titles[$event_id][0] = get_event_label_with_event_attribute_name($event_id, 'agent').' nominated for '
 					.get_event_label($event_id, '/award/award_nomination/award');
 		}
-		elseif($event_type == 'education') {
-			$output_with_titles[$event_id][0] = get_event_label_with_event_attribute_name($event_id, 'agent').' educated at '
-					.get_event_label_with_event_attribute_name($event_id, 'location');
+// 		elseif($event_type == 'education') {
+// 			$output_with_titles[$event_id][0] = get_event_label_with_event_attribute_name($event_id, 'agent').' educated at '
+// 					.get_event_label_with_event_attribute_name($event_id, 'location');
+// 		}
+		elseif($event_type == 'education') {//****here
+			$output_with_titles[$event_id][0] = get_event_label($event_id, '/education/education/student').' educated at '
+					.get_event_label($event_id, '/education/education/institution');
 		}
 		elseif($event_type == 'place_lived') {
 			$output_with_titles[$event_id][0] = get_event_label_with_event_attribute_name($event_id, 'agent').' lived in '
