@@ -81,7 +81,7 @@ function dec_rec_menu(){
      'page arguments' => array(1),
 	'access callback' => TRUE,
      );
-      $items['story/%'] = array(
+      $items['storyid/%'] = array(
 	 'title' => 'Story',
 	 'description' => 'Display information for a story.',
 	 'page callback' => 'dec_story',
@@ -966,7 +966,7 @@ function create_timeline_story_header($story) {
 		$header['asset']['caption'] = $caption;
 	}
 	
-	$header['headline'] = l(implode(', ',$headline), 'story/'.$story);
+	$header['headline'] = l(implode(', ',$headline), 'storyid/'.$story);
 	$header['text'] = '&nbsp;';//$text;
 	$header['type'] = 'default';
 	return $header;
