@@ -171,6 +171,33 @@ function dec_rec_menu(){
 }
 
 /**
+ * Read mids from the field collection of the story node
+ */
+function read_mids_from_story_node($story_node) {
+	$output = array();
+	$field_fb_tags = $story_node->field_fb_tags;
+	if(isset($field_fb_tags['und'][0])) {
+		foreach($field_fb_tags['und'] as $fb_value) {
+			if(isset($fb_value['value'])) {
+				$output[] = $fb_value['value'];
+			}
+		}
+	}
+	$fc_items = entity_load('field_collection_item',$output);
+	$mids = array();
+	foreach($fc_items as $fc_item) {
+		$fm = $fc_item->field_mid;
+		if(isset($fm['und'][0]['safe_value'])) {
+			$uri = $fm['und'][0]['safe_value'];
+			if($mid = extract_mid_from_freebase_uri($uri)) {
+				$mids[] = $mid;
+			}
+		}
+	}
+	return $mids;
+}
+
+/**
  * Check for the name, description and image of a topic
  * Retrieve if not stored in the database
 */
@@ -7210,6 +7237,21 @@ function check_array_is_returned($item) {
  */
 function is_freebase_topic_id($topic) {
 	return preg_match('/^\/m\//',$topic);
+}
+
+/**
+ * Extract mid from freebase URI
+ */
+//e.g. http://freebase.com/m/0q245
+function extract_mid_from_freebase_uri($uri) {
+	$num = strpos($uri,"/m/");
+	$mid = substr($uri,$num);
+	if(is_freebase_topic_id($mid)) {
+		return $mid;
+	}
+	else {
+		return FALSE;
+	}
 }
 
 /**
