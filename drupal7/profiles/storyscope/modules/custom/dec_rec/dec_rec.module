@@ -1320,7 +1320,7 @@ LEFT JOIN tag_name ON tag_name.tag = event_value_table.value;";
 		if($record->name) {
 			$output[$record->event][$record->position][] = l($record->name,'tag'.$record->value);
 		}
-		else {
+		elseif(!is_freebase_topic_id($record->value)) {//***here
 			$output[$record->event][$record->position][] = $record->value;
 		}
 	}
