@@ -171,6 +171,24 @@ function dec_rec_menu(){
 }
 
 /**
+ * Update query_tag table on story node update
+ */
+function dec_rec_node_insert($node) {
+	if($node->type == 'story') {
+		update_query_tags_for_story_node($node);
+	}
+}
+
+/**
+ * Update query_tag table on story node update
+ */
+function dec_rec_node_update($node) {
+	if($node->type == 'story') {
+		update_query_tags_for_story_node($node);
+	}
+}
+
+/**
  * Read mids from the field collection of the story node
  */
 function read_mids_from_story_node($story_node) {
@@ -195,6 +213,24 @@ function read_mids_from_story_node($story_node) {
 		}
 	}
 	return $mids;
+}
+
+
+function update_query_tags_for_story_node($node) {
+	$mid_array = read_mids_from_story_node($node);
+	
+	//delete previous entry in query_tag table
+	$nid = $node->nid;
+	db_delete('query_tag')
+	->condition('id', $nid)
+	->execute();
+	
+	//update query_tag table
+	$query = db_insert('query_tag')->fields(array('id', 'tag'));
+	foreach($mid_array as $tag) {
+		$query->values(array("id"=>$nid, "tag"=>$tag));
+	}
+	$query->execute();
 }
 
 /**
