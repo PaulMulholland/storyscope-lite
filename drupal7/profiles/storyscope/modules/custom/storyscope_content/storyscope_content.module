@@ -107,8 +107,7 @@ function storyscope_content_field_attach_form($entity_type, $entity, &$form, &$f
  * content.
  */
 function storyscope_content_node_insert($node) {
-
-
+	
   // Dossier context.
   // -----------------
   // Check to see if the node has been give a dossier context
@@ -123,8 +122,9 @@ function storyscope_content_node_insert($node) {
 		drupal_set_message('delta is ' . $delta);
    	 	$dossier_wrapper->field_stories[$delta]->set($node->nid);
     	storyscope_content_create_path_aliases($node, $dossier);
+		$dossier_wrapper->save();
   }
-  $dossier_wrapper->save();
+ 
 }
 
 /**
