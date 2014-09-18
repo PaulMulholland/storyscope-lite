@@ -70,6 +70,8 @@ dependencies[] = devel_generate
 
 ;Storyscope Manipulation
 dependencies[] = storyscope_listings
+dependencies[] = storyscope_content
+
 
 ;Storyscope Custom Content features
 dependencies[] = content_type_storyscope_dossier
