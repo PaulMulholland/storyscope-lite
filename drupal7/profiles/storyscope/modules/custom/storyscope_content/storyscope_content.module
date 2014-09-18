@@ -1,0 +1,183 @@
+<?php
+
+/**
+ * @file
+ * Manages the links between a dossier and its contents.
+ * Provides menu callbacks for adding content to a dossier
+ */
+ 
+/**
+ * Implements hook_help().
+ *
+ * Displays help and module information.
+ *
+ * @param path
+ *   Which path of the site we're using to display help
+ * @param arg
+ *   Array that holds the current path as returned from arg() function
+ */
+function storyscope_content_help($path, $arg) {
+  switch ($path) {
+    case "admin/help#storyscope_content":
+      return '<p>' . t("Manages the links between a dossier and its contents.") . '</p>';
+      break;
+  }
+} 
+/**
+ * Implements hook_menu().
+ */
+function storyscope_content_menu() {
+  $items = array();
+
+  // Add brand new child content to a dossier, object story or plot.
+  // ----------------------------------------------------------------
+  // To a dossier.
+  $items['dossier/%node/story/add'] = array(
+    'page callback' => 'storyscope_content_add_child_content_form',
+    'page arguments' => array('dossier', 1),
+    'access callback' => 'user_is_logged_in',
+    'type' => MENU_LOCAL_TASK,
+  );
+
+  return $items;
+}
+
+
+/**
+ * Present the add node form to the user for our custom callback but also
+ * allow for the dossier, to be updated with the link to a
+ * new piece of child content (story) when created.
+ *
+ * For example, when someone visits dossiers/1/storry/add it will show the
+ * add node form for a story but link it to dossier with nid 1 when saved.
+ *
+ * @param $parent_type
+ *   The type of content to add the link to, i.e. the context.  Allowed value
+ *   is 'dossier'
+ * @param $dossier_node
+ *   The node object for the dossier
+ *
+ * @return
+ *   The built $form array as returned from drupal_get_form().
+ */
+function storyscope_content_add_child_content_form($parent_type, $dossier_node) {
+
+global $user;
+
+  // we need to have the available node types available to the drupal_get_form function
+  module_load_include('inc', 'node', 'node.pages');
+
+  // Retrieve appropriate node form.
+  $types = node_type_get_types();
+
+  $node = (object) array(
+    'uid' => $user->uid,
+    'name' => (isset($user->name) ? $user->name : ''),
+    'type' => 'story',
+    'language' => LANGUAGE_NONE,
+    'dossier' => $dossier_node->nid,
+    
+  );
+  drupal_set_title(t('Create @name', array('@name' => 'story')), PASS_THROUGH);
+  $form = drupal_get_form('story_node_form', $node);
+  drupal_set_message($node->dossier);
+  return $form;
+}
+
+
+/**
+ * Implements hook_field_attach_form().
+ *
+ * Add temporary 'dossier' settings to the node form for later
+ * access in hook_node_insert().
+ */
+function storyscope_content_field_attach_form($entity_type, $entity, &$form, &$form_state, $langcode) {
+  if (!empty($entity->dossier)) {
+    $form['dossier'] = array(
+      '#type' => 'hidden',
+      '#value' => $entity->dossier,
+    );
+  }
+}
+
+/**
+ * Implements hook_node_insert().
+ *
+ * Update the parent dossier, story or plot with the link to the newly created
+ * content.
+ */
+function storyscope_content_node_insert($node) {
+
+
+  // Dossier context.
+  // -----------------
+  if (!empty($node->dossier)) {
+  	  drupal_set_message('node_set_is_run the dossier is ' . $node->dossier . ' and the story is ' . $node->nid );
+	  $dossier = node_load($node->dossier);
+	  drupal_set_message($dossier->title);
+	  $dossier_wrapper = entity_metadata_wrapper('node', $dossier);
+
+      // Update the dossier with the link to the new content.
+    	$delta = $dossier_wrapper->field_stories->count();
+		drupal_set_message('delta is ' . $delta);
+   	 	$dossier_wrapper->field_stories[$delta]->set($node->nid);
+    	storyscope_content_create_path_aliases($node, $dossier);
+  }
+  $dossier_wrapper->save();
+}
+
+/**
+ * Helper function to create a path alias for a node for all contexts it may
+ * exist in.
+ *
+ * @param $node
+ *   The node to create the aliases for.
+ * @param $parent_node
+ *   The direct parent context, another node object.
+ */
+function storyscope_content_create_path_aliases($node, $parent_node) {
+
+      $parent_path = 'dossier';
+	  $path['alias'] = $parent_path . '/' . $parent_node->nid . '/story/' . $node->nid;
+	  $path['source'] = 'node/' . $node->nid;
+      storyscope_content_path_save($path);
+
+}
+
+/**
+ * Wrapper function around path_save() to check for existing paths before
+ * creating new ones, so as to avoid duplicates.
+ *
+ * @param $path
+ *   Array of path arguments as accepted by path_save().
+ */
+function storyscope_content_path_save($path) {
+
+  if (!path_load(array('alias' => $path['alias']))) {
+    path_save($path);
+	drupal_set_message('set the path: ' . implode('|', $path));
+  }
+}
+
+/**
+ * Implements hook_form_FORMID_alter().
+ *
+ * Hide the field_fb_tags fields, used for storing Freebase machine names
+ * from the story node form.
+ */
+function storyscope_content_form_story_node_form_alter(&$form, $form_state) {
+  $author = $form['uid']['#value'];
+  global $user;
+
+  if (empty($form['nid']['#value'])) {
+    $form['actions']['submit']['#submit'][] = 'storyscope_content_form_story_node_form_submit';
+  }
+
+}
+
+function storyscope_content_form_story_node_form_submit($form, &$form_state) {
+  unset($_GET['destination']);
+  unset($form_state['rebuild']);
+  $nid = $form_state['nid'];
+  $form_state['redirect'] = 'dossier/' . $form['dossier']['#value'] . '/story/' . $nid;
+}
