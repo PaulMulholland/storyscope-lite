@@ -111,10 +111,11 @@ function storyscope_content_node_insert($node) {
 
   // Dossier context.
   // -----------------
+  // Check to see if the node has been give a dossier context
   if (!empty($node->dossier)) {
-  	  drupal_set_message('node_set_is_run the dossier is ' . $node->dossier . ' and the story is ' . $node->nid );
+  	  //now load the dossier so that we can set a new entity reference to the story
 	  $dossier = node_load($node->dossier);
-	  drupal_set_message($dossier->title);
+	  //use the metadatawrapper to get
 	  $dossier_wrapper = entity_metadata_wrapper('node', $dossier);
 
       // Update the dossier with the link to the new content.

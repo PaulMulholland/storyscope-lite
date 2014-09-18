@@ -107,6 +107,31 @@ function panels_node_dossier_default_page_manager_handlers() {
     $display->content['new-db01f179-5a13-41d4-b6a8-89eddf9c3e2d'] = $pane;
     $display->panels['middle_2_1'][0] = 'new-db01f179-5a13-41d4-b6a8-89eddf9c3e2d';
     $pane = new stdClass();
+    $pane->pid = 'new-0e937958-f084-4d48-9a31-77caa59d2566';
+    $pane->panel = 'middle_2_2';
+    $pane->type = 'custom';
+    $pane->subtype = 'custom';
+    $pane->shown = TRUE;
+    $pane->access = array();
+    $pane->configuration = array(
+      'admin_title' => '',
+      'title' => '',
+      'body' => '<a href="%node:nid/story/add">Add a Story</a>',
+      'format' => 'filtered_html',
+      'substitute' => 1,
+    );
+    $pane->cache = array();
+    $pane->style = array(
+      'settings' => NULL,
+    );
+    $pane->css = array();
+    $pane->extras = array();
+    $pane->position = 0;
+    $pane->locks = array();
+    $pane->uuid = '0e937958-f084-4d48-9a31-77caa59d2566';
+    $display->content['new-0e937958-f084-4d48-9a31-77caa59d2566'] = $pane;
+    $display->panels['middle_2_2'][0] = 'new-0e937958-f084-4d48-9a31-77caa59d2566';
+    $pane = new stdClass();
     $pane->pid = 'new-14a4f189-d6c1-455f-81f8-97ea82c8a2c2';
     $pane->panel = 'middle_3';
     $pane->type = 'views';

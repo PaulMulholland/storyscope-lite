@@ -76,6 +76,29 @@ function panels_node_story_default_page_manager_handlers() {
   $display->content = array();
   $display->panels = array();
     $pane = new stdClass();
+    $pane->pid = 'new-1307a31a-a9b0-4fc3-b7d2-a59f6d17ee2f';
+    $pane->panel = 'bottom';
+    $pane->type = 'story_event_space';
+    $pane->subtype = 'story_event_space';
+    $pane->shown = TRUE;
+    $pane->access = array();
+    $pane->configuration = array(
+      'username' => 'acdde',
+      'override_title' => 0,
+      'override_title_text' => '',
+    );
+    $pane->cache = array();
+    $pane->style = array(
+      'settings' => NULL,
+    );
+    $pane->css = array();
+    $pane->extras = array();
+    $pane->position = 0;
+    $pane->locks = array();
+    $pane->uuid = '1307a31a-a9b0-4fc3-b7d2-a59f6d17ee2f';
+    $display->content['new-1307a31a-a9b0-4fc3-b7d2-a59f6d17ee2f'] = $pane;
+    $display->panels['bottom'][0] = 'new-1307a31a-a9b0-4fc3-b7d2-a59f6d17ee2f';
+    $pane = new stdClass();
     $pane->pid = 'new-db01f179-5a13-41d4-b6a8-89eddf9c3e2d';
     $pane->panel = 'middle_2_1';
     $pane->type = 'entity_field';
