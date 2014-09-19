@@ -233,7 +233,7 @@ function storyscope_install() {
   variable_set('field_collection_field_collection_item_edit_disabled', 0);
 
   // Set /user as homepage
-  variable_set('site_frontpage', 'dossiers');
+  variable_set('site_frontpage', 'front');
 
   // Set a date format for Timeline
   variable_set('date_format_timeline_date', 'Y,m,d');
