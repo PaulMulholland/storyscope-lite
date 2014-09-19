@@ -218,7 +218,7 @@ function storyscope_install() {
   user_save($account);
 
   // Set Pathauto patterns
-  //variable_set('pathauto_node_pattern', '[node:menu-link:parents:join-path]/[node:title]');
+  variable_set('pathauto_node_pattern', '');
   variable_set('pathauto_node_news_item_pattern', 'news/[node:title]');
 
   variable_set('pathauto_update_action', '0');
