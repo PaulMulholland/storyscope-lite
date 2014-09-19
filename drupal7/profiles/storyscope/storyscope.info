@@ -72,6 +72,8 @@ dependencies[] = devel_generate
 dependencies[] = storyscope_listings
 dependencies[] = storyscope_content
 
+;Storyscope Menus
+dependencies[] = storyscope_menus
 
 ;Storyscope Custom Content features
 dependencies[] = content_type_storyscope_dossier

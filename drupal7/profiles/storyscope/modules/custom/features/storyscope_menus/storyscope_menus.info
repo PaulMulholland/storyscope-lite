@@ -1,0 +1,7 @@
+name = Storyscope Menus
+core = 7.x
+package = Storyscope Menus
+dependencies[] = features
+dependencies[] = menu
+features[features_api][] = api:2
+features[menu_custom][] = main-menu
