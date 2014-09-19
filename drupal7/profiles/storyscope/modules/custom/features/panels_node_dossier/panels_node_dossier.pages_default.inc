@@ -116,8 +116,8 @@ function panels_node_dossier_default_page_manager_handlers() {
     $pane->configuration = array(
       'admin_title' => '',
       'title' => '',
-      'body' => '<a href="%node:nid/story/add">Add a Story</a>',
-      'format' => 'filtered_html',
+      'body' => '<div class="button"><a href="%node:nid/story/add">Add a Story</a></div>',
+      'format' => 'full_html',
       'substitute' => 1,
     );
     $pane->cache = array();

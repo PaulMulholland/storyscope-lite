@@ -163,42 +163,6 @@ function storyscope_front_page_default_page_manager_pages() {
     $display->content['new-84e35a3a-0f9a-44e7-893f-c802b8e8320f'] = $pane;
     $display->panels['middle_2_2'][0] = 'new-84e35a3a-0f9a-44e7-893f-c802b8e8320f';
     $pane = new stdClass();
-    $pane->pid = 'new-d835ec32-4543-46d5-a997-f844aeb4492f';
-    $pane->panel = 'middle_3';
-    $pane->type = 'custom';
-    $pane->subtype = 'custom';
-    $pane->shown = TRUE;
-    $pane->access = array(
-      'plugins' => array(
-        0 => array(
-          'name' => 'entity_bundle:user',
-          'settings' => array(
-            'type' => array(),
-          ),
-          'context' => 'logged-in-user',
-          'not' => TRUE,
-        ),
-      ),
-    );
-    $pane->configuration = array(
-      'admin_title' => 'Add Dossier Button',
-      'title' => '',
-      'body' => '<a href="node/add/dossier"><p>Add a Dossier</p></a>',
-      'format' => 'filtered_html',
-      'substitute' => TRUE,
-    );
-    $pane->cache = array();
-    $pane->style = array(
-      'settings' => NULL,
-    );
-    $pane->css = array();
-    $pane->extras = array();
-    $pane->position = 0;
-    $pane->locks = array();
-    $pane->uuid = 'd835ec32-4543-46d5-a997-f844aeb4492f';
-    $display->content['new-d835ec32-4543-46d5-a997-f844aeb4492f'] = $pane;
-    $display->panels['middle_3'][0] = 'new-d835ec32-4543-46d5-a997-f844aeb4492f';
-    $pane = new stdClass();
     $pane->pid = 'new-ec9bd614-e188-4554-8d8d-9cf0ec3c52fb';
     $pane->panel = 'middle_3';
     $pane->type = 'views';
@@ -227,11 +191,47 @@ function storyscope_front_page_default_page_manager_pages() {
     );
     $pane->css = array();
     $pane->extras = array();
-    $pane->position = 1;
+    $pane->position = 0;
     $pane->locks = array();
     $pane->uuid = 'ec9bd614-e188-4554-8d8d-9cf0ec3c52fb';
     $display->content['new-ec9bd614-e188-4554-8d8d-9cf0ec3c52fb'] = $pane;
-    $display->panels['middle_3'][1] = 'new-ec9bd614-e188-4554-8d8d-9cf0ec3c52fb';
+    $display->panels['middle_3'][0] = 'new-ec9bd614-e188-4554-8d8d-9cf0ec3c52fb';
+    $pane = new stdClass();
+    $pane->pid = 'new-d835ec32-4543-46d5-a997-f844aeb4492f';
+    $pane->panel = 'middle_3';
+    $pane->type = 'custom';
+    $pane->subtype = 'custom';
+    $pane->shown = TRUE;
+    $pane->access = array(
+      'plugins' => array(
+        0 => array(
+          'name' => 'entity_bundle:user',
+          'settings' => array(
+            'type' => array(),
+          ),
+          'context' => 'logged-in-user',
+          'not' => TRUE,
+        ),
+      ),
+    );
+    $pane->configuration = array(
+      'admin_title' => 'Add Dossier Button',
+      'title' => '',
+      'body' => '<div class="button"><a href="node/add/dossier">Add a Dossier</a></div>',
+      'format' => 'full_html',
+      'substitute' => TRUE,
+    );
+    $pane->cache = array();
+    $pane->style = array(
+      'settings' => NULL,
+    );
+    $pane->css = array();
+    $pane->extras = array();
+    $pane->position = 1;
+    $pane->locks = array();
+    $pane->uuid = 'd835ec32-4543-46d5-a997-f844aeb4492f';
+    $display->content['new-d835ec32-4543-46d5-a997-f844aeb4492f'] = $pane;
+    $display->panels['middle_3'][1] = 'new-d835ec32-4543-46d5-a997-f844aeb4492f';
   $display->hide_title = PANELS_TITLE_FIXED;
   $display->title_pane = 'new-24210847-5004-46f8-9aa9-6fd83a935d32';
   $handler->conf['display'] = $display;

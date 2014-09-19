@@ -1,4 +1,4 @@
-name = Storyscope Dossier node Panel 
+name = Storyscope Dossier node Panel
 description = A nicer layout of a Dossier Node.
 core = 7.x
 package = Storyscope Panels
