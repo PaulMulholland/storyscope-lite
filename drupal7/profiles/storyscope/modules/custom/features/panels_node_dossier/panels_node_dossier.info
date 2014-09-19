@@ -1,6 +1,7 @@
-name = Panels node Dossier
+name = Storyscope Dossier node Panel 
+description = A nicer layout of a Dossier Node.
 core = 7.x
-package = Panels
+package = Storyscope Panels
 dependencies[] = ctools
 dependencies[] = page_manager
 features[ctools][] = page_manager:pages_default:1

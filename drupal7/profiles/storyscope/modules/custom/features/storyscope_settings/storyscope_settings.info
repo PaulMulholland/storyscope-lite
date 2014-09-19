@@ -1,7 +1,7 @@
 name = Storyscope Settings
 description = Various Settings (including from Strongarm) for a default Storyscope
 core = 7.x
-package = Features
+package = Storyscope Settings
 dependencies[] = ctools
 dependencies[] = file_entity
 dependencies[] = image

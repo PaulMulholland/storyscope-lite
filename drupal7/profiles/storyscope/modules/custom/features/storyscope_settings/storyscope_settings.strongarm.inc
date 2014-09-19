@@ -42,14 +42,14 @@ function storyscope_settings_strongarm() {
   $strongarm->disabled = FALSE; /* Edit this to true to make a default strongarm disabled initially */
   $strongarm->api_version = 1;
   $strongarm->name = 'pathauto_node_story_pattern';
-  $strongarm->value = 'story/[node:nid]';
+  $strongarm->value = '';
   $export['pathauto_node_story_pattern'] = $strongarm;
 
   $strongarm = new stdClass();
   $strongarm->disabled = FALSE; /* Edit this to true to make a default strongarm disabled initially */
   $strongarm->api_version = 1;
   $strongarm->name = 'site_frontpage';
-  $strongarm->value = 'dossiers';
+  $strongarm->value = 'front';
   $export['site_frontpage'] = $strongarm;
 
   $strongarm = new stdClass();

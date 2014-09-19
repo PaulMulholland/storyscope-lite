@@ -36,10 +36,6 @@ dependencies[] = panels
 dependencies[] = page_manager
 dependencies[] = views_content
 dependencies[] = views_ui
-dependencies[] = annertech_panels
-dependencies[] = storyscope_panels 
-dependencies[] = panels_node_dossier
-dependencies[] = panels_node_story
 
 ; Other essentials
 dependencies[] = backup_migrate
@@ -83,6 +79,13 @@ dependencies[] = content_type_storyscope_story
 dependencies[] = views_dossiers
 dependencies[] = views_dossier_stories
 
+;Storyscope Custom Panels
+dependencies[] = annertech_panels
+dependencies[] = storyscope_panels 
+dependencies[] = panels_node_dossier
+dependencies[] = panels_node_story
+dependencies[] = storyscope_front_page
+
 ;Storyscope Custom Configuration
 dependencies[] = storyscope_settings
 
@@ -95,5 +98,3 @@ dependencies[] = progress
 dependencies[] = background_process
 dependencies[] = dec_rec
 dependencies[] = dec_dossier
-
-

@@ -1,7 +1,7 @@
-name = Panels node Story
+name = Storyscope Story Node Panel
 description = Nicer layout for a Story Node
 core = 7.x
-package = Panels
+package = Storyscope Panels
 dependencies[] = ctools
 dependencies[] = page_manager
 features[ctools][] = page_manager:pages_default:1

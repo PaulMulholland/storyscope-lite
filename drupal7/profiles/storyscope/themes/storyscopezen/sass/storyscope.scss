@@ -163,14 +163,27 @@ p {
     }
   }
   .panel-middle-3 {
-      display: none;
-      //padding-top: 10px;
+      padding-top: 10px;
+      .pane-content {
+          .container-full {
+            background-color: #fff;
+          }
+        }
   }
+
   .middle-4-wrapper {
     background-color: #b5d5e9;
     height: 10px;
     margin: 15px 0;
     padding: 0;
+  }
+  .middle-2-2 {
+    .pane-user-login {
+      float: none;
+      width: inherit;
+      height: inherit;
+      padding-left: 25px;
+      }
   }
 }
 /*hightlighted section */
