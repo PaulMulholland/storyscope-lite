@@ -67,6 +67,7 @@ dependencies[] = devel_generate
 ;Storyscope Manipulation
 dependencies[] = storyscope_listings
 dependencies[] = storyscope_content
+dependencies[] = storyscope_tweaks
 
 ;Storyscope Menus
 dependencies[] = storyscope_menus
