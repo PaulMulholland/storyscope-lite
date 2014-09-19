@@ -1955,6 +1955,35 @@ p.events-display-date {
   }
   }
 }
+
+//Story Tags on a Story Node
+ul.field-name-field-fb-tags {
+
+      list-style-type: none;
+      padding-left: 0px;
+      float: left;
+      li {
+        margin: 0 15px 15px 0;
+        padding: 4px 15px 4px 15px;
+        list-style: none;
+        text-decoration: none;
+        background-color: #eee;
+        -moz-border-radius: 3px;
+        border-radius: 3px;
+        box-shadow: 1px 1px 4px #888888;
+        float: left;
+        display: block;
+        a {
+                  color: #666;
+        }
+        a:hover {
+          text-decoration: none;
+          border-bottom: none;
+        }
+      }
+}
+
+
 .node-object-form {
   .form-item-title {
     padding-bottom: 50px;
