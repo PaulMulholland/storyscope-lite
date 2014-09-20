@@ -1,0 +1,7 @@
+name = Storyscope User
+description = An ordinary user of Storyscope and to add and edit their own Dossiers and Stories
+core = 7.x
+package = Storyscope Permissions
+dependencies[] = features
+features[features_api][] = api:2
+features[user_role][] = storyscope user

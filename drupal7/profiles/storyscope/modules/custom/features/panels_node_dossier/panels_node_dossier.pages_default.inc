@@ -112,9 +112,20 @@ function panels_node_dossier_default_page_manager_handlers() {
     $pane->type = 'custom';
     $pane->subtype = 'custom';
     $pane->shown = TRUE;
-    $pane->access = array();
+    $pane->access = array(
+      'plugins' => array(
+        0 => array(
+          'name' => 'perm',
+          'settings' => array(
+            'perm' => 'create story content',
+          ),
+          'context' => 'logged-in-user',
+          'not' => FALSE,
+        ),
+      ),
+    );
     $pane->configuration = array(
-      'admin_title' => '',
+      'admin_title' => 'Add Story Button',
       'title' => '',
       'body' => '<div class="button"><a href="%node:nid/story/add">Add a Story</a></div>',
       'format' => 'full_html',
@@ -155,7 +166,7 @@ function panels_node_dossier_default_page_manager_handlers() {
         0 => '',
       ),
       'override_title' => 1,
-      'override_title_text' => 'Dossier Stories',
+      'override_title_text' => 'Stories',
     );
     $pane->cache = array();
     $pane->style = array(

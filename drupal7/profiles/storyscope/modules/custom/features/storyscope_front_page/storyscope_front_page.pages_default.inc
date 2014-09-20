@@ -205,12 +205,12 @@ function storyscope_front_page_default_page_manager_pages() {
     $pane->access = array(
       'plugins' => array(
         0 => array(
-          'name' => 'entity_bundle:user',
+          'name' => 'perm',
           'settings' => array(
-            'type' => array(),
+            'perm' => 'create dossier content',
           ),
           'context' => 'logged-in-user',
-          'not' => TRUE,
+          'not' => FALSE,
         ),
       ),
     );
