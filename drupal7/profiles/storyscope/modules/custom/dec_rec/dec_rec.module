@@ -8,6 +8,14 @@
  *
  */
 
+function storysettinglink($label, $link, $args = array()) {
+	return l($label,current_path(), $args);
+}
+
+function storytaglink($label, $link, $args = array()) {
+	$link_args = array_merge($args, array('query'=>array('tag'=>$link)));
+	return l($label,current_path(), $link_args);
+}
 
 /**
  * Admin settings for the module
@@ -81,13 +89,13 @@ function dec_rec_menu(){
      'page arguments' => array(1),
 	'access callback' => TRUE,
      );
-      $items['storyid/%'] = array(
-	 'title' => 'Story',
-	 'description' => 'Display information for a story.',
-	 'page callback' => 'dec_story',
-     'page arguments' => array(1),
-	'access callback' => TRUE,
-     );
+//       $items['storyid/%'] = array(
+// 	 'title' => 'Story',
+// 	 'description' => 'Display information for a story.',
+// 	 'page callback' => 'dec_story',
+//      'page arguments' => array(1),
+// 	'access callback' => TRUE,
+//      );
    	$items['timeline_for_setting'] = array(
 	 'title' => 'Timeline',
 	 'description' => 'Display timeline for a setting.',
@@ -114,20 +122,20 @@ function dec_rec_menu(){
 	 'page callback' => 'dec_reset',
 	'access callback' => TRUE,
      );
-     $items['tag/%/%'] = array(
-	 'title' => 'Tag',
-	 'description' => 'Display data for a story tag.',
-	 'page callback' => 'dec_tag',
-     'page arguments' => array(1,2),
-	'access callback' => TRUE,
-     );
-     $items['tag/%'] = array(
-     'title' => 'Tag',
-     'description' => 'Display data for a story tag that is not freebase topic, i.e. a timestamp.',
-     'page callback' => 'dec_tag',
-     'page arguments' => array(1),
-     'access callback' => TRUE,
-     );
+//      $items['tag/%/%'] = array(
+// 	 'title' => 'Tag',
+// 	 'description' => 'Display data for a story tag.',
+// 	 'page callback' => 'dec_tag',
+//      'page arguments' => array(1,2),
+// 	'access callback' => TRUE,
+//      );
+//      $items['tag/%'] = array(
+//      'title' => 'Tag',
+//      'description' => 'Display data for a story tag that is not freebase topic, i.e. a timestamp.',
+//      'page callback' => 'dec_tag',
+//      'page arguments' => array(1),
+//      'access callback' => TRUE,
+//      );
      $items['tagtimelinedata/%/%'] = array(
 	 'title' => 'Tag',
 	 'description' => 'Return JSON feed for timeline associated with a freebase topic.',
@@ -142,12 +150,12 @@ function dec_rec_menu(){
      'page arguments' => array(1),
 	'access callback' => TRUE,
      );
-     $items['tags'] = array(
-	 'title' => 'Tags',
-	 'description' => 'Display data for a set of tags.',
-	 'page callback' => 'dec_tags',
-	'access callback' => TRUE,
-     );
+//      $items['tags'] = array(
+// 	 'title' => 'Tags',
+// 	 'description' => 'Display data for a set of tags.',
+// 	 'page callback' => 'dec_tags',
+// 	'access callback' => TRUE,
+//      );
      $items['tagstimelinedata/%'] = array(
 	 'title' => 'Tags',
 	 'description' => 'Return JSON feed for timeline associated with a set of tags.',
@@ -161,12 +169,12 @@ function dec_rec_menu(){
 	 'page callback' => 'settingtimelinedata',
 	'access callback' => TRUE,
      );
-      $items['setting'] = array(
-	 'title' => 'Setting',
-	 'description' => 'Display data for a setting.',
-	 'page callback' => 'dec_setting',
-	'access callback' => TRUE,
-     );
+//       $items['setting'] = array(
+// 	 'title' => 'Setting',
+// 	 'description' => 'Display data for a setting.',
+// 	 'page callback' => 'dec_setting',
+// 	'access callback' => TRUE,
+//      );
      return $items;
 }
 
@@ -203,13 +211,109 @@ function dec_rec_story_event_space_edit_form_submit($form, &$form_state) {
 		}
 	}
 }
-function dec_rec_story_event_space_render($subtype, $conf, $panel_args, $context = NULL) {
+
+function story_event_space_block($type, $subtype, $args) {
 	$block = new stdClass();
-
-	$block->title = 'Story event space';
-	$block->content = dec_story(arg(1));
-
+	$block->id = 'story_event_space_block';
+	if($args['space'] == 'tag') {
+ 		$block->title = '';
+ 		$data['concept_space'] = dec_tag($args['focus']);
+ 		$data['title'] = 'Tag concept space';
+		$block->content = array('#theme'=>'story_event_space_block',
+				'#content'=>$data);
+	}
+	elseif($args['space'] == 'story') {
+		$block->title = '';
+		$data['concept_space'] = dec_story($args['focus']);
+		$data['title'] = 'Story concept space';
+		$block->content = array('#theme'=>'story_event_space_block',
+				'#content'=> $data);
+	}
+	elseif($args['space'] == 'setting') {
+		$block->title = '';
+		$data['concept_space'] = dec_setting($args['location'], $args['time'], $args['end']);
+		$data['title'] = 'Setting concept space';
+		$block->content = array('#theme'=>'story_event_space_block',
+				'#content'=> $data);
+	}
+	elseif($args['space'] == 'tags') {
+		$block->title = '';
+		$data['concept_space'] = dec_tags($args['focus']);
+		$data['title'] = 'Tags concept space';
+		$block->content = array('#theme'=>'story_event_space_block',
+				'#content'=> $data);
+	}
 	return $block;
+}
+
+function dec_rec_theme() {
+	return array(
+			'story_event_space_block' => array(
+					'render element' => 'data',
+					'template' => 'plugins/templates/story_event_space'
+			),
+	);
+}
+
+function dec_rec_block_info() {
+	$blocks = array();
+	$blocks['story_event_space_block'] = array(
+			'info' => t('Story event space block'),
+			'region' => 'footer',
+			'status' => 1,
+	);
+	return $blocks;
+}
+
+function dec_rec_block_view($delta = '') {
+	ctools_include('content');
+	$block = array();
+	switch ($delta) {
+		case 'story_event_space_block':
+			// assemble the params for ctools_content_render()
+			$type = 'story_event_space';
+			$subtype = 'story_event_space';
+			$conf = NULL;
+			$keywords = $contexts = array();
+			if(isset($_GET['tag'])) {
+				$tag = $_GET['tag'];
+				$args = array('space'=>'tag',
+						'focus'=>$tag);
+				$data = ctools_content_render($type, $subtype, $conf, $keywords, $args, $contexts);
+			}
+			elseif(isset($_GET['location']) && isset($_GET['time'])) {
+				$location = $_GET['location'];
+				$time = $_GET['time'];
+				if(isset($_GET['end'])) {
+					$end = $_GET['end'];
+				}
+				else {
+					$end = 0;
+				}
+				$args = array('space'=>'setting',
+						'location'=>$location, 'time'=>$time, 'end'=>$end);
+				$data = ctools_content_render($type, $subtype, $conf, $keywords, $args, $contexts);
+			}
+			elseif(isset($_GET['story'])) {
+				$story = $_GET['story'];
+				$args = array('space'=>'story',
+						'focus'=>$story);
+				$data = ctools_content_render($type, $subtype, $conf, $keywords, $args, $contexts);
+			}
+			elseif(isset($_GET['list'])) {
+				$taglist = $_GET['list'];
+				$args = array('space'=>'tags',
+						'focus'=>$taglist);
+				$data = ctools_content_render($type, $subtype, $conf, $keywords, $args, $contexts);
+			}
+			// pass the plugin content to our .tpl.php file via hook_theme()
+			$content = theme('story_event_space_block', $data->content);
+			$block['subject'] = '';
+			$block['content'] = array('#markup' => $content);
+			break;
+	}
+	// voila!
+	return($block);
 }
 
 /**
@@ -1016,7 +1120,7 @@ function create_timeline_setting_header($location, $year, $end = 0) {
 	$header['type'] = 'default';
 	if($image = check_freebase_saved_image($location)) {
 		$header['asset']['media'] = $image;
-		$header['asset']['caption'] = '<div style="clear:both">Setting location: '.l(get_topic_name($location), $base_url.'/tag'.$location).' (pictured above)</div>'.
+		$header['asset']['caption'] = '<div style="clear:both">Setting location: '.storytaglink(get_topic_name($location), $base_url.'/tag'.$location).' (pictured above)</div>'.
 				'<div style="clear:both">Setting year: '.$year.'</div>';
 	}
 	if(!$header['text']) {
@@ -1058,7 +1162,7 @@ function create_timeline_story_header($story) {
 		$caption = '';
 		foreach($tag_array as $tag) {
 			if($tag['1']) {
-				$caption .= '<div style="clear:both">'. l($tag['1'],'tag'.$tag['0']);
+				$caption .= '<div style="clear:both">'. storytaglink($tag['1'],'tag'.$tag['0']);
 				if($tag['0'] == $image_result['tag']['0']) {
 					$caption .= ' (pictured above)';
 				}
@@ -1097,12 +1201,12 @@ function get_image_from_tag_list($tag_array) {
 function create_timeline_header($topic) {
 	$header = array();
 	if(!get_topic_name($topic)) {
-		$header['headline'] = l($topic,'tag/'.$topic);;
+		$header['headline'] = storytaglink($topic,'tag/'.$topic);;
 		$header['type'] = 'default';
 		$header['text'] = 'Events connected to '.$topic;
 		return $header;
 	}
-	$header['headline'] = l(get_topic_name($topic),'tag'.$topic);
+	$header['headline'] = storytaglink(get_topic_name($topic),'tag'.$topic);
 	$description = get_topic_description($topic, 150);
 	if($description) {
 		$header['text'] = $description;
@@ -1128,7 +1232,7 @@ function create_timeline_header($topic) {
 				$name = $value;
 			}
 			if($tag_attribute->link) {
-				$output_values[] = l($name, 'tag'.$value);
+				$output_values[] = storytaglink($name, 'tag'.$value);
 			}
 			else {
 				$output_values[] = $name;
@@ -1164,7 +1268,7 @@ function translate_story_events_for_timeline($events, $header) {
 			$entry['tag'] = $event['activity']['0'];
 		}
 		if(is_array($event['title']['0'])) {
-			$entry['headline'] = l($event['title']['0']['1'],'tag'.$event['title']['0']['0']);
+			$entry['headline'] = storytaglink($event['title']['0']['1'],'tag'.$event['title']['0']['0']);
 			if($image = check_freebase_saved_image($event['title']['0']['0'])) {
 				$entry['asset'] = array('media'=> $image, 
 				'caption'=> produce_event_table_for_timeline($event),
@@ -1213,7 +1317,7 @@ function translate_events_for_timeline($events, $header) {
 		}
 		if(is_array($event['title'])) {
 			if(is_array($event['title']['0'])) {
-				$entry['headline'] = l($event['title']['0']['1'],'tag'.$event['title']['0']['0']);
+				$entry['headline'] = storytaglink($event['title']['0']['1'],'tag'.$event['title']['0']['0']);
 			}
 			else {
 				$entry['headline'] = $event['title']['0'];
@@ -1417,15 +1521,16 @@ WHERE event_attribute_value.event IN ".$event_string." AND
 event_attribute_value.attribute = attribute_name.attribute AND
 attribute_name.name = event_attribute_position.event_attribute) as event_value_table
 LEFT JOIN tag_name ON tag_name.tag = event_value_table.value;";
+	$output = array();
 	$result = db_query($query);
 	foreach($result as $record) {
 		if(!isset($output[$record->event])) {
 			$output[$record->event] = array(array(),array(),array(),array(),array(),array(),array());
 		}
 		if($record->name) {
-			$output[$record->event][$record->position][] = l($record->name,'tag'.$record->value);
+			$output[$record->event][$record->position][] = storytaglink($record->name, $record->value);
 		}
-		elseif(!is_freebase_topic_id($record->value)) {//***here
+		elseif(!is_freebase_topic_id($record->value)) {
 			$output[$record->event][$record->position][] = $record->value;
 		}
 	}
@@ -1442,7 +1547,7 @@ LEFT JOIN tag_name ON tag_name.tag = event_value_table.value;";
 		$event_type = get_type_of_stored_event($event_id);
 		
 		if($event_name = get_topic_name($event_id)) {
-			$output_with_titles[$event_id][0] = l($event_name,'tag'.$event_id);
+			$output_with_titles[$event_id][0] = storytaglink($event_name, $event_id);
 			
 // 			$output['title'][] = array($event_id,$event_name);
 			//cache topic info
@@ -1517,7 +1622,7 @@ LEFT JOIN tag_name ON tag_name.tag = event_value_table.value;";
 			$output[$record->event] = array(array(),array(),array(),array(),array(),array(),array());
 		}
 		if($record->name) {
-			$output[$record->event][$record->position][] = l($record->name,'tag'.$record->value);
+			$output[$record->event][$record->position][] = storytaglink($record->name, $record->value);
 		}
 		else {
 			$output[$record->event][$record->position][] = $record->value;
@@ -1536,7 +1641,7 @@ LEFT JOIN tag_name ON tag_name.tag = event_value_table.value;";
 		$event_type = get_type_of_stored_event($event_id);
 	
 		if($event_name = get_topic_name($event_id)) {
-			$output_with_titles[$event_id][0] = l($event_name,'tag'.$event_id);
+			$output_with_titles[$event_id][0] = storytaglink($event_name, $event_id);
 			//cache topic info
 			$handle = background_process_start_locked('dontrunconcurrently','check_topic_name_image_description', $event_id);
 	
@@ -1544,81 +1649,81 @@ LEFT JOIN tag_name ON tag_name.tag = event_value_table.value;";
 		elseif($event_type == 'award_won') {
 			if(in_array('/award/award', $topic_types)) {
 				$value_name = get_event_value_with_event_attribute_name($event_id, 'agent');
-				$output_with_titles[$event_id][0] = l($value_name[1],'tag'.$value_name[0]);
+				$output_with_titles[$event_id][0] = storytaglink($value_name[1], $value_name[0]);
 			}
 			else {
 				$value_name = get_event_value($event_id, '/award/award_honor/award');
-				$output_with_titles[$event_id][0] = l($value_name[1],'tag'.$value_name[0]);
+				$output_with_titles[$event_id][0] = storytaglink($value_name[1], $value_name[0]);
 			}
 		}
 		elseif($event_type == 'award_nomination') {
 			if(in_array('/award/award', $topic_types)) {
 				$value_name = get_event_value_with_event_attribute_name($event_id, 'agent');
-				$output_with_titles[$event_id][0] = l($value_name[1],'tag'.$value_name[0]);
+				$output_with_titles[$event_id][0] = storytaglink($value_name[1], $value_name[0]);
 			}
 			else {
 				$value_name = get_event_value($event_id, '/award/award_nomination/award');
-				$output_with_titles[$event_id][0] = l($value_name[1],'tag'.$value_name[0]);
+				$output_with_titles[$event_id][0] = storytaglink($value_name[1], $value_name[0]);
 			}
 		}
 		elseif($event_type == 'education') {
 			if(in_array('/education/educational_institution', $topic_types)) {
 				$value_name = get_event_value_with_event_attribute_name($event_id, 'agent');
-				$output_with_titles[$event_id][0] = l($value_name[1],'tag'.$value_name[0]);
+				$output_with_titles[$event_id][0] = storytaglink($value_name[1], $value_name[0]);
 			}
 			else {
 				$value_name = get_event_value_with_event_attribute_name($event_id, 'location');
-				$output_with_titles[$event_id][0] = l($value_name[1],'tag'.$value_name[0]);
+				$output_with_titles[$event_id][0] = storytaglink($value_name[1], $value_name[0]);
 			}
 		}
 		elseif($event_type == 'place_lived') {
 			if(in_array('/location/location', $topic_types)) {
 				$value_name = get_event_value_with_event_attribute_name($event_id, 'agent');
-				$output_with_titles[$event_id][0] = l($value_name[1],'tag'.$value_name[0]);
+				$output_with_titles[$event_id][0] = storytaglink($value_name[1], $value_name[0]);
 			}
 			else {
 				$value_name = get_event_value_with_event_attribute_name($event_id, 'location');
-				$output_with_titles[$event_id][0] = l($value_name[1],'tag'.$value_name[0]);
+				$output_with_titles[$event_id][0] = storytaglink($value_name[1], $value_name[0]);
 			}
 		}
 		elseif($event_type == 'exhibition_run') {
 			if(in_array('/exhibitions/exhibition', $topic_types)) {
 				$value_name = get_event_value($event_id, '/exhibitions/exhibition_run/venue');
-				$output_with_titles[$event_id][0] = l($value_name[1],'tag'.$value_name[0]);
+				$output_with_titles[$event_id][0] = storytaglink($value_name[1], $value_name[0]);
 			}
 			else {
 				$value_name = get_event_value($event_id, '/exhibitions/exhibition_run/exhibition');
-				$output_with_titles[$event_id][0] = l($value_name[1],'tag'.$value_name[0]);
+				$output_with_titles[$event_id][0] = storytaglink($value_name[1], $value_name[0]);
 			}
 		}
 		elseif($event_type == 'object_location') {
 			if(in_array('/visual_art/artwork', $topic_types)) {
 				$value_name = get_event_value($event_id, '/visual_art/artwork_location_relationship/location');
-				$output_with_titles[$event_id][0] = l($value_name[1],'tag'.$value_name[0]);
+				$output_with_titles[$event_id][0] = storytaglink($value_name[1], $value_name[0]);
 			}
 			else {
 				$value_name = get_event_value($event_id, '/visual_art/artwork_location_relationship/artwork');
-				$output_with_titles[$event_id][0] = l($value_name[1],'tag'.$value_name[0]);
+				$output_with_titles[$event_id][0] = storytaglink($value_name[1], $value_name[0]);
 			}
 		}
 		elseif($event_type == 'object_ownership') {
 			if(in_array('/visual_art/art_owner', $topic_types)) {
 				$value_name = get_event_value($event_id, '/visual_art/artwork_owner_relationship/artwork');
-				$output_with_titles[$event_id][0] = l($value_name[1],'tag'.$value_name[0]);
+				$output_with_titles[$event_id][0] = storytaglink($value_name[1], $value_name[0]);
 			}
 			else {
 				$value_name = get_event_value($event_id, '/visual_art/artwork_owner_relationship/owner');
-				$output_with_titles[$event_id][0] = l($value_name[1],'tag'.$value_name[0]);
+				$output_with_titles[$event_id][0] = storytaglink($value_name[1], $value_name[0]);
 			}
 		}
 		elseif($event_type == 'organization_membership') {
 			if(in_array(' /organization/membership_organization', $topic_types)) {
 				$value_name = get_event_value($event_id, '/organization/organization_membership/member');
-				$output_with_titles[$event_id][0] = l($value_name[1],'tag'.$value_name[0]);
+				$output_with_titles[$event_id][0] = storytaglink($value_name[1], $value_name[0]);
 			}
 			else {
 				$value_name = get_event_value($event_id, '/organization/organization_membership/organization');
-				$output_with_titles[$event_id][0] = l($value_name[1],'tag'.$value_name[0]);
+				$output_with_titles[$event_id][0] = storytaglink($value_name[1], $value_name[0]);
 			}
 		}
 	}
@@ -2278,32 +2383,42 @@ function complete_time_stamp($date, $start_end = 'start') {
 /**
  * Produce output for a setting
  */
-function dec_setting() {
+// function dec_setting() {
 
+// 	$output = "";
+// 	if(isset($_GET['location']) && isset($_GET['time'])) {
+// 		$location = $_GET['location'];
+// 		$time = $_GET['time'];
+// 	}
+// 	else {
+// 		return "No setting found";
+// 	}
+
+// 	$year = substr($time, 0, 4);
+
+// 	if(isset($_GET['end'])) {
+// 		$end = $_GET['end'];
+// 		$end_year = substr($end, 0, 4);
+// 		$full_start_time = complete_time_stamp($time, 'start');
+// 		$full_end_time = complete_time_stamp($end, 'end');
+// 	}
+// 	else {
+// 		$end_year = 0;
+// 		$end = 0;
+// 		$full_start_time = complete_time_stamp($time, 'start');
+// 		$full_end_time = complete_time_stamp($time, 'end');
+// 	}
+	
+function dec_setting($location, $time,  $end) {
 	$output = "";
-	if(isset($_GET['location']) && isset($_GET['time'])) {
-		$location = $_GET['location'];
-		$time = $_GET['time'];
+	if($end) {
+		$full_start_time = complete_time_stamp($time, 'start');
+		$full_end_time = complete_time_stamp($end, 'end');		
 	}
 	else {
-		return "No setting found";
-	}
-
-	$year = substr($time, 0, 4);
-
-	if(isset($_GET['end'])) {
-		$end = $_GET['end'];
-		$end_year = substr($end, 0, 4);
 		$full_start_time = complete_time_stamp($time, 'start');
-		$full_end_time = complete_time_stamp($end, 'end');
+		$full_end_time = complete_time_stamp($time, 'end');		
 	}
-	else {
-		$end_year = 0;
-		$end = 0;
-		$full_start_time = complete_time_stamp($time, 'start');
-		$full_end_time = complete_time_stamp($time, 'end');
-	}
-
 	//check the event space of the location has been calculated
 	new_event_space_of_a_topic($location);
 		
@@ -2321,26 +2436,30 @@ function dec_setting() {
 	$themes = dec_get_themes_for_events_of_setting($location, $full_start_time, $full_end_time);
 
 	$name = get_topic_name($location);
-	if($end_year) {
+	if($end) {
 		if($name) {
-			drupal_set_title($name.", ".$time." to ".$end);
+			$output .= '<h2>'.$name.", ".$time." to ".$end.'</h2>';
+// 			drupal_set_title($name.", ".$time." to ".$end);
 		}
 		else {
-			drupal_set_title($location.", ".$time." to ".$end);
+			$output .= '<h2>'.$location.", ".$time." to ".$end.'</h2>';
+// 			drupal_set_title($location.", ".$time." to ".$end);
 		}		
 	}
 	else {
 		if($name) {
-			drupal_set_title($name.", ".$time);
+			$output .= '<h2>'.$name.", ".$time.'</h2>';
+// 			drupal_set_title($name.", ".$time);
 		}
 		else {
-			drupal_set_title($location.", ".$time);
+			$output .= '<h2>'.$location.", ".$time.'</h2>';
+// 			drupal_set_title($location.", ".$time);
 		}
 	}
 	
 	//tag name and description
 	if($name) {
-		$output .= '<div style="clear:both">Location: '.l($name,'tag'.$location).'</div>';
+		$output .= '<div style="clear:both">Location: '.storytaglink($name, $location).'</div>';
 	}
 	else {
 		$output .= '<div style="clear:both">Location: '.$location.'</div>';
@@ -2354,7 +2473,8 @@ function dec_setting() {
 	if(!empty($themes)) {
 		$output .= '<div style="clear:both"><h2>Themes: </h2></div>';
 		foreach($themes as $theme) {
-			$output .= l('<div style="float: left; white-space: nowrap; background-color: #ebebeb; margin: 5px;">'.$theme->name."</div>", "tag".$theme->value, array("html"=>TRUE));
+// 			$output .= l('<div style="float: left; white-space: nowrap; background-color: #ebebeb; margin: 5px;">'.$theme->name."</div>", "tag".$theme->value, array("html"=>TRUE));
+			$output .= storytaglink('<div style="float: left; white-space: nowrap; background-color: #ebebeb; margin: 5px;">'.$theme->name."</div>", $theme->value, array("html"=>TRUE));
 		}
 	
 	}
@@ -2666,14 +2786,8 @@ WHERE query_tag.id = '".$story."';";
 /**
  * Get tag list and save as a story id
  */
-function dec_tags() {
-	
-	if(isset($_GET['list'])) {
-		$list = $_GET['list'];
-	}
-	else {
-		return "No list found";
-	}
+function dec_tags($list) {
+
 	$tag_array = explode(",", str_replace(' ', '', substr(substr($list, 1), 0, -1)));
 	$tag_array = array_unique($tag_array);
 
@@ -2750,12 +2864,12 @@ function dec_list_of_tags($tag_array, $max_value) {
 		$output .= '<div style="clear:both"><h2>Tags: </h2></div>';
 		foreach($matching_themes as $theme) {
 			if($theme->value && !$theme->name) {
-				$output .= l('<div style="float: left; white-space: nowrap; background-color: #ebebeb; margin: 5px;">'.$theme->value."</div>", "tag/".$theme->value, array("html"=>TRUE));
+				$output .= storytaglink('<div style="float: left; white-space: nowrap; background-color: #ebebeb; margin: 5px;">'.$theme->value."</div>", $theme->value, array("html"=>TRUE));
 				
 // 				$output .= '<div style="float: left; white-space: nowrap; background-color: #ebebeb; margin: 5px;">'.$theme->value."</div>";
 			}
 			else {
-				$output .= l('<div style="float: left; white-space: nowrap; background-color: #ebebeb; margin: 5px;">'.$theme->name."</div>", "tag".$theme->value, array("html"=>TRUE));
+				$output .= storytaglink('<div style="float: left; white-space: nowrap; background-color: #ebebeb; margin: 5px;">'.$theme->name."</div>", $theme->value, array("html"=>TRUE));
 			}
 		}
 	
@@ -2765,7 +2879,7 @@ function dec_list_of_tags($tag_array, $max_value) {
 	if(!empty($nonmatching_themes)) {
 		$output .= '<div style="clear:both"><h2>Themes: </h2></div>';
 		foreach($nonmatching_themes as $theme) {
-			$output .= l('<div style="float: left; white-space: nowrap; background-color: #ebebeb; margin: 5px;">'.$theme->name."</div>", "tag".$theme->value, array("html"=>TRUE));
+			$output .= storytaglink('<div style="float: left; white-space: nowrap; background-color: #ebebeb; margin: 5px;">'.$theme->name."</div>", $theme->value, array("html"=>TRUE));
 		}
 	
 	}
@@ -2777,22 +2891,22 @@ function dec_list_of_tags($tag_array, $max_value) {
 		foreach($overlapping_settings as $setting) {
 			if($setting->end && $setting->start && $setting->start !== $setting->end) {
 				$output .= '<div style="float: left; white-space: nowrap; background-color: #ebebeb; margin: 5px;">'.
-						l($setting->name.", ".$setting->start." to ".$setting->end,'setting',array('query' => array('location' => $setting->location, 'time' => $setting->start, 'end' => $setting->end))).
+						storysettinglink($setting->name.", ".$setting->start." to ".$setting->end,'setting',array('query' => array('location' => $setting->location, 'time' => $setting->start, 'end' => $setting->end))).
 						"</div>";				
 			}
 			elseif($setting->start == $setting->end) {
 				$output .= '<div style="float: left; white-space: nowrap; background-color: #ebebeb; margin: 5px;">'.
-					l($setting->name.", ".$setting->start,'setting',array('query' => array('location' => $setting->location, 'time' => $setting->start))).
+					storysettinglink($setting->name.", ".$setting->start,'setting',array('query' => array('location' => $setting->location, 'time' => $setting->start))).
 					"</div>";
 			}
 			elseif($setting->start && !$setting->end) {
 				$output .= '<div style="float: left; white-space: nowrap; background-color: #ebebeb; margin: 5px;">'.
-					l($setting->name.", ".$setting->start,'setting',array('query' => array('location' => $setting->location, 'time' => $setting->start))).
+					storysettinglink($setting->name.", ".$setting->start,'setting',array('query' => array('location' => $setting->location, 'time' => $setting->start))).
 					"</div>";
 			}
 			elseif($setting->end && !$setting->start) {
 				$output .= '<div style="float: left; white-space: nowrap; background-color: #ebebeb; margin: 5px;">'.
-					l($setting->name.", ".$setting->end,'setting',array('query' => array('location' => $setting->location, 'time' => $setting->end))).
+					storysettinglink($setting->name.", ".$setting->end,'setting',array('query' => array('location' => $setting->location, 'time' => $setting->end))).
 					"</div>";
 			}
 		}
@@ -3052,10 +3166,8 @@ function get_notable_tag_type_names($topic) {
 /**
  * Produce output for a single tag
  */
-function dec_tag($m, $id = FALSE) {
+function dec_tag($topic) {
 	$output = "";
-	$x = arg(1);
-	$y = arg(2);
 
 	if(isset($_GET['reload'])) {
 		$reload = $_GET['reload'];
@@ -3064,19 +3176,21 @@ function dec_tag($m, $id = FALSE) {
 		$reload = FALSE;
 	}
 	
-	if($m == "m") {
-		$topic = "/".$m."/".$id;
-	}
-	elseif($m && !$id) {
-		$topic = $m;
-		drupal_set_title($m);
-		$types = array();
-	}
-	else {
-		return "No topic found";
-	}
-	if($m == "m" && $id) {
-		
+// 	if($m == "m") {
+// 		$topic = "/".$m."/".$id;
+// 	}
+// 	elseif($m && !$id) {
+// 		$topic = $m;
+// 		$output .= '<h2>'.$m.'</h2>';
+// // 		drupal_set_title($m);
+// 		$types = array();
+// 	}
+// 	else {
+// 		return "No topic found";
+// 	}
+	
+	
+	if(is_freebase_topic_id($topic)) {
 		//calculate event space (if not cached)
 		$types = new_event_space_of_a_topic($topic, $reload);
 
@@ -3089,7 +3203,8 @@ function dec_tag($m, $id = FALSE) {
 		//tag name
 		$name = get_topic_name($topic);
 		if($name) {
-			drupal_set_title($name);
+			$output .= '<h2>'.$name.'</h2>';
+// 			drupal_set_title($name);
 		}
 
 // 		$output .= image_html_for_a_freebase_topic($topic);
@@ -3123,7 +3238,7 @@ function dec_tag($m, $id = FALSE) {
 					$name = $value;
 				}
 				if($tag_attribute->link) {
-					$output_values[] = l($name, 'tag'.$value);
+					$output_values[] = storytaglink($name, $value);
 				}
 				else {
 					$output_values[] = $name."</div>";
@@ -3133,13 +3248,18 @@ function dec_tag($m, $id = FALSE) {
 			$output .= "</div>";
 		}	
 	}
+	//not freebase topic
+	else {
+		$output .= '<h2>'.$topic.'</h2>';
+		$types = array();
+	}
 	
 	//tag themes
 	$themes = top_n_themes_of_tag($topic, 10);
 	if(!empty($themes)) {
 		$output .= '<div style="clear:both"><h2>Themes: </h2></div>';
 		foreach($themes as $theme) {
-			$output .= l('<div style="float: left; white-space: nowrap; background-color: #ebebeb; margin: 5px;">'.$theme->name."</div>", "tag".$theme->value, array("html"=>TRUE));
+			$output .= storytaglink('<div style="float: left; white-space: nowrap; background-color: #ebebeb; margin: 5px;">'.$theme->name."</div>", $theme->value, array("html"=>TRUE));
 		}
 		
 	}
@@ -3152,17 +3272,17 @@ function dec_tag($m, $id = FALSE) {
 		foreach($settings as $setting) {
 			if(isset($setting->end_time) && isset($setting->start_time) && $setting->start_time !== $setting->end_time) {
 				$output .= '<div style="float: left; white-space: nowrap; background-color: #ebebeb; margin: 5px;">'.
-						l($setting->name.", ".$setting->start_time." to ".$setting->end_time,'setting',array('query' => array('location' => $setting->location, 'time' => $setting->start_time, 'end' => $setting->end_time))).
+						storysettinglink($setting->name.", ".$setting->start_time." to ".$setting->end_time,'setting',array('query' => array('location' => $setting->location, 'time' => $setting->start_time, 'end' => $setting->end_time))).
 						"</div>";
 			}
 			elseif(isset($setting->start_time)) {
 				$output .= '<div style="float: left; white-space: nowrap; background-color: #ebebeb; margin: 5px;">'.
-						l($setting->name.", ".$setting->start_time,'setting',array('query' => array('location' => $setting->location, 'time' => $setting->start_time))).
+						storysettinglink($setting->name.", ".$setting->start_time,'setting',array('query' => array('location' => $setting->location, 'time' => $setting->start_time))).
 						"</div>";
 			}
 			elseif(isset($setting->end_time)) {
 				$output .= '<div style="float: left; white-space: nowrap; background-color: #ebebeb; margin: 5px;">'.
-						l($setting->name.", ".$setting->end_time,'setting',array('query' => array('location' => $setting->location, 'time' => $setting->end_time))).
+						storysettinglink($setting->name.", ".$setting->end_time,'setting',array('query' => array('location' => $setting->location, 'time' => $setting->end_time))).
 						"</div>";
 			}
 		}
@@ -3243,7 +3363,7 @@ function dec_tag($m, $id = FALSE) {
 
 	//l($setting->name." ".$setting->time,'setting',array('query' => array('location' => $setting->location, 'time' => $setting->time))).
 	
-	$output .= '<div style="clear:both">'.l('Reload','tag/'.$m.'/'.$id, array('query' => array('reload' => '1'))).'</div>';
+	$output .= '<div style="clear:both">'.l('Reload',current_path(), array('query' => array('tag'=>$topic, 'reload' => '1'))).'</div>';
 	return $output;
 }
 
@@ -3261,7 +3381,7 @@ function produce_event_table_for_timeline($event) {
 				$output .= '<div style="clear:both">'.$key.": ";
 				foreach($elements as $element) {
 					if(is_array($element)) {
-						$value_array[] = l($element[1], "tag".$element[0]);
+						$value_array[] = storytaglink($element[1], "tag".$element[0]);
 					}
 					//comment this out to remove date links TODO
 					// 			elseif($key == 'start_time' || $key == 'end_time') {
@@ -3286,7 +3406,7 @@ function produce_event_table($event) {
 		if(is_array($elements))	{
 			foreach($elements as $element) {
 				if(is_array($element)) {
-					$value_string .= l($element[1], "tag".$element[0])."</br> ";
+					$value_string .= storytaglink($element[1], $element[0])."</br> ";
 				}
 				//comment this out to remove date links TODO
 				// 			elseif($key == 'start_time' || $key == 'end_time') {
@@ -3321,7 +3441,7 @@ function output_event_table($event_id) {
 		$value_string = "";
 		foreach($elements as $element) {
 			if(is_array($element)) {
-				$value_string .= l($element[1], "tag".$element[0])."</br> ";
+				$value_string .= storytaglink($element[1], $element[0])."</br> ";
 			}
 			//comment this out to remove date links TODO
 // 			elseif($key == 'start_time' || $key == 'end_time') {
