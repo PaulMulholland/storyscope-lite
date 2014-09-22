@@ -9,12 +9,12 @@
  */
 
 function storysettinglink($label, $link, $args = array()) {
-	return l($label,current_path(), $args);
+	return l($label,request_path(), $args);
 }
 
 function storytaglink($label, $link, $args = array()) {
 	$link_args = array_merge($args, array('query'=>array('tag'=>$link)));
-	return l($label,current_path(), $link_args);
+	return l($label,request_path(), $link_args);
 }
 
 /**
@@ -82,13 +82,13 @@ function dec_rec_menu(){
     'access arguments' => array('administer dec_rec settings'),
     'type' => MENU_NORMAL_ITEM,
    );
-    $items['timeline_for_tags/%'] = array(
-	 'title' => 'Story timeline',
-	 'description' => 'Timeline for a list of tags.',
-	 'page callback' => 'dec_timeline_for_tags',
-     'page arguments' => array(1),
-	'access callback' => TRUE,
-     );
+//     $items['timeline_for_tags/%'] = array(
+// 	 'title' => 'Story timeline',
+// 	 'description' => 'Timeline for a list of tags.',
+// 	 'page callback' => 'dec_timeline_for_tags',
+//      'page arguments' => array(1),
+// 	'access callback' => TRUE,
+//      );
 //       $items['storyid/%'] = array(
 // 	 'title' => 'Story',
 // 	 'description' => 'Display information for a story.',
@@ -102,20 +102,20 @@ function dec_rec_menu(){
 	 'page callback' => 'dec_timeline_for_setting',
 	'access callback' => TRUE,
      );
-      $items['timeline/%/%'] = array(
-	 'title' => 'Timeline',
-	 'description' => 'Display timeline for a single freebase topic.',
-	 'page callback' => 'dec_timeline',
-     'page arguments' => array(1,2),
-	'access callback' => TRUE,
-     );
-      $items['timeline/%'] = array(
-	 'title' => 'Timeline',
-	 'description' => 'Display timeline for a single tag that is not freebase topic, i.e. a timestamp.',
-	 'page callback' => 'dec_timeline',
-     'page arguments' => array(1),
-	'access callback' => TRUE,
-     );
+//       $items['timeline/%/%'] = array(
+// 	 'title' => 'Timeline',
+// 	 'description' => 'Display timeline for a single freebase topic.',
+// 	 'page callback' => 'dec_timeline',
+//      'page arguments' => array(1,2),
+// 	'access callback' => TRUE,
+//      );
+//       $items['timeline/%'] = array(
+// 	 'title' => 'Timeline',
+// 	 'description' => 'Display timeline for a single tag that is not freebase topic, i.e. a timestamp.',
+// 	 'page callback' => 'dec_timeline',
+//      'page arguments' => array(1),
+// 	'access callback' => TRUE,
+//      );
       $items['reset'] = array(
 	 'title' => 'Reset',
 	 'description' => 'Used for resetting the cached database of freebase data.',
@@ -243,6 +243,27 @@ function story_event_space_block($type, $subtype, $args) {
 		$block->content = array('#theme'=>'story_event_space_block',
 				'#content'=> $data);
 	}
+	elseif($args['space'] == 'timeline') {
+		$block->title = '';
+		$data['concept_space'] = dec_timeline($args['focus']);
+		$data['title'] = 'Tag timeline';
+		$block->content = array('#theme'=>'story_event_space_block',
+				'#content'=> $data);
+	}
+	elseif($args['space'] == 'timeline_for_tags') {
+		$block->title = '';
+		$data['concept_space'] = dec_timeline_for_tags($args['focus']);
+		$data['title'] = 'Tags timeline';
+		$block->content = array('#theme'=>'story_event_space_block',
+				'#content'=> $data);
+	}
+	elseif($args['space'] == 'timeline_for_setting') {
+		$block->title = '';
+		$data['concept_space'] = dec_timeline_for_setting($args['focus'],$args['time'],$args['end']);
+		$data['title'] = 'Setting timeline';
+		$block->content = array('#theme'=>'story_event_space_block',
+				'#content'=> $data);
+	}
 	return $block;
 }
 
@@ -280,6 +301,9 @@ function dec_rec_block_view($delta = '') {
 				$args = array('space'=>'tag',
 						'focus'=>$tag);
 				$data = ctools_content_render($type, $subtype, $conf, $keywords, $args, $contexts);
+				$content = theme('story_event_space_block', $data->content);
+				$block['subject'] = '';
+				$block['content'] = array('#markup' => $content);
 			}
 			elseif(isset($_GET['location']) && isset($_GET['time'])) {
 				$location = $_GET['location'];
@@ -293,23 +317,68 @@ function dec_rec_block_view($delta = '') {
 				$args = array('space'=>'setting',
 						'location'=>$location, 'time'=>$time, 'end'=>$end);
 				$data = ctools_content_render($type, $subtype, $conf, $keywords, $args, $contexts);
+				// pass the plugin content to our .tpl.php file via hook_theme()
+				$content = theme('story_event_space_block', $data->content);
+				$block['subject'] = '';
+				$block['content'] = array('#markup' => $content);
 			}
 			elseif(isset($_GET['story'])) {
 				$story = $_GET['story'];
 				$args = array('space'=>'story',
 						'focus'=>$story);
 				$data = ctools_content_render($type, $subtype, $conf, $keywords, $args, $contexts);
+				// pass the plugin content to our .tpl.php file via hook_theme()
+				$content = theme('story_event_space_block', $data->content);
+				$block['subject'] = '';
+				$block['content'] = array('#markup' => $content);
 			}
 			elseif(isset($_GET['list'])) {
 				$taglist = $_GET['list'];
 				$args = array('space'=>'tags',
 						'focus'=>$taglist);
 				$data = ctools_content_render($type, $subtype, $conf, $keywords, $args, $contexts);
+				// pass the plugin content to our .tpl.php file via hook_theme()
+				$content = theme('story_event_space_block', $data->content);
+				$block['subject'] = '';
+				$block['content'] = array('#markup' => $content);
 			}
-			// pass the plugin content to our .tpl.php file via hook_theme()
-			$content = theme('story_event_space_block', $data->content);
-			$block['subject'] = '';
-			$block['content'] = array('#markup' => $content);
+			elseif(isset($_GET['timeline'])) {
+				$timeline = $_GET['timeline'];
+				$args = array('space'=>'timeline',
+						'focus'=>$timeline);
+				$data = ctools_content_render($type, $subtype, $conf, $keywords, $args, $contexts);
+				// pass the plugin content to our .tpl.php file via hook_theme()
+				$content = theme('story_event_space_block', $data->content);
+				$block['subject'] = '';
+				$block['content'] = array('#markup' => $content);
+			}
+			elseif(isset($_GET['timeline_for_tags'])) {
+				$timeline = $_GET['timeline_for_tags'];
+				$args = array('space'=>'timeline_for_tags',
+						'focus'=>$timeline);
+				$data = ctools_content_render($type, $subtype, $conf, $keywords, $args, $contexts);
+				// pass the plugin content to our .tpl.php file via hook_theme()
+				$content = theme('story_event_space_block', $data->content);
+				$block['subject'] = '';
+				$block['content'] = array('#markup' => $content);
+			}
+			elseif(isset($_GET['timeline_for_setting']) && isset($_GET['time'])) {
+				$location = $_GET['timeline_for_setting'];
+				$time = $_GET['time'];
+				if(isset($_GET['end'])) {
+					$end = $_GET['end'];
+				}
+				else {
+					$end = 0;
+				}
+				$args = array('space'=>'timeline_for_setting',
+						'focus'=>$location, 'time'=>$time, 'end'=>$end);
+				$data = ctools_content_render($type, $subtype, $conf, $keywords, $args, $contexts);
+				// pass the plugin content to our .tpl.php file via hook_theme()
+				$content = theme('story_event_space_block', $data->content);
+				$block['subject'] = '';
+				$block['content'] = array('#markup' => $content);
+			}
 			break;
 	}
 	// voila!
@@ -488,6 +557,14 @@ function tagtimelinedata($m, $id = FALSE) {
 	else {
 		$attribute = FALSE;
 	}
+	
+	if(isset($_GET['path'])) {
+		$path = $_GET['path'];
+	}
+	else {
+		global $base_url;
+		$path = $base_url;
+	}
 
 	//check for cached version of the timeline data
  	$cached_data = check_for_cached_topic_timeline($topic, $attribute);
@@ -497,7 +574,7 @@ function tagtimelinedata($m, $id = FALSE) {
  	}
 
 	//generate new timeline data	
-	$timeline_data = drupal_json_encode(array('timeline'=>dec_tag_timeline($topic, $attribute)));
+	$timeline_data = drupal_json_encode(array('timeline'=>dec_tag_timeline($topic, $attribute, $path)));
 	//save new timeline data
  	save_topic_timelime($topic, $attribute, $timeline_data);
 	
@@ -623,9 +700,17 @@ function save_story_timeline($story, $event_type = FALSE, $timeline_data) {
  * JSON data feed for the timeline of a setting
 */
 function settingtimelinedata() {
+	if(isset($_GET['path'])) {
+		$path = $_GET['path'];
+	}
+	else {
+		global $base_url;
+		$path = $base_url;
+	}
+	
 	$output = "";
-	if(isset($_GET['location']) && isset($_GET['time'])) {
-		$location = $_GET['location'];
+	if(isset($_GET['settinglocation']) && isset($_GET['time'])) {
+		$location = $_GET['settinglocation'];
 		$time = $_GET['time'];
 	}
 	else {
@@ -635,12 +720,10 @@ function settingtimelinedata() {
 
 	if(isset($_GET['end'])) {
 		$end = $_GET['end'];
-		$end_year = substr($end, 0, 4);
 		$full_start_time = complete_time_stamp($time, 'start');
 		$full_end_time = complete_time_stamp($end, 'end');
 	}
 	else {
-		$end_year = 0;
 		$end = 0;
 		$full_start_time = complete_time_stamp($time, 'start');
 		$full_end_time = complete_time_stamp($time, 'end');
@@ -660,7 +743,7 @@ function settingtimelinedata() {
 		return drupal_json_output(json_decode(stripslashes($cached_data)));
 	}
 	
-	$timeline_data = drupal_json_encode(array('timeline'=>dec_setting_timeline($location, $full_start_time, $full_end_time, $time, $end, $event_type)));
+	$timeline_data = drupal_json_encode(array('timeline'=>dec_setting_timeline($location, $full_start_time, $full_end_time, $time, $end, $event_type, $path)));
 
 	//save setting timeline data
 	save_setting_timelime($location, $time, $end, $event_type, $timeline_data);
@@ -672,6 +755,14 @@ function settingtimelinedata() {
  * JSON data feed for the timeline of a story (i.e. set of tags)
  */
 function tagstimelinedata($story_id) {
+	if(isset($_GET['path'])) {
+		$path = $_GET['path'];
+	}
+	else {
+		global $base_url;
+		$path = $base_url;
+	}
+	
 	$story_id = (int) $story_id;
 
 	if(isset($_GET['event_type'])) {
@@ -688,7 +779,7 @@ function tagstimelinedata($story_id) {
  		return drupal_json_output(json_decode(stripslashes($cached_data)));
  	}
  
- 	$timeline_data = drupal_json_encode(array('timeline'=>dec_tags_timeline($story_id, $event_type)));
+ 	$timeline_data = drupal_json_encode(array('timeline'=>dec_tags_timeline($story_id, $event_type, $path)));
 
 	//save new timeline data
 	save_story_timeline($story_id, $event_type, $timeline_data);
@@ -714,49 +805,35 @@ function get_attribute_reverse_title($attribute = '/visual_art/artwork/artist') 
 /**
  * Timeline page for setting
 */
-function dec_timeline_for_setting() {
+function dec_timeline_for_setting($location, $time, $end) {
 	global $base_url;
 	$output = "";
 
-	if(isset($_GET['location']) && isset($_GET['time'])) {
-		$location = $_GET['location'];
-		$time = $_GET['time'];
-	}
-	else {
+	if(!$location && !$time) {
 		return "No setting found";
-	}
-	$year = substr($time, 0, 4);
-
-	if(isset($_GET['end'])) {
-		$end = $_GET['end'];
-		$end_year = substr($end, 0, 4);
-	}
-	else {
-		$end_year = 0;
-		$end = 0;
 	}
 
 	//check the event space of the location has been calculated
 	new_event_space_of_a_topic($location);
 	
 	//timeline title
-	$name = get_topic_name($location);
+// 	$name = get_topic_name($location);
 	if(isset($_GET['event_type'])) {
 		$event_type = $_GET['event_type'];
-		if($end) {
-			drupal_set_title($name.", ".$time." to ".$end.': '.$event_type);			
-		}
-		else {
-			drupal_set_title($name.", ".$time.': '.$event_type);			
-		}
-	}
-	else {
-		if($end) {
-			drupal_set_title($name.", ".$time." to ".$end);
-		}
-		else {
-			drupal_set_title($name.", ".$time);
-		}
+// 		if($end) {
+// 			drupal_set_title($name.", ".$time." to ".$end.': '.$event_type);			
+// 		}
+// 		else {
+// 			drupal_set_title($name.", ".$time.': '.$event_type);			
+// 		}
+// 	}
+// 	else {
+// 		if($end) {
+// 			drupal_set_title($name.", ".$time." to ".$end);
+// 		}
+// 		else {
+// 			drupal_set_title($name.", ".$time);
+// 		}
 	}
 
 	//check for reload 
@@ -783,18 +860,18 @@ function dec_timeline_for_setting() {
             height:             "600",';
 	if(isset($event_type)) {
 		if($end) {
-			$output .= 'source:             "'.$base_url.'/settingtimelinedata?location='.$location.'&time='.$time.'&event_type='.$event_type.'&end='.$end.'"';
+			$output .= 'source:             "'.$base_url.'/settingtimelinedata?settinglocation='.$location.'&time='.$time.'&event_type='.$event_type.'&end='.$end.'&path='.request_path().'&path='.request_path().'&path='.request_path().'"';
 		}
 		else {
-			$output .= 'source:             "'.$base_url.'/settingtimelinedata?location='.$location.'&time='.$time.'&event_type='.$event_type.'"';
+			$output .= 'source:             "'.$base_url.'/settingtimelinedata?settinglocation='.$location.'&time='.$time.'&event_type='.$event_type.'&path='.request_path().'"';
 		}
 	}
 	else {
 		if($end) {
-			$output .= 'source:             "'.$base_url.'/settingtimelinedata?location='.$location.'&time='.$time.'&end='.$end.'"';
+			$output .= 'source:             "'.$base_url.'/settingtimelinedata?settinglocation='.$location.'&time='.$time.'&end='.$end.'&path='.request_path().'"';
 		}
 		else {
-			$output .= 'source:             "'.$base_url.'/settingtimelinedata?location='.$location.'&time='.$time.'"';
+			$output .= 'source:             "'.$base_url.'/settingtimelinedata?settinglocation='.$location.'&time='.$time.'&path='.request_path().'"';
 		}
 	}
 	
@@ -804,18 +881,19 @@ function dec_timeline_for_setting() {
 
 	if(isset($event_type)) {
 		if($end) {
-			$output .= l("Reload",'timeline_for_setting', array('query'=>array('location'=>$location, 'time'=>$time, 'end'=>$end, 'event_type'=>$event_type, 'reload'=>'1')));
+			$output .= l("Reload", request_path(), array('query'=>array('timeline_for_setting'=>$location, 'time'=>$time, 'end'=>$end, 'event_type'=>$event_type, 'reload'=>'1')));
 		}
 		else {
-			$output .= l("Reload",'timeline_for_setting', array('query'=>array('location'=>$location, 'time'=>$time, 'event_type'=>$event_type, 'reload'=>'1')));
+			$output .= l("Reload", request_path(), array('query'=>array('timeline_for_setting'=>$location, 'time'=>$time, 'event_type'=>$event_type, 'reload'=>'1')));
 		}
 	}
 	else {
 		if($end) {
-			$output .= l("Reload",'timeline_for_setting', array('query'=>array('location'=>$location, 'time'=>$time, 'end'=>$end, 'reload'=>'1')));
+			$output .= l("Reload", request_path(), array('query'=>array('timeline_for_setting'=>$location, 'time'=>$time, 'end'=>$end, 'reload'=>'1')));
 		}
 		else {
-			$output .= l("Reload",'timeline_for_setting', array('query'=>array('location'=>$location, 'time'=>$time, 'reload'=>'1')));
+			//request_path(), array('query'=>array('timeline_for_tags'=>$story_id, 'reload'=>'1')));
+			$output .= l("Reload", request_path(),  array('query'=>array('timeline_for_setting'=>$location, 'time'=>$time, 'reload'=>'1')));
 		}
 	}
 	
@@ -848,13 +926,13 @@ function dec_timeline_for_tags($story_id) {
 	$story_title = implode(', ',$headline);
 	
 	//timeline title
-	if(isset($_GET['event_type'])) {
-		$event_type = $_GET['event_type'];
-		drupal_set_title($story_title.': '.$event_type);
-	}
-	else {
-		drupal_set_title($story_title);
-	}
+// 	if(isset($_GET['event_type'])) {
+// 		$event_type = $_GET['event_type'];
+// 		drupal_set_title($story_title.': '.$event_type);
+// 	}
+// 	else {
+// 		drupal_set_title($story_title);
+// 	}
 
 	//check for reload 
 	if(isset($_GET['reload'])) {
@@ -881,10 +959,10 @@ function dec_timeline_for_tags($story_id) {
 	
 // 		$output .= 'source:             "'.'http://localhost/my-data2.json'.'"';
 	if(isset($event_type)) {
-		$output .= 'source:             "'.$base_url.'/tagstimelinedata/'.$story_id.'?event_type='.$event_type.'"';
+		$output .= 'source:             "'.$base_url.'/tagstimelinedata/'.$story_id.'?event_type='.$event_type.'&path='.request_path().'"';
 	}
 	else {
-		$output .= 'source:             "'.$base_url.'/tagstimelinedata/'.$story_id.'"';
+		$output .= 'source:             "'.$base_url.'/tagstimelinedata/'.$story_id.'?path='.request_path().'"';
 	}
 	
 	$output .= '    }
@@ -892,10 +970,10 @@ function dec_timeline_for_tags($story_id) {
     <script type="text/javascript" src="'.get_timeline_path().'"></script>';
 	
 	if(isset($event_type)) {
-		$output .= l("Reload",'timeline_for_tags/'.$story_id, array('query'=>array('event_type'=>$event_type, 'reload'=>'1')));
+		$output .= l("Reload", request_path(), array('query'=>array('timeline_for_tags'=>$story_id, 'event_type'=>$event_type, 'reload'=>'1')));
 	}
 	else {
-		$output .= l("Reload",'timeline_for_tags/'.$story_id, array('query'=>array('reload'=>'1')));
+		$output .= l("Reload", request_path(), array('query'=>array('timeline_for_tags'=>$story_id, 'reload'=>'1')));
 	}
 	
 	return $output;	
@@ -904,17 +982,17 @@ function dec_timeline_for_tags($story_id) {
 /**
  * Timeline page for single tag
  */
-function dec_timeline($m, $id = FALSE) {
+function dec_timeline($topic) {
 	global $base_url;
-	if($m == "m") {
-		$topic = "/".$m."/".$id;
-	}
-	elseif($m && !$id) {
-		$topic = $m;
-	}
-	else {
-		return "No topic found";
-	}
+// 	if($m == "m") {
+// 		$topic = "/".$m."/".$id;
+// 	}
+// 	elseif($m && !$id) {
+// 		$topic = $m;
+// 	}
+// 	else {
+// 		return "No topic found";
+// 	}
 
 	//attribute
 	if(isset($_GET['attribute'])) {
@@ -940,37 +1018,41 @@ function dec_timeline($m, $id = FALSE) {
 	}
 	
 	$output = "";
-	if($attribute) {
-		if($attribute_title = get_attribute_reverse_title($attribute)) {
-			$name = get_topic_name($topic);
-			if($name) {
-				drupal_set_title($name.': '.$attribute_title);
-			}
-			else {
-				drupal_set_title($topic.': '.$attribute_title);
-			}
-		}
-		else {
-			$name = get_topic_name($topic);
-			if($name) {
-				drupal_set_title($name.': '.$attribute);
-			}
-			else {
-				drupal_set_title($topic.': '.$attribute);
-			}
-		}
-	}
-	else {
-		$name = get_topic_name($topic);
-		if($name) {
-			drupal_set_title($name);
-		}
-		else {
-			drupal_set_title($topic);
-		}
-	}
-	
-
+// 	if($attribute) {
+// 		if($attribute_title = get_attribute_reverse_title($attribute)) {
+// 			$name = get_topic_name($topic);
+// 			if($name) {
+// 				$output .= '<h2>'.$name.': '.$attribute_title.'</h2>';
+// // 				drupal_set_title($name.': '.$attribute_title);
+// 			}
+// 			else {
+// 				$output .= '<h2>'.$topic.': '.$attribute_title.'</h2>';
+// // 				drupal_set_title($topic.': '.$attribute_title);
+// 			}
+// 		}
+// 		else {
+// 			$name = get_topic_name($topic);
+// 			if($name) {
+// 				$output .= '<h2>'.$name.': '.$attribute.'</h2>';
+// // 				drupal_set_title($name.': '.$attribute);
+// 			}
+// 			else {
+// 				$output .= '<h2>'.$topic.': '.$attribute.'</h2>';
+// // 				drupal_set_title($topic.': '.$attribute);
+// 			}
+// 		}
+// 	}
+// 	else {
+// 		$name = get_topic_name($topic);
+// 		if($name) {
+// 			$output .= '<h2>'.$name.'</h2>';
+// // 			drupal_set_title($name);
+// 		}
+// 		else {
+// 			$output .= '<h2>'.$topic.'</h2>';
+// // 			drupal_set_title($topic);
+// 		}
+// 	}
 	
 	$output = '<div id="timeline-embed"></div>
     <script type="text/javascript">
@@ -978,34 +1060,28 @@ function dec_timeline($m, $id = FALSE) {
             width:              "100%",
             height:             "600",';
 
-	if(!$id) {
-		$topic_path = '/'.$topic;
-	}
-	else {
-		$topic_path = $topic;
-	}
-
-	if(isset($attribute)) {
-		$output .= 'source:             "'.$base_url.'/tagtimelinedata'.$topic_path.'?attribute='.$attribute.'"';
-	}
-    else {
-    	$output .= 'source:             "'.$base_url.'/tagtimelinedata'.$topic_path.'"';
-    }
-
-    $output .= '    }
-    </script>
-    <script type="text/javascript" src="'.get_timeline_path().'"></script>';
     if(is_freebase_topic_id($topic)) {
     	$topic_path = $topic;
     }
     else {
     	$topic_path = '/'.$topic;
     }
+
+	if(isset($attribute)) {
+		$output .= 'source:             "'.$base_url.'/tagtimelinedata'.$topic_path.'?attribute='.$attribute.'&path='.request_path().'"';
+	}
+    else {
+    	$output .= 'source:             "'.$base_url.'/tagtimelinedata'.$topic_path.'?path='.request_path().'"';
+    }
+
+    $output .= '    }
+    </script>
+    <script type="text/javascript" src="'.get_timeline_path().'"></script>';
     if($attribute) {
-    	$output .= l("Reload",'timeline'.$topic_path, array('query'=>array('attribute'=>$attribute, 'reload'=>'1')));
+    	$output .= l("Reload", request_path(), array('query'=>array('timeline'=>$topic, 'attribute'=>$attribute, 'reload'=>'1')));
     }
     else {
-    	$output .= l("Reload",'timeline'.$topic_path, array('query'=>array('reload'=>'1')));
+    	$output .= l("Reload", request_path(), array('query'=>array('timeline'=>$topic, 'reload'=>'1')));
     }
 	return $output;
 }
@@ -1013,7 +1089,7 @@ function dec_timeline($m, $id = FALSE) {
 /**
  * Calculate timeline data for setting
 */
-function dec_setting_timeline($location, $full_year, $full_end = 0, $year, $end = 0, $event_type = FALSE) {
+function dec_setting_timeline($location, $full_year, $full_end = 0, $year, $end = 0, $event_type = FALSE, $path) {
 	$output = array();
 	if($event_type) {
 		$events = get_all_events_for_setting_event_type($location, $full_year, $event_type, $full_end);
@@ -1029,13 +1105,12 @@ function dec_setting_timeline($location, $full_year, $full_end = 0, $year, $end 
 			}
 		}
 	}
-	
 	//header
-	$header = create_timeline_setting_header($location, $year, $end);
+	$header = create_timeline_setting_header($location, $year, $end, $path);
 
 	//timeline array
-	
-	$timeline_array = translate_story_events_for_timeline($output, $header);
+
+	$timeline_array = translate_story_events_for_timeline($output, $header, $path);
 	
 	return $timeline_array;
 }
@@ -1043,7 +1118,7 @@ function dec_setting_timeline($location, $full_year, $full_end = 0, $year, $end 
 /**
  * Calculate timeline data for list of tags
 */
-function dec_tags_timeline($story_id, $event_type = FALSE) {
+function dec_tags_timeline($story_id, $event_type = FALSE, $path) {
 
 	$output = array();	
 	if($event_type) {
@@ -1062,10 +1137,10 @@ function dec_tags_timeline($story_id, $event_type = FALSE) {
 	}
 
 	//header
-	$header = create_timeline_story_header($story_id);
+	$header = create_timeline_story_header($story_id, $path);
 
 	//timeline array
-	$timeline_array = translate_story_events_for_timeline($output, $header);
+	$timeline_array = translate_story_events_for_timeline($output, $header, $path);
 	
 	return $timeline_array;
 }
@@ -1073,7 +1148,7 @@ function dec_tags_timeline($story_id, $event_type = FALSE) {
 /**
  * Calculate timeline data for single tag
  */
-function dec_tag_timeline($topic = '/m/01qwfk', $attribute = FALSE) {
+function dec_tag_timeline($topic = '/m/01qwfk', $attribute = FALSE, $path) {
 	$output = array();
 	$types = check_for_tag_types($topic);
 	$all_events = get_all_events_for_tag($topic);
@@ -1089,9 +1164,9 @@ function dec_tag_timeline($topic = '/m/01qwfk', $attribute = FALSE) {
 	foreach($events as $event) {
 		$output[] = load_art_event_dec_tag($event, $types, TRUE);
 	}
-	$header = create_timeline_header($topic);
+	$header = create_timeline_header($topic, $path);
 
-	$timeline_array = translate_events_for_timeline($output, $header);
+	$timeline_array = translate_events_for_timeline($output, $header, $path);
 
 	return $timeline_array;
 }
@@ -1106,21 +1181,21 @@ function translate_time_for_timeline($time) {
 /**
  * Create header for setting timeline
 */
-function create_timeline_setting_header($location, $year, $end = 0) {
+function create_timeline_setting_header($location, $year, $end = 0, $path) {///***here
 	global $base_url;
 
 	$header = array();
 	if($end) {
-		$header['headline'] = l(get_topic_name($location).', '.$year.' to '.$end, $base_url.'/setting', array('query'=>array('location'=>$location, 'time'=>$year, 'end'=>$end)));
+		$header['headline'] = l(get_topic_name($location).', '.$year.' to '.$end, $path, array('query'=>array('location'=>$location, 'time'=>$year, 'end'=>$end)));
 	}
 	else {
-		$header['headline'] = l(get_topic_name($location).', '.$year, $base_url.'/setting', array('query'=>array('location'=>$location, 'time'=>$year)));
+		$header['headline'] = l(get_topic_name($location).', '.$year, $path, array('query'=>array('location'=>$location, 'time'=>$year)));
 	}
 	$header['text'] = get_topic_description($location, 150);
 	$header['type'] = 'default';
 	if($image = check_freebase_saved_image($location)) {
 		$header['asset']['media'] = $image;
-		$header['asset']['caption'] = '<div style="clear:both">Setting location: '.storytaglink(get_topic_name($location), $base_url.'/tag'.$location).' (pictured above)</div>'.
+		$header['asset']['caption'] = '<div style="clear:both">Setting location: '.l(get_topic_name($location), $path, array('query'=>array('tag'=>$location))).' (pictured above)</div>'.
 				'<div style="clear:both">Setting year: '.$year.'</div>';
 	}
 	if(!$header['text']) {
@@ -1132,7 +1207,7 @@ function create_timeline_setting_header($location, $year, $end = 0) {
 /**
  * Create header for story timeline
  */
-function create_timeline_story_header($story) {
+function create_timeline_story_header($story, $path) {
 
 	$tag_array = get_tags_names_for_a_story($story);
 	$headline = array();
@@ -1162,7 +1237,7 @@ function create_timeline_story_header($story) {
 		$caption = '';
 		foreach($tag_array as $tag) {
 			if($tag['1']) {
-				$caption .= '<div style="clear:both">'. storytaglink($tag['1'],'tag'.$tag['0']);
+				$caption .= '<div style="clear:both">'. l($tag['1'], $path, array('query'=>array('tag'=>$tag['0'])));
 				if($tag['0'] == $image_result['tag']['0']) {
 					$caption .= ' (pictured above)';
 				}
@@ -1175,7 +1250,7 @@ function create_timeline_story_header($story) {
 		$header['asset']['caption'] = $caption;
 	}
 	
-	$header['headline'] = l(implode(', ',$headline), 'storyid/'.$story);
+	$header['headline'] = l(implode(', ',$headline), $path, array('query'=>array('story'=>$story)));
 	$header['text'] = '&nbsp;';//$text;
 	$header['type'] = 'default';
 	return $header;
@@ -1198,15 +1273,15 @@ function get_image_from_tag_list($tag_array) {
 /**
  * Create header (i.e. intro page) for the timeline
  */
-function create_timeline_header($topic) {
+function create_timeline_header($topic, $path) {
 	$header = array();
 	if(!get_topic_name($topic)) {
-		$header['headline'] = storytaglink($topic,'tag/'.$topic);;
+		$header['headline'] = l($topic, $path, array('query'=>array('tag'=>$topic)));
 		$header['type'] = 'default';
 		$header['text'] = 'Events connected to '.$topic;
 		return $header;
 	}
-	$header['headline'] = storytaglink(get_topic_name($topic),'tag'.$topic);
+	$header['headline'] = l(get_topic_name($topic), $path, array('query'=>array('tag'=>$topic)));
 	$description = get_topic_description($topic, 150);
 	if($description) {
 		$header['text'] = $description;
@@ -1232,7 +1307,7 @@ function create_timeline_header($topic) {
 				$name = $value;
 			}
 			if($tag_attribute->link) {
-				$output_values[] = storytaglink($name, 'tag'.$value);
+				$output_values[] = l($name, $path, array('query'=>array('tag'=>$value)));
 			}
 			else {
 				$output_values[] = $name;
@@ -1247,7 +1322,7 @@ function create_timeline_header($topic) {
 /**
  * Translate story event data for timeline display
 */
-function translate_story_events_for_timeline($events, $header) {
+function translate_story_events_for_timeline($events, $header, $path) {
 	$output = $header;
 	if(empty($events)) {
 		$output['date'] = array(array("startDate"=>"0000,00,00", "headline"=>"No dates available"));
@@ -1268,21 +1343,21 @@ function translate_story_events_for_timeline($events, $header) {
 			$entry['tag'] = $event['activity']['0'];
 		}
 		if(is_array($event['title']['0'])) {
-			$entry['headline'] = storytaglink($event['title']['0']['1'],'tag'.$event['title']['0']['0']);
+			$entry['headline'] = l($event['title']['0']['1'], $path, array('query'=>array('tag'=>$event['title']['0']['0'])));
 			if($image = check_freebase_saved_image($event['title']['0']['0'])) {
 				$entry['asset'] = array('media'=> $image, 
-				'caption'=> produce_event_table_for_timeline($event),
+				'caption'=> produce_event_table_for_timeline($event, $path),
 				'thumbnail'=> check_freebase_saved_image($event['title']['0']['0'],TRUE));
 				$entry['text'] = check_for_topic_description($event['title']['0']['0'], 70);
 			}
 			else {
-				$entry['text'] = '<div style="clear:both">'.produce_event_table_for_timeline($event).'</div>'.
+				$entry['text'] = '<div style="clear:both">'.produce_event_table_for_timeline($event, $path).'</div>'.
 				'<div style="clear:both">'.check_for_topic_description($event['title']['0']['0'], 70).'</div>';
 			}
 		}
 		elseif(is_array($event['title'])) {
 			$entry['headline'] = $event['title']['0'];
-			$entry['text'] = produce_event_table_for_timeline($event);
+			$entry['text'] = produce_event_table_for_timeline($event, $path);
 		}
 		$list[] = $entry;
 	}
@@ -1293,7 +1368,7 @@ function translate_story_events_for_timeline($events, $header) {
 /**
  * Translate event data for timeline display
  */
-function translate_events_for_timeline($events, $header) {
+function translate_events_for_timeline($events, $header, $path) {
 
 	$output = $header;
 	if(empty($events)) {
@@ -1317,18 +1392,18 @@ function translate_events_for_timeline($events, $header) {
 		}
 		if(is_array($event['title'])) {
 			if(is_array($event['title']['0'])) {
-				$entry['headline'] = storytaglink($event['title']['0']['1'],'tag'.$event['title']['0']['0']);
+				$entry['headline'] = l($event['title']['0']['1'], $path, array('query'=>array('tag'=>$event['title']['0']['0'])));
 			}
 			else {
 				$entry['headline'] = $event['title']['0'];
 			}
 			if($image = check_freebase_saved_image($event['title']['0']['0'])) {
 				$entry['asset'] = array('media'=> $image, 
-					'caption'=> produce_event_table_for_timeline($event),
+					'caption'=> produce_event_table_for_timeline($event, $path),
 					'thumbnail'=> check_freebase_saved_image($event['title']['0']['0'],TRUE));
 			}
 			else {
-				$entry['text'] .= produce_event_table_for_timeline($event);
+				$entry['text'] .= produce_event_table_for_timeline($event, $path);
 			}
 		}
 		$list[] = $entry;
@@ -2945,17 +3020,17 @@ function dec_setting_timeline_links($time, $end, $location, $event_array) {
 	if(!empty($attribute_list)) {
 		$output_list = array();
 		if($end) {
-			$output_list[] = l('All','timeline_for_setting',array('query'=>array('location'=>$location, 'time'=>$time, 'end'=>$end)));
+			$output_list[] = l('All', request_path(), array('query'=>array('timeline_for_setting'=>$location, 'time'=>$time, 'end'=>$end)));
 		}
 		else {
-			$output_list[] = l('All','timeline_for_setting',array('query'=>array('location'=>$location, 'time'=>$time)));
+			$output_list[] = l('All', request_path(), array('query'=>array('timeline_for_setting'=>$location, 'time'=>$time)));
 		}
 		foreach($attribute_list as $attribute) {
 			if($end) {
-				$output_list[] = l(ucfirst($attribute),'timeline_for_setting',array('query'=>array('location'=>$location, 'time'=>$time, 'event_type'=>$attribute, 'end'=>$end)));
+				$output_list[] = l(ucfirst($attribute), request_path(), array('query'=>array('timeline_for_setting'=>$location, 'time'=>$time, 'event_type'=>$attribute, 'end'=>$end)));
 			}
 			else {
-				$output_list[] = l(ucfirst($attribute),'timeline_for_setting',array('query'=>array('location'=>$location, 'time'=>$time, 'event_type'=>$attribute)));
+				$output_list[] = l(ucfirst($attribute), request_path(), array('query'=>array('timeline_for_setting'=>$location, 'time'=>$time, 'event_type'=>$attribute)));
 			}
 		}
 		$output = '<div style="clear:both">Timelime: '.implode(', ',$output_list).'</div>';
@@ -2971,17 +3046,11 @@ function dec_setting_timeline_links($time, $end, $location, $event_array) {
  */
 function dec_tag_timeline_links($topic, $event_array) {
 	$attribute_list = temporal_type_list_for_event_array($event_array);
-	if(is_freebase_topic_id($topic)) {
-		$topic_path = $topic;
-	}
-	else {
-		$topic_path = '/'.$topic;
-	}
 	if(!empty($attribute_list)) {
 		$output_list = array();
-		$output_list[] = l('All','timeline'.$topic_path);
+		$output_list[] = l('All', request_path(), array('query'=>array('timeline'=>$topic)));
 		foreach($attribute_list as $attribute) {
-			$output_list[] = l(ucfirst($attribute),'timeline'.$topic_path,array('query'=>array('attribute'=>$attribute)));
+			$output_list[] = l(ucfirst($attribute), request_path(), array('query'=>array('timeline'=>$topic, 'attribute'=>$attribute))); 
 		}
 		$output = '<div style="clear:both">Timelime: '.implode(', ',$output_list).'</div>';
 	}
@@ -2998,9 +3067,9 @@ function dec_tags_timeline_links($story_id) {
 	$attribute_list = temporal_type_list_for_story_id($story_id);
 	if(!empty($attribute_list)) {
 		$output_list = array();
-		$output_list[] = l('All','timeline_for_tags/'.$story_id);
+		$output_list[] = l('All', request_path(), array('query'=>array('timeline_for_tags'=>$story_id)));
 		foreach($attribute_list as $attribute) {
-			$output_list[] = l(ucfirst($attribute),'timeline_for_tags/'.$story_id,array('query'=>array('event_type'=>$attribute)));
+			$output_list[] = l(ucfirst($attribute), request_path(), array('query'=>array('timeline_for_tags'=>$story_id, 'event_type'=>$attribute)));
 		}
 		$output = '<div style="clear:both">Timelime: '.implode(', ',$output_list).'</div>';
 	}
@@ -3363,14 +3432,14 @@ function dec_tag($topic) {
 
 	//l($setting->name." ".$setting->time,'setting',array('query' => array('location' => $setting->location, 'time' => $setting->time))).
 	
-	$output .= '<div style="clear:both">'.l('Reload',current_path(), array('query' => array('tag'=>$topic, 'reload' => '1'))).'</div>';
+	$output .= '<div style="clear:both">'.l('Reload',request_path(), array('query' => array('tag'=>$topic, 'reload' => '1'))).'</div>';
 	return $output;
 }
 
 /**
  * Output event table for timeline
 */
-function produce_event_table_for_timeline($event) {
+function produce_event_table_for_timeline($event, $path) {
 
 	$output = '';
 	$rows = array();
@@ -3381,7 +3450,7 @@ function produce_event_table_for_timeline($event) {
 				$output .= '<div style="clear:both">'.$key.": ";
 				foreach($elements as $element) {
 					if(is_array($element)) {
-						$value_array[] = storytaglink($element[1], "tag".$element[0]);
+						$value_array[] = l($element[1], $path, array('query' => array('tag'=>$element[0])));
 					}
 					//comment this out to remove date links TODO
 					// 			elseif($key == 'start_time' || $key == 'end_time') {
@@ -3729,6 +3798,10 @@ LEFT JOIN tag_name ON tag_name.tag = events.value;";
 		$handle = background_process_start_locked('dontrunconcurrently','check_topic_name_image_description', $event_id);
 		
 		}
+	elseif($event_type == 'exhibition_creation') {
+		$output['title'][] = get_event_label($event_id, '/exhibitions/exhibition').' at '
+				.get_event_label($event_id, '/exhibitions/exhibition_run/venue');
+	}
 	elseif($event_type == 'award_won') {
 			$output['title'][] = get_event_label_with_event_attribute_name($event_id, 'agent').' won '
 		.get_event_label($event_id, '/award/award_honor/award');
