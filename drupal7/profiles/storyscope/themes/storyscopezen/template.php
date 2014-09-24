@@ -63,9 +63,21 @@ function storyscopezen_preprocess_page(&$variables, $hook) {
 * Overrides the theme_field for field_fb_tags to make it clickable and link to the Event Space (this will change).
 */
 function storyscopezen_field__field_fb_tags($variables) {
+	if ($node = menu_get_object()) {
+	  // Get the nid
+	  $nid = $node->nid;
+	}
 	$output = '';
-
+	$show_all = '';
+	$path = drupal_lookup_path('alias', current_path());
+	
+	
+	if (!empty ($variables['items'][0])) {
+			$show_all = '<li class="tags">' . l(t('Show All'),  $path , array('attributes' => array('target'=>'_self'), 'query' => array('story'=> $nid ))) . '</li>';
+		    $output .= $show_all;
+	}
 	foreach ($variables['items'] as $item) {
+
 		$fcid = key($item['entity']['field_collection_item']);
 		if (!empty($item['entity']['field_collection_item'][$fcid]['field_mid'][0]['#markup'])) {
 			$mid = $item['entity']['field_collection_item'][$fcid]['field_mid'][0]['#markup'];
@@ -76,8 +88,9 @@ function storyscopezen_field__field_fb_tags($variables) {
 		if (!empty($mid) && !empty($topic)) {
 			$relative_mid = end(explode("/", $mid));
 			$output .= '<li class="tags">';
-			$tags_link = l($topic, "tag/m/" . $relative_mid, array('attributes' => array('target'=>'_self')));
-			$output .= $tags_link . '</li>';
+			$tags_link = l($topic,  $path , array('attributes' => array('target'=>'_self'), 'query' => array('tag'=> '/m/' . $relative_mid )));
+			$output .= $tags_link . '</li>'; 
+			
 			//$output .= '<div class="tags freebase-link">' . $topic . '</div>';
 		}
 		elseif (empty($mid) && !empty($topic)) {
