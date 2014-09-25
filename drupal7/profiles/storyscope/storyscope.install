@@ -263,6 +263,19 @@ function storyscope_update_7003() {
   return t('Enabled and reverted the Storyscope features.');
 }
 
+
+function storyscope_update_7004() {
+  // An array of new or changed features; the array keys are feature names,
+  // values are an array of exportable types as seen in a feature's .info file:
+  //   features[field][] = node-page-body
+  $features = array(
+    'fontawesome' );
+ 
+  // Enable the modules by name.
+  module_enable($features);
+ 
+  return t('Enabled fontawesome module - nice icons.');
+}
 /**
 * Revert specified features.
 *
