@@ -251,16 +251,43 @@ function storyscope_update_7002() {
   // values are an array of exportable types as seen in a feature's .info file:
   //   features[field][] = node-page-body
   $features = array(
-    'annertech_panels', 'content_type_storyscope_dossier', 'content_type_storyscope_story', 'panels_node_dossier', 'panels_node_story', 'storyscope_front_page', 'storyscope_menus', 'storyscope_panels', 'storyscope_settings', 'storyscope_user', 'views_dossier_stories', 'views_dossiers'
+    'advanced_help', 'pathauto', 'annertech_panels', 'content_type_storyscope_dossier', 'content_type_storyscope_story', 'panels_node_dossier', 'panels_node_story', 'storyscope_front_page', 'storyscope_menus', 'storyscope_panels', 'storyscope_settings', 'storyscope_user', 'views_dossier_stories', 'views_dossiers'
   );
  
   // Enable the modules by name.
   module_enable($features);
  
   // Revert the features (if the feature has been changed)
-  features_revert($features);
+  storyscope_features_revert($features);
  
   return t('Enabled and reverted the Storyscope features.');
 }
 
+/**
+* Revert specified features.
+*
+* @TODO Check that it really is Forced features revert.  Currently an exact
+* copy of the function initially placed in feature_projects.install.
+*
+* Code mostly taken from drush.
+*/
+function storyscope_features_revert($modules) {
+  module_load_include('inc', 'features', 'features.export');
+  features_include();
+  foreach (
+	$modules as $module) {
+    if (($feature = feature_load($module, TRUE)) && module_exists($module)) {
+      $components = array();
+      // Forcefully revert all components of a feature.
+      foreach (array_keys($feature->info['features']) as $component) {
+        if (features_hook($component, 'features_revert')) {
+          $components[] = $component;
+        }
+      }
+    }
+    foreach ($components as $component) {
+      features_revert(array($module => array($component)));
+    }
+  }
+}
 
