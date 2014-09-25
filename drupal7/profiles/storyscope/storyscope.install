@@ -246,12 +246,12 @@ function storyscope_install() {
  * STORYSCOPE FEATURE UPDATES
  * Enable and revert the storyscope_features.
  */
-function storyscope_update_7002() {
+function storyscope_update_7003() {
   // An array of new or changed features; the array keys are feature names,
   // values are an array of exportable types as seen in a feature's .info file:
   //   features[field][] = node-page-body
   $features = array(
-    'advanced_help', 'pathauto', 'annertech_panels', 'content_type_storyscope_dossier', 'content_type_storyscope_story', 'panels_node_dossier', 'panels_node_story', 'storyscope_front_page', 'storyscope_menus', 'storyscope_panels', 'storyscope_settings', 'storyscope_user', 'views_dossier_stories', 'views_dossiers'
+    'storyscope_tweaks', 'storyscope_content', 'advanced_help', 'pathauto', 'annertech_panels', 'content_type_storyscope_dossier', 'content_type_storyscope_story', 'panels_node_dossier', 'panels_node_story', 'storyscope_front_page', 'storyscope_menus', 'storyscope_panels', 'storyscope_settings', 'storyscope_user', 'views_dossier_stories', 'views_dossiers'
   );
  
   // Enable the modules by name.
