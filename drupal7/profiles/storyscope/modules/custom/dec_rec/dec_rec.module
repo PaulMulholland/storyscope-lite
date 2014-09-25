@@ -4541,23 +4541,38 @@ function top_n_themes_of_tag($tag = '/m/01qwfk', $n = 5) {
 // ORDER BY frequency DESC) as frequency
 // WHERE frequency > 1 LIMIT ".$n." ;";
 	//this version of the query excludes locations
+// 	$query = "SELECT * FROM (SELECT result.tag as value, COUNT(result.tag) as frequency, result.name
+// FROM tag_name as result,
+// (SELECT tag_name.tag
+// FROM tag_attribute, tag_attribute_id_value, tag_name 
+// WHERE tag_name.tag = tag_name.tag AND tag_attribute.tag = :tag AND 
+// tag_attribute.id = tag_attribute_id_value.tag_attribute_id and
+// tag_name.tag = tag_attribute_id_value.value
+// UNION ALL 
+// SELECT tag_name.tag 
+// FROM event_attribute_value as event_table, event_attribute_value as value_table, tag_name  
+// WHERE event_table.value = :tag AND event_table.event = value_table.event AND
+// tag_name.tag = value_table.value AND NOT EXISTS (SELECT attribute_name.name FROM attribute_name WHERE value_table.attribute = attribute_name.attribute AND attribute_name.name = 'location')) as data
+// WHERE result.tag = data.tag AND NOT(result.tag = :tag)
+// GROUP BY result.tag
+// ORDER BY frequency DESC) as frequency
+// WHERE frequency > 1 LIMIT ".$n." ;";
 	$query = "SELECT * FROM (SELECT result.tag as value, COUNT(result.tag) as frequency, result.name
 FROM tag_name as result,
 (SELECT tag_name.tag
-FROM tag_attribute, tag_attribute_id_value, tag_name 
-WHERE tag_name.tag = tag_name.tag AND tag_attribute.tag = :tag AND 
+FROM tag_attribute, tag_attribute_id_value, tag_name
+WHERE tag_name.tag = tag_name.tag AND tag_attribute.tag = :tag AND
 tag_attribute.id = tag_attribute_id_value.tag_attribute_id and
 tag_name.tag = tag_attribute_id_value.value
-UNION ALL 
-SELECT tag_name.tag 
-FROM event_attribute_value as event_table, event_attribute_value as value_table, tag_name  
+UNION ALL
+SELECT tag_name.tag
+FROM event_attribute_value as event_table, event_attribute_value as value_table, tag_name
 WHERE event_table.value = :tag AND event_table.event = value_table.event AND
 tag_name.tag = value_table.value AND NOT EXISTS (SELECT attribute_name.name FROM attribute_name WHERE value_table.attribute = attribute_name.attribute AND attribute_name.name = 'location')) as data
-WHERE result.tag = data.tag AND NOT(result.tag = :tag)
+WHERE result.tag = data.tag
 GROUP BY result.tag
 ORDER BY frequency DESC) as frequency
 WHERE frequency > 1 LIMIT ".$n." ;";
-
 	$result = db_query($query, array(':tag' => $tag));
 	$output = array();
 	foreach ($result as $record) {
