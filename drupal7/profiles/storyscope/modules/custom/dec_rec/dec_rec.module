@@ -215,54 +215,56 @@ function dec_rec_story_event_space_edit_form_submit($form, &$form_state) {
 function story_event_space_block($type, $subtype, $args) {
 	$block = new stdClass();
 	$block->id = 'story_event_space_block';
-	if($args['space'] == 'tag') {
- 		$block->title = '';
- 		$data['concept_space'] = dec_tag($args['focus']);
- 		$data['title'] = 'Tag concept space';
-		$block->content = array('#theme'=>'story_event_space_block',
-				'#content'=>$data);
-	}
-	elseif($args['space'] == 'story') {
-		$block->title = '';
-		$data['concept_space'] = dec_story($args['focus']);
-		$data['title'] = 'Story concept space';
-		$block->content = array('#theme'=>'story_event_space_block',
-				'#content'=> $data);
-	}
-	elseif($args['space'] == 'setting') {
-		$block->title = '';
-		$data['concept_space'] = dec_setting($args['location'], $args['time'], $args['end']);
-		$data['title'] = 'Setting concept space';
-		$block->content = array('#theme'=>'story_event_space_block',
-				'#content'=> $data);
-	}
-	elseif($args['space'] == 'tags') {
-		$block->title = '';
-		$data['concept_space'] = dec_tags($args['focus']);
-		$data['title'] = 'Tags concept space';
-		$block->content = array('#theme'=>'story_event_space_block',
-				'#content'=> $data);
-	}
-	elseif($args['space'] == 'timeline') {
-		$block->title = '';
-		$data['concept_space'] = dec_timeline($args['focus']);
-		$data['title'] = 'Tag timeline';
-		$block->content = array('#theme'=>'story_event_space_block',
-				'#content'=> $data);
-	}
-	elseif($args['space'] == 'timeline_for_tags') {
-		$block->title = '';
-		$data['concept_space'] = dec_timeline_for_tags($args['focus']);
-		$data['title'] = 'Tags timeline';
-		$block->content = array('#theme'=>'story_event_space_block',
-				'#content'=> $data);
-	}
-	elseif($args['space'] == 'timeline_for_setting') {
-		$block->title = '';
-		$data['concept_space'] = dec_timeline_for_setting($args['focus'],$args['time'],$args['end']);
-		$data['title'] = 'Setting timeline';
-		$block->content = array('#theme'=>'story_event_space_block',
-				'#content'=> $data);
+	if(isset($args['space'])) {
+		if($args['space'] == 'tag') {
+	 		$block->title = '';
+	 		$data['concept_space'] = dec_tag($args['focus']);
+	 		$data['title'] = 'Tag concept space';
+			$block->content = array('#theme'=>'story_event_space_block',
+					'#content'=>$data);
+		}
+		elseif($args['space'] == 'story') {
+			$block->title = '';
+			$data['concept_space'] = dec_story($args['focus']);
+			$data['title'] = 'Story concept space';
+			$block->content = array('#theme'=>'story_event_space_block',
+					'#content'=> $data);
+		}
+		elseif($args['space'] == 'setting') {
+			$block->title = '';
+			$data['concept_space'] = dec_setting($args['location'], $args['time'], $args['end']);
+			$data['title'] = 'Setting concept space';
+			$block->content = array('#theme'=>'story_event_space_block',
+					'#content'=> $data);
+		}
+		elseif($args['space'] == 'tags') {
+			$block->title = '';
+			$data['concept_space'] = dec_tags($args['focus']);
+			$data['title'] = 'Tags concept space';
+			$block->content = array('#theme'=>'story_event_space_block',
+					'#content'=> $data);
+		}
+		elseif($args['space'] == 'timeline') {
+			$block->title = '';
+			$data['concept_space'] = dec_timeline($args['focus']);
+			$data['title'] = 'Tag timeline';
+			$block->content = array('#theme'=>'story_event_space_block',
+					'#content'=> $data);
+		}
+		elseif($args['space'] == 'timeline_for_tags') {
+			$block->title = '';
+			$data['concept_space'] = dec_timeline_for_tags($args['focus']);
+			$data['title'] = 'Tags timeline';
+			$block->content = array('#theme'=>'story_event_space_block',
+					'#content'=> $data);
+		}
+		elseif($args['space'] == 'timeline_for_setting') {
+			$block->title = '';
+			$data['concept_space'] = dec_timeline_for_setting($args['focus'],$args['time'],$args['end']);
+			$data['title'] = 'Setting timeline';
+			$block->content = array('#theme'=>'story_event_space_block',
+					'#content'=> $data);
+		}
 	}
 	return $block;
 }
