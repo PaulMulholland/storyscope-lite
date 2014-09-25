@@ -71,7 +71,7 @@ function panels_node_story_default_page_manager_handlers() {
     ),
   );
   $display->cache = array();
-  $display->title = '';
+  $display->title = '<i class="fa fa-comments fa-lg">&nbsp;</i>%node:title';
   $display->uuid = '1c92e558-d518-4881-b4be-3e6de7be91e0';
   $display->content = array();
   $display->panels = array();
@@ -151,7 +151,7 @@ function panels_node_story_default_page_manager_handlers() {
       ),
       'context' => 'argument_entity_id:node_1',
       'override_title' => 1,
-      'override_title_text' => 'Story Tags',
+      'override_title_text' => '<i class="fa fa-tags fa-lg">&nbsp;</i>Story Tags',
     );
     $pane->cache = array();
     $pane->style = array(
@@ -181,18 +181,18 @@ function panels_node_story_default_page_manager_handlers() {
       'delta_offset' => '0',
       'delta_reversed' => 0,
       'formatter_settings' => array(
-        'file_view_mode' => 'media_preview',
+        'file_view_mode' => 'default',
         'colorbox_view_mode' => 'colorbox',
         'fixed_width' => '',
         'fixed_height' => '',
-        'colorbox_gallery' => 'post',
+        'colorbox_gallery' => 'field_page',
         'colorbox_gallery_custom' => '',
-        'colorbox_caption' => 'title',
+        'colorbox_caption' => 'mediafield',
         'audio_playlist' => 0,
       ),
       'context' => 'argument_entity_id:node_1',
       'override_title' => 1,
-      'override_title_text' => 'Story Gallery',
+      'override_title_text' => '<i class="fa fa-picture-o fa-lg">&nbsp;</i>Story Gallery',
     );
     $pane->cache = array();
     $pane->style = array(

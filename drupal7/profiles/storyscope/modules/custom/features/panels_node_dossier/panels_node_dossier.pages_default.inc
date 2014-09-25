@@ -71,7 +71,7 @@ function panels_node_dossier_default_page_manager_handlers() {
     ),
   );
   $display->cache = array();
-  $display->title = '';
+  $display->title = '<i class="fa fa-folder-open fa-lg">&nbsp;</i>%node:title';
   $display->uuid = '1c92e558-d518-4881-b4be-3e6de7be91e0';
   $display->content = array();
   $display->panels = array();
@@ -166,7 +166,7 @@ function panels_node_dossier_default_page_manager_handlers() {
         0 => '',
       ),
       'override_title' => 1,
-      'override_title_text' => 'Stories',
+      'override_title_text' => '<i class="fa fa-comments fa-lg">&nbsp;</i>Stories',
     );
     $pane->cache = array();
     $pane->style = array(

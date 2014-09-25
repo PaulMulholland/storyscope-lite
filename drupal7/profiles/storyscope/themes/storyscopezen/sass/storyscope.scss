@@ -789,6 +789,10 @@ div.button {
   padding: 1em;
   text-transform: uppercase;
   @include adjust-font-size-to( 12px);
+  //don't show any icons in the crumbtrail'
+  i {
+    display: none;
+  }
 }
 
 /* Search */
@@ -1963,8 +1967,8 @@ ul.field-name-field-fb-tags {
       padding-left: 0px;
       float: left;
       li {
-        margin: 0 15px 15px 0;
-        padding: 4px 15px 4px 15px;
+        margin: 0 10px 10px 0;
+        padding: 3px 10px 3px 10px;
         list-style: none;
         text-decoration: none;
         background-color: #eee;
