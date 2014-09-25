@@ -2928,8 +2928,8 @@ function dec_list_of_tags($tag_array, $max_value) {
 	//use this list for event table 
 	$event_list = event_list_for_story_id($max_value);
 	
-	$nonmatching_themes = top_n_nonmatching_themes_of_story2($event_list, $max_value, 10);
-	$matching_themes = top_n_matching_themes_of_story2($event_list, $max_value, 10);	
+	$themes = top_n_themes_of_story($event_list, 10);
+// 	$matching_themes = top_n_matching_themes_of_story2($event_list, $max_value, 10);	
 	$event_table = event_table_for_event_list($event_list);
 	$timeline_links = dec_tags_timeline_links($max_value);
 
@@ -2937,25 +2937,25 @@ function dec_list_of_tags($tag_array, $max_value) {
 	$overlapping_settings = get_n_matching_settings_for_a_story2($max_value, 5);	
 	
 	//matching themes (i.e. the story tags)
-	if(!empty($matching_themes)) {
-		$output .= '<div style="clear:both"><h2>Tags: </h2></div>';
-		foreach($matching_themes as $theme) {
-			if($theme->value && !$theme->name) {
-				$output .= storytaglink('<div style="float: left; white-space: nowrap; background-color: #ebebeb; margin: 5px;">'.$theme->value."</div>", $theme->value, array("html"=>TRUE));
+// 	if(!empty($matching_themes)) {
+// 		$output .= '<div style="clear:both"><h2>Tags: </h2></div>';
+// 		foreach($matching_themes as $theme) {
+// 			if($theme->value && !$theme->name) {
+// 				$output .= storytaglink('<div style="float: left; white-space: nowrap; background-color: #ebebeb; margin: 5px;">'.$theme->value."</div>", $theme->value, array("html"=>TRUE));
 				
-// 				$output .= '<div style="float: left; white-space: nowrap; background-color: #ebebeb; margin: 5px;">'.$theme->value."</div>";
-			}
-			else {
-				$output .= storytaglink('<div style="float: left; white-space: nowrap; background-color: #ebebeb; margin: 5px;">'.$theme->name."</div>", $theme->value, array("html"=>TRUE));
-			}
-		}
+// // 				$output .= '<div style="float: left; white-space: nowrap; background-color: #ebebeb; margin: 5px;">'.$theme->value."</div>";
+// 			}
+// 			else {
+// 				$output .= storytaglink('<div style="float: left; white-space: nowrap; background-color: #ebebeb; margin: 5px;">'.$theme->name."</div>", $theme->value, array("html"=>TRUE));
+// 			}
+// 		}
 	
-	}
+// 	}
 	
-	//non-matching themes (i.e. themes that are not story tags)
-	if(!empty($nonmatching_themes)) {
+	//themes (i.e. themes may or may not be story tags)
+	if(!empty($themes)) {
 		$output .= '<div style="clear:both"><h2>Themes: </h2></div>';
-		foreach($nonmatching_themes as $theme) {
+		foreach($themes as $theme) {
 			$output .= storytaglink('<div style="float: left; white-space: nowrap; background-color: #ebebeb; margin: 5px;">'.$theme->name."</div>", $theme->value, array("html"=>TRUE));
 		}
 	
@@ -4565,6 +4565,48 @@ WHERE frequency > 1 LIMIT ".$n." ;";
 	}
 	return $output;	
 }
+
+
+/**
+ * Top matching themes (whether or not tags of the story)
+ */
+function top_n_themes_of_story($event_list, $n = 5) {
+	$n = (int) $n;
+if($n == 0) {
+	$n = 5;
+}
+$query_list = "('".implode("','",$event_list)."')";
+//this version keeps locations in the theme list
+// 	$query = "SELECT COUNT(DISTINCT result.value) as tags, COUNT(DISTINCT result.event) as frequency, result.value, result.name
+// FROM
+// (SELECT *
+// FROM event_attribute_value, tag_name
+// WHERE event_attribute_value.event IN ".$query_list." AND tag_name.tag = event_attribute_value.value) as result
+// WHERE
+//  NOT EXISTS (SELECT qt.tag FROM query_tag as qt WHERE qt.id = '".$max_value."' AND qt.tag = result.value)
+// GROUP BY result.value
+// ORDER BY tags DESC, frequency DESC LIMIT ".$n.";";
+//this version of the query excludes locations
+$query = "SELECT COUNT(DISTINCT result.value) as tags, COUNT(DISTINCT result.event) as frequency, result.value, result.name
+FROM
+(SELECT *
+FROM event_attribute_value, tag_name
+WHERE event_attribute_value.event IN ".$query_list." AND tag_name.tag = event_attribute_value.value
+	AND NOT EXISTS
+(SELECT attribute_name.name FROM attribute_name WHERE event_attribute_value.attribute = attribute_name.attribute AND attribute_name.name = 'location')) as result
+GROUP BY result.value
+ORDER BY tags DESC, frequency DESC LIMIT ".$n.";";
+
+$result = db_query($query);
+
+$output = array();
+foreach ($result as $record) {
+	$output[] = $record;
+}
+
+return $output;
+}
+
 
 /**
  * Ordering of the story tags according to theme ranking
