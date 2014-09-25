@@ -245,7 +245,7 @@ function storyscope_install() {
 /**
  * STORYSCOPE FEATURE UPDATES
  * Enable and revert the storyscope_features.
- */
+ *
 function storyscope_update_7003() {
   // An array of new or changed features; the array keys are feature names,
   // values are an array of exportable types as seen in a feature's .info file:
@@ -262,19 +262,22 @@ function storyscope_update_7003() {
  
   return t('Enabled and reverted the Storyscope features.');
 }
-
+*/
 
 function storyscope_update_7004() {
   // An array of new or changed features; the array keys are feature names,
   // values are an array of exportable types as seen in a feature's .info file:
   //   features[field][] = node-page-body
   $features = array(
-    'fontawesome' );
+    'fontawesome' , 'panels_node_dossier', 'panels_node_story' );
  
   // Enable the modules by name.
   module_enable($features);
+  
+    // Revert the features (if the feature has been changed)
+  storyscope_features_revert($features);
  
-  return t('Enabled fontawesome module - nice icons.');
+  return t('Enabled fontawesome module, reverted Dossier and Story Panels');
 }
 /**
 * Revert specified features.
