@@ -452,6 +452,32 @@ function update_query_tags_for_story_node($node) {
 }
 
 /**
+ * Asynchronously check for freebase topic in cache and retrieve if not found (new story tag)
+ */
+function dec_rec_entity_insert($entity, $type) {
+  // Insert the new entity into a fictional table of all entities.
+	if($type == 'field_collection_item') {
+		if(isset($entity->field_mid['und'][0]['value'])) {
+			$mid = extract_mid_from_freebase_uri($entity->field_mid['und'][0]['value']);
+			$handle = background_process_start('new_event_space_of_a_topic', $mid);
+		}
+	}
+}
+
+/**
+ * Asynchronously check for freebase topic in cache and retrieve if not found (edited story tag)
+ */
+function dec_rec_entity_update($entity, $type) {
+	// Insert the new entity into a fictional table of all entities.
+	if($type == 'field_collection_item') {
+		if(isset($entity->field_mid['und'][0]['value'])) {
+			$mid = extract_mid_from_freebase_uri($entity->field_mid['und'][0]['value']);
+			$handle = background_process_start('new_event_space_of_a_topic', $mid);
+		}
+	}
+}
+
+/**
  * Check for the name, description and image of a topic
  * Retrieve if not stored in the database
 */
@@ -1184,7 +1210,7 @@ function translate_time_for_timeline($time) {
 /**
  * Create header for setting timeline
 */
-function create_timeline_setting_header($location, $year, $end = 0, $path) {///***here
+function create_timeline_setting_header($location, $year, $end = 0, $path) {
 	global $base_url;
 
 	$header = array();
@@ -1648,7 +1674,7 @@ LEFT JOIN tag_name ON tag_name.tag = event_value_table.value;";
 // 			$output_with_titles[$event_id][0] = get_event_label_with_event_attribute_name($event_id, 'agent').' educated at '
 // 					.get_event_label_with_event_attribute_name($event_id, 'location');
 // 		}
-		elseif($event_type == 'education') {//****here
+		elseif($event_type == 'education') {
 			$output_with_titles[$event_id][0] = get_event_label($event_id, '/education/education/student').' educated at '
 					.get_event_label($event_id, '/education/education/institution');
 		}
