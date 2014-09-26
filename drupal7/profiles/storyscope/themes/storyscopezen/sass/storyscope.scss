@@ -1960,32 +1960,6 @@ p.events-display-date {
   }
 }
 
-//Story Tags on a Story Node
-ul.field-name-field-fb-tags {
-
-      list-style-type: none;
-      padding-left: 0px;
-      float: left;
-      li {
-        margin: 0 10px 10px 0;
-        padding: 3px 10px 3px 10px;
-        list-style: none;
-        text-decoration: none;
-        background-color: #eee;
-        -moz-border-radius: 3px;
-        border-radius: 3px;
-        box-shadow: 1px 1px 4px #888888;
-        float: left;
-        display: block;
-        a {
-                  color: #666;
-        }
-        a:hover {
-          text-decoration: none;
-          border-bottom: none;
-        }
-      }
-}
 
 
 .node-object-form {
@@ -3315,15 +3289,89 @@ float: left;
   }
 }
 
-// Storyscope Lite //
+//******* Storyscope Lite ********//
 
 .field-name-field-media {
-.field-item {
-  float: left;
-  padding: 10px;
-}
+  .field-item {
+    float: left;
+    padding: 10px;
+  }
 }
 
 .pane-node-field-fb-tags {
   clear:left;
+}
+
+//Story Tags on a Story Node
+ul.field-name-field-fb-tags {
+
+      list-style-type: none;
+      padding-left: 0px;
+      float: left;
+      li {
+        margin: 0 10px 10px 0;
+        padding: 3px 10px 3px 10px;
+        list-style: none;
+        text-decoration: none;
+        background-color: #eee;
+        -moz-border-radius: 3px;
+        border-radius: 3px;
+        box-shadow: 1px 1px 1px #999999;
+        float: left;
+        display: block;
+        color: #666;
+        a {
+                  color: #666;
+        }
+        a:hover {
+          text-decoration: none;
+          border-bottom: none;
+        }
+      }
+      .plain {
+        background-color: #fff;
+        -moz-border-radius: none;
+        border-radius: none;
+        box-shadow: none;
+      }
+}
+
+//Event Space Styling
+.block-dec-rec {
+  border-top: 1px solid #D3D7D9;
+  padding-top: 1em;
+  h2 {
+    font-size: 1.2em;
+  }
+  .event-space-headings {
+    clear:both;
+  }
+  .event-space-table {
+    clear: both;
+    table {
+      width: 100%;
+      border: 1px solid lightgrey;
+      th {
+        padding: 2px 3px 2px 3px;
+        border-bottom: 1px solid lightgrey;
+        overflow: hidden;
+        width: 50px;
+        text-transform: capitalize;
+      }
+      
+      tr.odd {
+        background: lighten(lightblue, 20%);
+      }
+      tr.even {
+        background: lighten(lightgreen, 25%);
+      }
+      td {
+        padding: 3px 3px 3px 3px;
+        a {
+          color: #666;
+        }
+
+      }
+    }
+  }
 }

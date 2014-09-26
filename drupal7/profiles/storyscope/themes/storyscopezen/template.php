@@ -73,7 +73,8 @@ function storyscopezen_field__field_fb_tags($variables) {
 	
 	
 	if (!empty ($variables['items'][0])) {
-			$show_all = '<li class="tags">' . l(t('Show All'),  $path , array('attributes' => array('target'=>'_self'), 'query' => array('story'=> $nid ))) . '</li>';
+		    
+			$show_all = l('<li class="tags">' . t('Show All') . '</li>',  $path , array('html'=>'true', 'attributes' => array('target'=>'_self'), 'query' => array('story'=> $nid )));
 		    $output .= $show_all;
 	}
 	foreach ($variables['items'] as $item) {
@@ -87,9 +88,7 @@ function storyscopezen_field__field_fb_tags($variables) {
 		}
 		if (!empty($mid) && !empty($topic)) {
 			$relative_mid = end(explode("/", $mid));
-			$output .= '<li class="tags">';
-			$tags_link = l($topic,  $path , array('attributes' => array('target'=>'_self'), 'query' => array('tag'=> '/m/' . $relative_mid )));
-			$output .= $tags_link . '</li>'; 
+			$output .= l('<li class="tags">' . $topic . '</li>',  $path , array('html'=>'true', 'attributes' => array('target'=>'_self'), 'query' => array('tag'=> '/m/' . $relative_mid )));
 			
 			//$output .= '<div class="tags freebase-link">' . $topic . '</div>';
 		}
@@ -98,7 +97,7 @@ function storyscopezen_field__field_fb_tags($variables) {
     }
 
 	}
-	// Render the top-level DIV.
+	// Render the top-level UL.
 	$output = '<ul class="' . $variables['classes'] . '"' . $variables['attributes'] . '>' . $output . '</ul>';
 	return $output;
 }

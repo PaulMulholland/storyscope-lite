@@ -1,3 +1,4 @@
+
 <?php
 /**
  * file: dec_rec.module
@@ -1673,8 +1674,8 @@ LEFT JOIN tag_name ON tag_name.tag = event_value_table.value;";
 		}
 
 	}
-	$table = theme('table',array('rows' => $output_with_titles, 'header' => array('title','activity','agent','start_time','end_time','location','tags')));
-	return $table;
+	$table = theme('table',array('rows' => $output_with_titles, 'header' => str_replace('_', ' ', array('title','activity','agent','start_time','end_time','location','tags'))));
+	return '<div class="event-space-table">' . $table . '</div>';
 }
 
 /**
@@ -2548,17 +2549,22 @@ function dec_setting($location, $time,  $end) {
 	}
 
 	if(!empty($themes)) {
-		$output .= '<div style="clear:both"><h2>Themes: </h2></div>';
+		$output .= '<div style="clear:both"><h2><i class="fa fa-link fa-lg">&nbsp;</i>Themes</h2></div>';
+		$output .=  '<ul class="field-name-field-fb-tags">';
 		foreach($themes as $theme) {
 // 			$output .= l('<div style="float: left; white-space: nowrap; background-color: #ebebeb; margin: 5px;">'.$theme->name."</div>", "tag".$theme->value, array("html"=>TRUE));
-			$output .= storytaglink('<div style="float: left; white-space: nowrap; background-color: #ebebeb; margin: 5px;">'.$theme->name."</div>", $theme->value, array("html"=>TRUE));
+			//$output .= storytaglink('<div style="float: left; white-space: nowrap; background-color: #ebebeb; margin: 5px;">'.$theme->name."</div>", $theme->value, array("html"=>TRUE));
+			$output .= storytaglink('<li class="tags">'.$theme->name."</li>", $theme->value, array("html"=>TRUE));
+		
 		}
-	
+
+		$output .=  '</ul">';
 	}
 	
 	if(!empty($event_array)) {
-		$output .= '<div style="clear:both"><h2>Event space: </h2></div>';
 		$output .= $timeline_links;
+		$output .= '<div style="clear:both"><h2><i class="fa fa-cloud fa-lg">&nbsp;</i>Event space</h2></div>';
+
 		$output .= $setting_event_table;
 	}
 
@@ -2954,40 +2960,36 @@ function dec_list_of_tags($tag_array, $max_value) {
 	
 	//themes (i.e. themes may or may not be story tags)
 	if(!empty($themes)) {
-		$output .= '<div style="clear:both"><h2>Themes: </h2></div>';
+		$output .= '<div style="clear:both"><h2><i class="fa fa-link fa-lg">&nbsp;</i>Themes</h2></div>';
+		$output .=  '<ul class="field-name-field-fb-tags">';
 		foreach($themes as $theme) {
-			$output .= storytaglink('<div style="float: left; white-space: nowrap; background-color: #ebebeb; margin: 5px;">'.$theme->name."</div>", $theme->value, array("html"=>TRUE));
+			$output .= storytaglink('<li class="tags"">'.$theme->name."</li>", $theme->value, array("html"=>TRUE));
 		}
+		$output .=  '</ul>';
 	
 	}
 	
 	//settings
 	if(!empty($overlapping_settings)) {
 	
-		$output .= '<div style="clear:both"><h2>Settings: </h2></div>';
+		$output .= '<div style="clear:both"><h2><i class="fa fa-compass fa-lg">&nbsp;</i>Settings</h2></div>';
+		$output .=  '<ul class="field-name-field-fb-tags">';
 		foreach($overlapping_settings as $setting) {
 			if($setting->end && $setting->start && $setting->start !== $setting->end) {
-				$output .= '<div style="float: left; white-space: nowrap; background-color: #ebebeb; margin: 5px;">'.
-						storysettinglink($setting->name.", ".$setting->start." to ".$setting->end,'setting',array('query' => array('location' => $setting->location, 'time' => $setting->start, 'end' => $setting->end))).
-						"</div>";				
+				$output .= storysettinglink('<li class="tags">'. $setting->name.", ".$setting->start." to ".$setting->end . '</li>','setting',array('html'=>'true', 'query' => array('location' => $setting->location, 'time' => $setting->start, 'end' => $setting->end)));				
 			}
 			elseif($setting->start == $setting->end) {
-				$output .= '<div style="float: left; white-space: nowrap; background-color: #ebebeb; margin: 5px;">'.
-					storysettinglink($setting->name.", ".$setting->start,'setting',array('query' => array('location' => $setting->location, 'time' => $setting->start))).
-					"</div>";
+				$output .= storysettinglink('<li class="tags">'. $setting->name.", ".$setting->start . '</li>','setting', array('html'=>'true', 'query' => array('location' => $setting->location, 'time' => $setting->start)));
 			}
 			elseif($setting->start && !$setting->end) {
-				$output .= '<div style="float: left; white-space: nowrap; background-color: #ebebeb; margin: 5px;">'.
-					storysettinglink($setting->name.", ".$setting->start,'setting',array('query' => array('location' => $setting->location, 'time' => $setting->start))).
-					"</div>";
+				$output .= storysettinglink('<li class="tags">'. $setting->name.", ".$setting->start . '</li>','setting',array('html'=>'true', 'query' => array('location' => $setting->location, 'time' => $setting->start)));
 			}
 			elseif($setting->end && !$setting->start) {
-				$output .= '<div style="float: left; white-space: nowrap; background-color: #ebebeb; margin: 5px;">'.
-					storysettinglink($setting->name.", ".$setting->end,'setting',array('query' => array('location' => $setting->location, 'time' => $setting->end))).
-					"</div>";
+				$output .= storysettinglink('<li class="tags">'. $setting->name.", ".$setting->end . '</li>','setting',array('html'=>'true', 'query' => array('location' => $setting->location, 'time' => $setting->end)));
 			}
+		
 		}
-	
+	$output .=  '</ul>';
 	}
 	
 	//events
@@ -3005,10 +3007,11 @@ function dec_list_of_tags($tag_array, $max_value) {
 // 			}
 // 		}
 // 	}
-	if(!empty($event_list)) {
-		$output .= '<div style="clear:both"><h2>Event space: </h2></div>';
-	}
 	$output .= $timeline_links;
+	if(!empty($event_list)) {
+		$output .= '<div style="clear:both"><h2><i class="fa fa-cloud fa-lg">&nbsp;</i>Event Space</h2></div>';
+	}
+
 	$output .= $event_table;
 	
 	return $output;
@@ -3020,23 +3023,27 @@ function dec_list_of_tags($tag_array, $max_value) {
 function dec_setting_timeline_links($time, $end, $location, $event_array) {
 	$attribute_list = temporal_type_list_for_event_array($event_array);
 	if(!empty($attribute_list)) {
-		$output_list = array();
+		
+		$output = '<div class="event-space-headings"><h2><i class="fa fa-clock-o fa-lg">&nbsp;</i>' . t('Timelimes') . '</h2>';
+		$output .= '<ul class="field-name-field-fb-tags" style="clear:both">';
+		
 		if($end) {
-			$output_list[] = l('All', request_path(), array('query'=>array('timeline_for_setting'=>$location, 'time'=>$time, 'end'=>$end)));
+			$output .= l('<li class="tags">' . t('All') . '</li>', request_path(), array('html'=>'true', 'query'=>array('timeline_for_setting'=>$location, 'time'=>$time, 'end'=>$end)));
 		}
 		else {
-			$output_list[] = l('All', request_path(), array('query'=>array('timeline_for_setting'=>$location, 'time'=>$time)));
+			$output .= l('<li class="tags">' . t('All') . '</li>', request_path(), array('html'=>'true', 'query'=>array('timeline_for_setting'=>$location, 'time'=>$time)));
 		}
 		foreach($attribute_list as $attribute) {
 			if($end) {
-				$output_list[] = l(ucfirst($attribute), request_path(), array('query'=>array('timeline_for_setting'=>$location, 'time'=>$time, 'event_type'=>$attribute, 'end'=>$end)));
+				$output .= l('<li class="tags">' . str_replace('_', ' ', ucfirst($attribute)) . '</li>', request_path(), array('html'=>'true', 'query'=>array('timeline_for_setting'=>$location, 'time'=>$time, 'event_type'=>$attribute, 'end'=>$end)));
 			}
 			else {
-				$output_list[] = l(ucfirst($attribute), request_path(), array('query'=>array('timeline_for_setting'=>$location, 'time'=>$time, 'event_type'=>$attribute)));
+				$output .= l('<li class="tags">' . str_replace('_', ' ', ucfirst($attribute)) . '</li>', request_path(), array('html'=>'true', 'query'=>array('timeline_for_setting'=>$location, 'time'=>$time, 'event_type'=>$attribute)));
 			}
 		}
-		$output = '<div style="clear:both">Timelime: '.implode(', ',$output_list).'</div>';
+		$output .= '</ul>';	
 	}
+	
 	else {
 		$output = '';
 	}
@@ -3050,11 +3057,12 @@ function dec_tag_timeline_links($topic, $event_array) {
 	$attribute_list = temporal_type_list_for_event_array($event_array);
 	if(!empty($attribute_list)) {
 		$output_list = array();
-		$output_list[] = l('All', request_path(), array('query'=>array('timeline'=>$topic)));
+		$output = '<div class="event-space-headings"><h2><i class="fa fa-clock-o fa-lg">&nbsp;</i>Timelimes</h2></div><ul class="field-name-field-fb-tags">';
+		$output .= l('<li class="tags">' . t('All') . '</li>', request_path(), array('html'=>'true', 'query'=>array('timeline'=>$topic)));
 		foreach($attribute_list as $attribute) {
-			$output_list[] = l(ucfirst($attribute), request_path(), array('query'=>array('timeline'=>$topic, 'attribute'=>$attribute))); 
+			$output .= l('<li class="tags">' . str_replace('_', ' ', ucfirst($attribute)) . '</li>', request_path(), array('html'=>'true', 'query'=>array('timeline'=>$topic, 'attribute'=>$attribute)));
 		}
-		$output = '<div style="clear:both">Timelime: '.implode(', ',$output_list).'</div>';
+		$output .= '</ul>';
 	}
 	else {
 		$output = '';
@@ -3068,12 +3076,12 @@ function dec_tag_timeline_links($topic, $event_array) {
 function dec_tags_timeline_links($story_id) {
 	$attribute_list = temporal_type_list_for_story_id($story_id);
 	if(!empty($attribute_list)) {
-		$output_list = array();
-		$output_list[] = l('All', request_path(), array('query'=>array('timeline_for_tags'=>$story_id)));
+		$output = '<div class="event-space-headings"><h2><i class="fa fa-clock-o fa-lg">&nbsp;</i>Timelimes</h2></div><ul class="field-name-field-fb-tags">';
+		$output .=  l('<li class="tags">' . t('All') . '</li>', request_path(), array('query'=>array('timeline_for_tags'=>$story_id), 'html'=>'true'));
 		foreach($attribute_list as $attribute) {
-			$output_list[] = l(ucfirst($attribute), request_path(), array('query'=>array('timeline_for_tags'=>$story_id, 'event_type'=>$attribute)));
+			$output .= l('<li class="tags">' . str_replace('_', ' ', ucfirst($attribute)) . '</li>', request_path(), array('query'=>array('timeline_for_tags'=>$story_id, 'event_type'=>$attribute), 'html'=>'true'));
 		}
-		$output = '<div style="clear:both">Timelime: '.implode(', ',$output_list).'</div>';
+		$output .= '</ul>';
 	}
 	else {
 		$output = '';
@@ -3274,7 +3282,7 @@ function dec_tag($topic) {
 		//tag name
 		$name = get_topic_name($topic);
 		if($name) {
-			$output .= '<h2>'.$name.'</h2>';
+			$output .= '<h2><i class="fa fa-info fa-lg">&nbsp;</i>' . t('About : ') .$name.'</h2>';
 // 			drupal_set_title($name);
 		}
 
@@ -3328,10 +3336,12 @@ function dec_tag($topic) {
 	//tag themes
 	$themes = top_n_themes_of_tag($topic, 10);
 	if(!empty($themes)) {
-		$output .= '<div style="clear:both"><h2>Themes: </h2></div>';
+		$output .= '<div style="clear:both"><h2><i class="fa fa-link fa-lg">&nbsp;</i>Themes</h2></div>';
+		$output .=  '<ul class="field-name-field-fb-tags">';
 		foreach($themes as $theme) {
-			$output .= storytaglink('<div style="float: left; white-space: nowrap; background-color: #ebebeb; margin: 5px;">'.$theme->name."</div>", $theme->value, array("html"=>TRUE));
-		}
+			$output .= storytaglink('<li class="tags">'.$theme->name."</li>", $theme->value, array("html"=>TRUE));
+					}
+		$output .=  '</ul>';
 		
 	}
 	
@@ -3339,24 +3349,21 @@ function dec_tag($topic) {
 	$settings = get_n_settings_for_a_tag($topic, 10);
 
 	if(!empty($settings)) {
-		$output .= '<div style="clear:both"><h2>Settings: </h2></div>';
+		$output .= '<div style="clear:both"><h2><i class="fa fa-compass fa-lg">&nbsp;</i>Settings</h2></div>';
+		$output .=  '<ul class="field-name-field-fb-tags">';
+		
 		foreach($settings as $setting) {
 			if(isset($setting->end_time) && isset($setting->start_time) && $setting->start_time !== $setting->end_time) {
-				$output .= '<div style="float: left; white-space: nowrap; background-color: #ebebeb; margin: 5px;">'.
-						storysettinglink($setting->name.", ".$setting->start_time." to ".$setting->end_time,'setting',array('query' => array('location' => $setting->location, 'time' => $setting->start_time, 'end' => $setting->end_time))).
-						"</div>";
+				$output .= storysettinglink('<li class="tags">' .$setting->name.", ".$setting->start_time." to ".$setting->end_time . '</li>','setting',array('html'=>'true', 'query' => array('location' => $setting->location, 'time' => $setting->start_time, 'end' => $setting->end_time)));
 			}
 			elseif(isset($setting->start_time)) {
-				$output .= '<div style="float: left; white-space: nowrap; background-color: #ebebeb; margin: 5px;">'.
-						storysettinglink($setting->name.", ".$setting->start_time,'setting',array('query' => array('location' => $setting->location, 'time' => $setting->start_time))).
-						"</div>";
+				$output .= storysettinglink('<li class="tags">' .$setting->name.", ".$setting->start_time . '</li>','setting',array('html'=>'true', 'query' => array('location' => $setting->location, 'time' => $setting->start_time)));
 			}
 			elseif(isset($setting->end_time)) {
-				$output .= '<div style="float: left; white-space: nowrap; background-color: #ebebeb; margin: 5px;">'.
-						storysettinglink($setting->name.", ".$setting->end_time,'setting',array('query' => array('location' => $setting->location, 'time' => $setting->end_time))).
-						"</div>";
+				$output .= storysettinglink('<li class="tags">' .$setting->name.", ".$setting->end_time  . '</li>','setting',array('html'=>'true', 'query' => array('location' => $setting->location, 'time' => $setting->end_time)));
 			}
 		}
+		$output .=  '</ul>';
 	}
 	
 // 	if(!empty($settings)) {
@@ -3403,8 +3410,9 @@ function dec_tag($topic) {
 	
 	$event_list = flat_list_of_single_tag_events($all_events);
 	if(!empty($event_list)) {
-		$output .= '<div style="clear:both"><h2>Event space: </h2></div>';
 		$output .= dec_tag_timeline_links($topic, $event_list);
+		$output .= '<div style="clear:both"><h2><i class="fa fa-cloud fa-lg">&nbsp;</i>Event space</h2></div>';
+
 		$output .= event_table_for_event_list($event_list);
 	}
 // 	$event_table = event_table_for_tag($topic);
@@ -3524,7 +3532,7 @@ function output_event_table($event_id) {
 		}
 		$rows[] = array($key,$value_string);
 	}
-	return theme('table', array('rows' => $rows, 'attributes' => array('width' => '50%')));
+	return '<div class="event-space-table">' . theme('table', array('rows' => $rows, 'attributes' => array('width' => '50%'))) . '</div>';
 }
 
 /**
