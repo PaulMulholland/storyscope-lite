@@ -279,6 +279,23 @@ function storyscope_update_7004() {
  
   return t('Enabled fontawesome module, reverted Dossier and Story Panels');
 }
+
+function storyscope_update_7005() {
+  // An array of new or changed features; the array keys are feature names,
+  // values are an array of exportable types as seen in a feature's .info file:
+  //   features[field][] = node-page-body
+  $features = array(
+    'footable' );
+ 
+  // Enable the modules by name.
+  module_enable($features);
+  
+    // Revert the features (if the feature has been changed)
+  storyscope_features_revert($features);
+ 
+  return t('Enabled footable module - sorting and filtering tables');
+}
+
 /**
 * Revert specified features.
 *
