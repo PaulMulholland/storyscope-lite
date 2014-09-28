@@ -4675,16 +4675,22 @@ div.tabs .button a:hover {
 
 /* line 3301, ../sass/storyscope.scss */
 .pane-node-field-fb-tags {
-  clear: left;
+  padding-top: 25px;
+  border-top: solid 1px #CDCCCB;
+}
+/* line 3306, ../sass/storyscope.scss */
+.pane-node-field-fb-tags .pane-content .field-collection-container {
+  border-bottom: none;
+  margin-bottom: 0px;
 }
 
-/* line 3306, ../sass/storyscope.scss */
+/* line 3316, ../sass/storyscope.scss */
 ul.field-name-field-fb-tags {
   list-style-type: none;
   padding-left: 0px;
   float: left;
 }
-/* line 3311, ../sass/storyscope.scss */
+/* line 3321, ../sass/storyscope.scss */
 ul.field-name-field-fb-tags li {
   margin: 0 10px 10px 0;
   padding: 3px 10px 3px 10px;
@@ -4698,59 +4704,94 @@ ul.field-name-field-fb-tags li {
   display: block;
   color: #666;
 }
-/* line 3323, ../sass/storyscope.scss */
+/* line 3333, ../sass/storyscope.scss */
 ul.field-name-field-fb-tags li a {
   color: #666;
 }
-/* line 3326, ../sass/storyscope.scss */
+/* line 3336, ../sass/storyscope.scss */
 ul.field-name-field-fb-tags li a:hover {
   text-decoration: none;
   border-bottom: none;
 }
-/* line 3331, ../sass/storyscope.scss */
+/* line 3341, ../sass/storyscope.scss */
 ul.field-name-field-fb-tags .plain {
   background-color: #fff;
   -moz-border-radius: none;
   border-radius: none;
   box-shadow: none;
+  font-weight: bold;
 }
 
-/* line 3340, ../sass/storyscope.scss */
+/* line 3351, ../sass/storyscope.scss */
 .block-dec-rec {
   border-top: 1px solid #D3D7D9;
   padding-top: 1em;
 }
-/* line 3343, ../sass/storyscope.scss */
+/* line 3354, ../sass/storyscope.scss */
 .block-dec-rec h2, .block-dec-rec .node-story-visualisation .exhibit-collectionView-body ol li > div > div:first-child, .node-story-visualisation .exhibit-collectionView-body ol .block-dec-rec li > div > div:first-child {
   font-size: 1.2em;
 }
-/* line 3346, ../sass/storyscope.scss */
+/* line 3357, ../sass/storyscope.scss */
 .block-dec-rec .event-space-headings {
   clear: both;
 }
-/* line 3349, ../sass/storyscope.scss */
+/* line 3360, ../sass/storyscope.scss */
 .block-dec-rec .event-space-filter {
   font-size: 13px;
   color: #4E4E4E;
 }
-/* line 3354, ../sass/storyscope.scss */
+/* line 3365, ../sass/storyscope.scss */
 .block-dec-rec .event-space-tag-attibutes-wrapper {
   padding-top: 15px;
   padding-bottom: 25px;
 }
-/* line 3357, ../sass/storyscope.scss */
+/* line 3368, ../sass/storyscope.scss */
 .block-dec-rec .event-space-tag-attibutes-wrapper .event-space-tag-attibutes {
   clear: both;
 }
-/* line 3368, ../sass/storyscope.scss */
+/* line 3371, ../sass/storyscope.scss */
+.block-dec-rec .event-space-tag-attibutes-wrapper .event-space-tag-attibutes .field-name-field-fb-tags {
+  margin: 0;
+}
+/* line 3378, ../sass/storyscope.scss */
+.block-dec-rec .topic-block {
+  display: block;
+  padding-bottom: 10px;
+  border-bottom: solid 1px #CDCCCB;
+}
+/* line 3382, ../sass/storyscope.scss */
+.block-dec-rec .topic-block .description-attribute-block {
+  display: inline-block;
+}
+/* line 3384, ../sass/storyscope.scss */
+.block-dec-rec .topic-block .description-attribute-block .topic-description {
+  width: 75%;
+  float: left;
+}
+/* line 3387, ../sass/storyscope.scss */
+.block-dec-rec .topic-block .description-attribute-block .topic-description p {
+  width: 95%;
+}
+/* line 3391, ../sass/storyscope.scss */
+.block-dec-rec .topic-block .description-attribute-block .topic-image {
+  width: 25%;
+  float: right;
+  max-height: 212px;
+  overflow: hidden;
+}
+/* line 3396, ../sass/storyscope.scss */
+.block-dec-rec .topic-block .description-attribute-block .topic-image img {
+  width: 90%;
+}
+/* line 3404, ../sass/storyscope.scss */
 .block-dec-rec .event-space-table {
   clear: both;
 }
-/* line 3370, ../sass/storyscope.scss */
+/* line 3406, ../sass/storyscope.scss */
 .block-dec-rec .event-space-table table {
   width: 100%;
 }
-/* line 3373, ../sass/storyscope.scss */
+/* line 3409, ../sass/storyscope.scss */
 .block-dec-rec .event-space-table table th {
   padding: 2px 3px 2px 3px;
   border-bottom: 1px solid grey;
@@ -4758,16 +4799,16 @@ ul.field-name-field-fb-tags .plain {
   width: 50px;
   text-transform: capitalize;
 }
-/* line 3380, ../sass/storyscope.scss */
+/* line 3416, ../sass/storyscope.scss */
 .block-dec-rec .event-space-table table tr {
   border-bottom: 1px solid lightgrey;
   background: none;
 }
-/* line 3390, ../sass/storyscope.scss */
+/* line 3426, ../sass/storyscope.scss */
 .block-dec-rec .event-space-table table td {
   padding: 3px 3px 3px 3px;
 }
-/* line 3392, ../sass/storyscope.scss */
+/* line 3428, ../sass/storyscope.scss */
 .block-dec-rec .event-space-table table td a {
   color: #0088cc;
 }

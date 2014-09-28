@@ -3347,22 +3347,24 @@ function dec_tag($topic) {
 		//tag name
 		$name = get_topic_name($topic);
 		if($name) {
-			$output .= '<h2><i class="fa fa-tag fa-lg">&nbsp;</i>' . t('About : <span class="topic-title">') . $name . $topic_types . '</span></h2>';
+			$output .= '<div class="topic-block"><h2><i class="fa fa-tag fa-lg">&nbsp;</i><span class="topic-title">' . $name . $topic_types . '</span></h2>';
 // 			drupal_set_title($name);
 		}
 
+
+		
+		$output .= '<div class="description-attribute-block">';
 // 		$output .= image_html_for_a_freebase_topic($topic);
 		if($image = check_freebase_saved_image($topic, FALSE, $reload)) {
-			$output .= '<img class="topic-image" src="'.$image.'">';
+			$output .= '<div class="topic-image"><img src="'.$image.'"></div>';
 		}
-		
-
 		//tag description
 		$description = get_topic_description($topic);
 		if($description) {
-			$output .= '<div class="topic-description">'.$description.'</div>';
+			$output .= '<div class="topic-description">';
 		}
-		
+
+		$output .= '<p>' . $description . '</p>';
 		//tag triples
 		$tag_attributes = get_triple_ids_of_a_tag($topic);
 		$output .= '<div class="event-space-tag-attibutes-wrapper">';
@@ -3379,11 +3381,21 @@ function dec_tag($topic) {
 					if($tag_attribute->link) {
 						$output .= storytaglink('<li class="tags">'.$name."</li>", $value, array("html"=>TRUE));
 					}
+					else {
+						$output .= '<li>'.$name."</li>";
+					}
 					
 				}
 			$output .=  '</ul></div>';
 		}
 		$output .= '</div>';
+		
+		$output .= '</div>';	
+
+		$output .= '</div>';
+		
+		$output .= '</div>';
+		// end of topic-block
 	}
 	//not freebase topic
 	else {

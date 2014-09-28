@@ -3299,7 +3299,17 @@ float: left;
 }
 
 .pane-node-field-fb-tags {
-  clear:left;
+  padding-top: 25px;
+  border-top: solid 1px #CDCCCB;
+  //clear:left;
+  .pane-content {
+      .field-collection-container {
+        border-bottom: none;
+        margin-bottom: 0px; 
+      }
+  }
+
+  
 }
 
 //Story Tags on a Story Node
@@ -3333,6 +3343,7 @@ ul.field-name-field-fb-tags {
         -moz-border-radius: none;
         border-radius: none;
         box-shadow: none;
+        font-weight: bold;
       }
 }
 
@@ -3358,13 +3369,38 @@ ul.field-name-field-fb-tags {
          clear:both;
 
         .field-name-field-fb-tags {
-           //margin: 0 ;
+           margin: 0 ;
 
         }
     }
     
   }
-
+  .topic-block {
+      display: block;
+      padding-bottom: 10px;
+      border-bottom: solid 1px #CDCCCB;
+      .description-attribute-block {
+        display: inline-block;
+        .topic-description {
+          width: 75%;
+          float: left;
+          p {
+            width: 95%;
+          }
+        }
+        .topic-image {
+          width: 25%;
+          float: right;
+          max-height: 212px;
+          overflow: hidden;
+          img {
+            width:90%;
+          
+          }
+        }
+      }    
+  }
+  
   .event-space-table {
     clear: both;
     table {
