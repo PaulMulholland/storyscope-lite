@@ -3347,7 +3347,7 @@ function dec_tag($topic) {
 		//tag name
 		$name = get_topic_name($topic);
 		if($name) {
-			$output .= '<h2><i class="fa fa-info fa-lg">&nbsp;</i>' . t('About : <span class="topic-title">') . $name . $topic_types . '</span></h2>';
+			$output .= '<h2><i class="fa fa-tag fa-lg">&nbsp;</i>' . t('About : <span class="topic-title">') . $name . $topic_types . '</span></h2>';
 // 			drupal_set_title($name);
 		}
 
