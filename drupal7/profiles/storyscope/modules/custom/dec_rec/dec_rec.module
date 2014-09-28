@@ -3365,26 +3365,25 @@ function dec_tag($topic) {
 		
 		//tag triples
 		$tag_attributes = get_triple_ids_of_a_tag($topic);
+		$output .= '<div class="event-space-tag-attibutes-wrapper">';
 		foreach($tag_attributes as $tag_attribute) {
 			$values = get_tag_attribute_id_values($tag_attribute->id);
-			$output .= '<div style="clear:both">'.$tag_attribute->attribute.": ";
-			$output_values = array();
-			foreach($values as $value) {
-				
-				$name = get_topic_name($value);
-				if(!$name) {
-					$name = $value;
+			$output .=  '<div class="event-space-tag-attibutes"><ul class="field-name-field-fb-tags">';
+			$output .= ' <li class="plain">'.$tag_attribute->attribute."</li>";
+			
+				foreach($values as $value) {
+					$name = get_topic_name($value);
+					if(!$name) {
+						$name = $value;
+					}
+					if($tag_attribute->link) {
+						$output .= storytaglink('<li class="tags">'.$name."</li>", $value, array("html"=>TRUE));
+					}
+					
 				}
-				if($tag_attribute->link) {
-					$output_values[] = storytaglink($name, $value);
-				}
-				else {
-					$output_values[] = $name."</div>";
-				}						
-			}
-			$output .= implode(', ',$output_values);
-			$output .= "</div>";
-		}	
+			$output .=  '</ul></div>';
+		}
+		$output .= '</div>';
 	}
 	//not freebase topic
 	else {
@@ -3501,7 +3500,7 @@ function dec_tag($topic) {
 
 	//l($setting->name." ".$setting->time,'setting',array('query' => array('location' => $setting->location, 'time' => $setting->time))).
 	
-	$output .= '<div style="clear:both">'.l('Reload',request_path(), array('query' => array('tag'=>$topic, 'reload' => '1'))).'</div>';
+	$output .= '<div class="button">'.l('Reload',request_path(), array('query' => array('tag'=>$topic, 'reload' => '1'))).'</div>';
 	return $output;
 }
 

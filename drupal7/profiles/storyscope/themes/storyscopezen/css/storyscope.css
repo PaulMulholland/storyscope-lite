@@ -4734,14 +4734,23 @@ ul.field-name-field-fb-tags .plain {
   color: #4E4E4E;
 }
 /* line 3354, ../sass/storyscope.scss */
+.block-dec-rec .event-space-tag-attibutes-wrapper {
+  padding-top: 15px;
+  padding-bottom: 25px;
+}
+/* line 3357, ../sass/storyscope.scss */
+.block-dec-rec .event-space-tag-attibutes-wrapper .event-space-tag-attibutes {
+  clear: both;
+}
+/* line 3368, ../sass/storyscope.scss */
 .block-dec-rec .event-space-table {
   clear: both;
 }
-/* line 3356, ../sass/storyscope.scss */
+/* line 3370, ../sass/storyscope.scss */
 .block-dec-rec .event-space-table table {
   width: 100%;
 }
-/* line 3359, ../sass/storyscope.scss */
+/* line 3373, ../sass/storyscope.scss */
 .block-dec-rec .event-space-table table th {
   padding: 2px 3px 2px 3px;
   border-bottom: 1px solid grey;
@@ -4749,16 +4758,16 @@ ul.field-name-field-fb-tags .plain {
   width: 50px;
   text-transform: capitalize;
 }
-/* line 3366, ../sass/storyscope.scss */
+/* line 3380, ../sass/storyscope.scss */
 .block-dec-rec .event-space-table table tr {
   border-bottom: 1px solid lightgrey;
   background: none;
 }
-/* line 3376, ../sass/storyscope.scss */
+/* line 3390, ../sass/storyscope.scss */
 .block-dec-rec .event-space-table table td {
   padding: 3px 3px 3px 3px;
 }
-/* line 3378, ../sass/storyscope.scss */
+/* line 3392, ../sass/storyscope.scss */
 .block-dec-rec .event-space-table table td a {
   color: #0088cc;
 }
