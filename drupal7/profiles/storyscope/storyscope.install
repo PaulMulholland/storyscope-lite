@@ -312,6 +312,21 @@ function storyscope_update_7006() {
   return t('Reverted panels_node_story - new layout for story');
 }
 
+function storyscope_update_7007() {
+  // An array of new or changed features; the array keys are feature names,
+  // values are an array of exportable types as seen in a feature's .info file:
+  //   features[field][] = node-page-body
+  $features = array(
+    'jquery_update' , 'storyscope_settings');
+ 
+  // Enable the modules by name.
+  module_enable($features);
+  
+    // Revert the features (if the feature has been changed)
+  storyscope_features_revert($features);
+ 
+  return t('Enabled JQuery Update module and storyscope settings - revert to v1.8 as work around msie bug');
+}
 /**
 * Revert specified features.
 *

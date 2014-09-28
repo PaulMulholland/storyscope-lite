@@ -46,6 +46,7 @@ features[file_display][] = video__preview__media_vimeo_video
 features[image][] = larger_thumbnail
 features[variable][] = features_default_export_path
 features[variable][] = install_profile
+features[variable][] = jquery_update_jquery_version
 features[variable][] = media__file_extensions
 features[variable][] = pathauto_node_dossier_pattern
 features[variable][] = pathauto_node_story_pattern
