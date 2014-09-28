@@ -2619,7 +2619,7 @@ function dec_setting($location, $time,  $end) {
 	
 	if(!empty($event_array)) {
 		$output .= $timeline_links;
-		$output .= '<div style="clear:both"><h2><i class="fa fa-cloud fa-lg">&nbsp;</i>Event space</h2></div>';
+		$output .= '<div style="clear:both"><h2><i class="fa fa-cloud fa-lg">&nbsp;</i>Event Space : <span class="event-space-filter"><input id="event-space-filter" type="text"></span></h2></div>';
 
 		$output .= $setting_event_table;
 	}
@@ -3334,30 +3334,33 @@ function dec_tag($topic) {
 		if(!$calculated_triples || $reload) {
 			triples_of_a_tag($topic);
 		}
+		//tag type
+		$notable_tag_types = get_notable_tag_type_names($topic);
+		if(!empty($notable_tag_types)) {
+			$topic_types = ' (' . implode(', ', $notable_tag_types) . ')';
+		}
+		else {
+			$topic_types = '';
+		}
+		
 	
 		//tag name
 		$name = get_topic_name($topic);
 		if($name) {
-			$output .= '<h2><i class="fa fa-info fa-lg">&nbsp;</i>' . t('About : ') .$name.'</h2>';
+			$output .= '<h2><i class="fa fa-info fa-lg">&nbsp;</i>' . t('About : <span class="topic-title">') . $name . $topic_types . '</span></h2>';
 // 			drupal_set_title($name);
 		}
 
 // 		$output .= image_html_for_a_freebase_topic($topic);
 		if($image = check_freebase_saved_image($topic, FALSE, $reload)) {
-			$output .= '<img src="'.$image.'">';
+			$output .= '<img class="topic-image" src="'.$image.'">';
 		}
 		
-		//tag type
-		$notable_tag_types = get_notable_tag_type_names($topic);
-		if(!empty($notable_tag_types)) {
-			$output .= '<div style="clear:both">Type: ';
-			$output .= implode(', ', $notable_tag_types);
-			$output .= '</div>';
-		}
+
 		//tag description
 		$description = get_topic_description($topic);
 		if($description) {
-			$output .= '<div style="clear:both"><div style="float: left;">'.$description.'</div>';
+			$output .= '<div class="topic-description">'.$description.'</div>';
 		}
 		
 		//tag triples
@@ -3467,7 +3470,7 @@ function dec_tag($topic) {
 	$event_list = flat_list_of_single_tag_events($all_events);
 	if(!empty($event_list)) {
 		$output .= dec_tag_timeline_links($topic, $event_list);
-		$output .= '<div style="clear:both"><h2><i class="fa fa-cloud fa-lg">&nbsp;</i>Event space</h2></div>';
+		$output .= '<div style="clear:both"><h2><i class="fa fa-cloud fa-lg">&nbsp;</i>Event Space : <span class="event-space-filter"><input id="event-space-filter" type="text"></span></h2></div>';
 
 		$output .= event_table_for_event_list($event_list);
 	}
