@@ -60,6 +60,12 @@ function storyscopezen_preprocess_page(&$variables, $hook) {
 }
 
 /**
+* Overrides the default sticky header for tables because we use FooTables and it isn't supported (yet)
+*/
+function storyscopezen_js_alter(&$js) {
+    unset($js['misc/tableheader.js']);
+}
+/**
 * Overrides the theme_field for field_fb_tags to make it clickable and link to the Event Space (this will change).
 */
 function storyscopezen_field__field_fb_tags($variables) {

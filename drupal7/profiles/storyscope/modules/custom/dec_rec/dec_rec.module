@@ -70,6 +70,19 @@ function get_timeline_path() {
 	}
 }
 
+/**
+ * Add FooTable JS 
+ *
+ * Implements hook_preprocess_node().
+ */
+function dec_rec_preprocess_page() { 
+  // Locate the FooTables JS library.
+  drupal_add_library('footable', 'footable');
+  drupal_add_js(drupal_get_path('module', 'footable') . '/js/caller.js');
+  drupal_add_js('profiles/storyscope/libraries/FooTable/js/footable.sort.js');
+  drupal_add_js('profiles/storyscope/libraries/FooTable/js/footable.filter.js');
+}
+
 
 /**
  * Menu items for the recommender
@@ -1700,7 +1713,24 @@ LEFT JOIN tag_name ON tag_name.tag = event_value_table.value;";
 		}
 
 	}
-	$table = theme('table',array('rows' => $output_with_titles, 'header' => str_replace('_', ' ', array('title','activity','agent','start_time','end_time','location','tags'))));
+	$table = theme(
+				'table', 
+				array(	'rows' => $output_with_titles, 
+						'header' => array(	
+										array( 	'data'=>'title', 
+												'data-class'=>'expand'), 
+										'activity', 
+										'agent', 
+										'start time',
+										'end time',
+										'location',
+										array(	'data'=>'tags', 
+												'data-sort-initial'=>'descending', 
+												'data-class'=>'expand')
+										),
+						'attributes' => array('data-filter'=> '#event-space-filter')
+					)
+				);
 	return '<div class="event-space-table">' . $table . '</div>';
 }
 
@@ -3035,7 +3065,7 @@ function dec_list_of_tags($tag_array, $max_value) {
 // 	}
 	$output .= $timeline_links;
 	if(!empty($event_list)) {
-		$output .= '<div style="clear:both"><h2><i class="fa fa-cloud fa-lg">&nbsp;</i>Event Space</h2></div>';
+		$output .= '<div style="clear:both"><h2><i class="fa fa-cloud fa-lg">&nbsp;</i>Event Space : <span class="event-space-filter"><input id="event-space-filter" type="text"></span></h2></div>';
 	}
 
 	$output .= $event_table;

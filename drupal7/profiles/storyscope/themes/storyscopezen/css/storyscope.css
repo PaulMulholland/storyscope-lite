@@ -4729,35 +4729,36 @@ ul.field-name-field-fb-tags .plain {
   clear: both;
 }
 /* line 3349, ../sass/storyscope.scss */
+.block-dec-rec .event-space-filter {
+  font-size: 13px;
+  color: #4E4E4E;
+}
+/* line 3354, ../sass/storyscope.scss */
 .block-dec-rec .event-space-table {
   clear: both;
 }
-/* line 3351, ../sass/storyscope.scss */
+/* line 3356, ../sass/storyscope.scss */
 .block-dec-rec .event-space-table table {
   width: 100%;
-  border: 1px solid lightgrey;
 }
-/* line 3354, ../sass/storyscope.scss */
+/* line 3359, ../sass/storyscope.scss */
 .block-dec-rec .event-space-table table th {
   padding: 2px 3px 2px 3px;
-  border-bottom: 1px solid lightgrey;
+  border-bottom: 1px solid grey;
   overflow: hidden;
   width: 50px;
   text-transform: capitalize;
 }
-/* line 3362, ../sass/storyscope.scss */
-.block-dec-rec .event-space-table table tr.odd {
-  background: #fbfdfe;
+/* line 3366, ../sass/storyscope.scss */
+.block-dec-rec .event-space-table table tr {
+  border-bottom: 1px solid lightgrey;
+  background: none;
 }
-/* line 3365, ../sass/storyscope.scss */
-.block-dec-rec .event-space-table table tr.even {
-  background: white;
-}
-/* line 3368, ../sass/storyscope.scss */
+/* line 3376, ../sass/storyscope.scss */
 .block-dec-rec .event-space-table table td {
   padding: 3px 3px 3px 3px;
 }
-/* line 3370, ../sass/storyscope.scss */
+/* line 3378, ../sass/storyscope.scss */
 .block-dec-rec .event-space-table table td a {
-  color: #666;
+  color: #0088cc;
 }

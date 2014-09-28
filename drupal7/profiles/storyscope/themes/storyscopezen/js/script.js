@@ -20,6 +20,7 @@
     $(".node-type-section .view-dossier-events-search-api .node-title a").bind('click', function(e){
           e.preventDefault();
     });
+    $('table').footable();
 
   });
   // Quietly stop ajax errors from showing up in a popup window when the user does

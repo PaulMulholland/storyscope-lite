@@ -3346,29 +3346,37 @@ ul.field-name-field-fb-tags {
   .event-space-headings {
     clear:both;
   }
+  .event-space-filter {
+    font-size:13px;
+    color: #4E4E4E;
+    
+  }
   .event-space-table {
     clear: both;
     table {
       width: 100%;
-      border: 1px solid lightgrey;
+      // border: 1px solid lightgrey;
       th {
         padding: 2px 3px 2px 3px;
-        border-bottom: 1px solid lightgrey;
+        border-bottom: 1px solid grey;
         overflow: hidden;
         width: 50px;
         text-transform: capitalize;
       }
-      
+      tr {
+        border-bottom: 1px solid lightgrey;
+        background: none;
+      }
       tr.odd {
-        background: lighten(lightblue, 20%);
+        //background: lighten(lightblue, 20%);
       }
       tr.even {
-        background: lighten(lightgreen, 25%);
+        //background: lighten(lightgreen, 25%);
       }
       td {
         padding: 3px 3px 3px 3px;
         a {
-          color: #666;
+          color: #0088cc;
         }
 
       }
