@@ -967,14 +967,11 @@ function dec_timeline_for_tags($story_id) {
 	
 	$story_title = implode(', ',$headline);
 	
-	//timeline title
-// 	if(isset($_GET['event_type'])) {
-// 		$event_type = $_GET['event_type'];
-// 		drupal_set_title($story_title.': '.$event_type);
-// 	}
-// 	else {
-// 		drupal_set_title($story_title);
-// 	}
+
+	if(isset($_GET['event_type'])) {
+		$event_type = $_GET['event_type'];
+	}
+
 
 	//check for reload 
 	if(isset($_GET['reload'])) {
@@ -1583,9 +1580,16 @@ attribute_name.name = 'start_time';";
 }
 
 /**
- * Save image file
+ * Save image using Drupal system_retrieve_file
  */
 function dec_save_image($url, $filename) {
+	system_retrieve_file($url,'public://'.$filename, TRUE, $replace = FILE_EXISTS_REPLACE);
+}
+
+/**
+ * Save image file
+ */
+function dec_save_image_curl($url, $filename) {
 	$ch = curl_init($url);
 
 	$fp = fopen($filename, 'wb');
@@ -1648,8 +1652,13 @@ LEFT JOIN tag_name ON tag_name.tag = event_value_table.value;";
 			$output[$record->event][$record->position][] = storytaglink($record->name, $record->value);
 		}
 		elseif(!is_freebase_topic_id($record->value)) {
-			$output[$record->event][$record->position][] = $record->value;
-		}
+			if($record->position == '1') {
+				$output[$record->event][$record->position][] = str_replace("_"," ",$record->value);
+			}
+			else {
+				$output[$record->event][$record->position][] = $record->value;
+				}
+			}
 	}
 
 	$output_with_titles = array();
@@ -1892,10 +1901,10 @@ function check_freebase_saved_image($topic = '/m/01qwfk', $thumbnail_url = FALSE
 	if(!empty($image_topic_test)) {
 		if($image_topic_test['image_tag']) {
 			if($thumbnail_url) {
-				return $base_url.'/fbimages/'.$image_topic_test['image_tag'].'_sm.jpeg';
+				return $base_url.'/sites/default/files/fbimages/'.$image_topic_test['image_tag'].'_sm.jpeg';
 			}
 			else {
-				return $base_url.'/fbimages/'.$image_topic_test['image_tag'].'.jpeg';
+				return $base_url.'/sites/default/files/fbimages/'.$image_topic_test['image_tag'].'.jpeg';
 			}
 		}
 		else {
@@ -1935,10 +1944,10 @@ function check_freebase_saved_image($topic = '/m/01qwfk', $thumbnail_url = FALSE
 		$query = "INSERT INTO fb_saved_images (tag, image_tag) ".$values_list." ON DUPLICATE KEY UPDATE image_tag = VALUES(image_tag);";
 		$result = db_query($query);
 		if($thumbnail_url) {
-			return $base_url.'/fbimages/'.$id.'_sm.jpeg';
+			return $base_url.'/sites/default/files/fbimages/'.$id.'_sm.jpeg';
 		}
 		else {
-			return $base_url.'/fbimages/'.$id.'.jpeg';
+			return $base_url.'/sites/default/files/fbimages/'.$id.'.jpeg';
 		}
 	}	
 
@@ -2572,21 +2581,25 @@ function dec_setting($location, $time,  $end) {
 	$name = get_topic_name($location);
 	if($end) {
 		if($name) {
-			$output .= '<h2>'.$name.", ".$time." to ".$end.'</h2>';
+			$output .= '<h2><i class="fa fa-info fa-lg">&nbsp;</i>' . t('About : ') .$name.", ".$time." to ".$end.'</h2>';
+// 			$output .= '<h2>'.$name.", ".$time." to ".$end.'</h2>';
 // 			drupal_set_title($name.", ".$time." to ".$end);
 		}
 		else {
-			$output .= '<h2>'.$location.", ".$time." to ".$end.'</h2>';
+			$output .= '<h2><i class="fa fa-info fa-lg">&nbsp;</i>' . t('About : ') .$name.", ".$time." to ".$end.'</h2>';
+// 			$output .= '<h2>'.$location.", ".$time." to ".$end.'</h2>';
 // 			drupal_set_title($location.", ".$time." to ".$end);
 		}		
 	}
 	else {
 		if($name) {
-			$output .= '<h2>'.$name.", ".$time.'</h2>';
+			$output .= '<h2><i class="fa fa-info fa-lg">&nbsp;</i>' . t('About : ') .$name.", ".$time.'</h2>';
+// 			$output .= '<h2>'.$name.", ".$time.'</h2>';
 // 			drupal_set_title($name.", ".$time);
 		}
 		else {
-			$output .= '<h2>'.$location.", ".$time.'</h2>';
+			$output .= '<h2><i class="fa fa-info fa-lg">&nbsp;</i>' . t('About : ') .$name.", ".$time.'</h2>';
+// 			$output .= '<h2>'.$location.", ".$time.'</h2>';
 // 			drupal_set_title($location.", ".$time);
 		}
 	}
@@ -2609,6 +2622,7 @@ function dec_setting($location, $time,  $end) {
 		$output .=  '<ul class="field-name-field-fb-tags">';
 		foreach($themes as $theme) {
 // 			$output .= l('<div style="float: left; white-space: nowrap; background-color: #ebebeb; margin: 5px;">'.$theme->name."</div>", "tag".$theme->value, array("html"=>TRUE));
+
 			//$output .= storytaglink('<div style="float: left; white-space: nowrap; background-color: #ebebeb; margin: 5px;">'.$theme->name."</div>", $theme->value, array("html"=>TRUE));
 			$output .= storytaglink('<li class="tags">'.$theme->name."</li>", $theme->value, array("html"=>TRUE));
 		
@@ -3266,9 +3280,28 @@ function flat_list_of_single_tag_events($all_events) {
 }
 
 /**
- * Execute freebase MQL query
+ * Execute freebase MQL query using drupal http request function
  */
 function execute_mql_event_query($query) {
+	$jsonquerystr = urlencode(json_encode($query));
+	#run the query
+	$googleapikey = get_google_api_key_path();
+	$queryurl='https://www.googleapis.com/freebase/v1/mqlread?query='.$jsonquerystr.$googleapikey;
+	$result = drupal_http_request($queryurl);
+	if(isset($result->data)) {
+		$jsonresultstr = $result->data;
+		$resultarray = json_decode($jsonresultstr, true);	
+	}
+	else {
+		$resultarray = array();
+	}
+	return $resultarray;
+}
+
+/**
+ * Execute freebase MQL query
+ */
+function execute_mql_event_query_curl($query) {
 	$jsonquerystr = urlencode(json_encode($query));
 	#run the query
 	$googleapikey = get_google_api_key_path();
@@ -3358,6 +3391,15 @@ function dec_tag($topic) {
 		if($image = check_freebase_saved_image($topic, FALSE, $reload)) {
 			$output .= '<div class="topic-image"><img src="'.$image.'"></div>';
 		}
+		
+		//tag type
+		$notable_tag_types = get_notable_tag_type_names($topic);
+		if(!empty($notable_tag_types)) {
+			$output .= '<div style="float:left; margin-bottom:20px; width:70%">';
+			$output .= '<div style="clear:both">Type: ';
+			$output .= implode(', ', $notable_tag_types);
+			$output .= '</div>';
+		}
 		//tag description
 		$description = get_topic_description($topic);
 		if($description) {
@@ -3386,6 +3428,7 @@ function dec_tag($topic) {
 					}
 					
 				}
+
 			$output .=  '</ul></div>';
 		}
 		$output .= '</div>';
@@ -3396,13 +3439,14 @@ function dec_tag($topic) {
 		
 		$output .= '</div>';
 		// end of topic-block
+
 	}
 	//not freebase topic
 	else {
 		$output .= '<h2>'.$topic.'</h2>';
 		$types = array();
 	}
-	
+
 	//tag themes
 	$themes = top_n_themes_of_tag($topic, 10);
 	if(!empty($themes)) {
@@ -3527,7 +3571,7 @@ function produce_event_table_for_timeline($event, $path) {
 		if(!in_array($key,array('title','activity','start_time','end_time'))) {
 			$value_array = array();
 			if(is_array($elements)) {
-				$output .= '<div style="clear:both">'.$key.": ";
+				$output .= '<div style="clear:both"><b>'.ucfirst($key).":</b> ";
 				foreach($elements as $element) {
 					if(is_array($element)) {
 						$value_array[] = l($element[1], $path, array('query' => array('tag'=>$element[0])));
@@ -3847,6 +3891,10 @@ LEFT JOIN tag_name ON tag_name.tag = events.value;";
 		}
 	}
 
+	if(isset($output['activity'])) {
+		$output['activity'] = str_replace("_", " ", $output['activity']);
+	}
+	
 	return $output;
 }
 
@@ -3941,7 +3989,9 @@ LEFT JOIN tag_name ON tag_name.tag = events.value;";
 				}
 			}
 		}
-		
+		if(isset($output['activity'])) {
+			$output['activity'] = str_replace("_", " ", $output['activity']);
+		}
 		if($for_timeline) {
 			if(isset($output['end_time']) && !isset($output['start_time'])) {
 				$output['start_time'] = $output['end_time'];
@@ -8015,11 +8065,20 @@ function check_for_topic_description($topic = "/m/055rd2", $limit = FALSE, $relo
 	$service_url = 'https://www.googleapis.com/freebase/v1/topic';
 	$googleapikey = get_google_api_key_path();
 	$url = $service_url . $topic . '?filter=/common/topic/description'.$googleapikey;
-	$ch = curl_init();
-	curl_setopt($ch, CURLOPT_URL, $url);
-	curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-	$result = json_decode(curl_exec($ch), true);
-	curl_close($ch);
+	$resultobj = drupal_http_request($url);
+	if(isset($resultobj->data)) {
+		$jsonresultstr = $resultobj->data;
+		$result = json_decode($jsonresultstr, true);	
+	}
+	else {
+		$result = array();
+	}
+
+// 	$ch = curl_init();
+// 	curl_setopt($ch, CURLOPT_URL, $url);
+// 	curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+// 	$result = json_decode(curl_exec($ch), true);
+// 	curl_close($ch);
 
 	$descriptions = array();
 	if(isset($result["property"]["/common/topic/description"]["values"])) {
@@ -8067,11 +8126,21 @@ function check_for_notable_types($topic = "/m/055rd2") {
 	$service_url = 'https://www.googleapis.com/freebase/v1/topic';
 	$googleapikey = get_google_api_key_path();
 	$url = $service_url . $topic . '?filter=/common/topic/notable_types'.$googleapikey;
-	$ch = curl_init();
-	curl_setopt($ch, CURLOPT_URL, $url);
-	curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-	$result = json_decode(curl_exec($ch), true);
-	curl_close($ch);
+	$resultobj = drupal_http_request($url);
+	if(isset($resultobj->data)) {
+		$jsonresultstr = $resultobj->data;
+		$result = json_decode($jsonresultstr, true);	
+	}
+	else {
+		$result = array();
+	}
+	
+	
+// 	$ch = curl_init();
+// 	curl_setopt($ch, CURLOPT_URL, $url);
+// 	curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+// 	$result = json_decode(curl_exec($ch), true);
+// 	curl_close($ch);
 	
 	$notable_types = array();
 	$types = array();

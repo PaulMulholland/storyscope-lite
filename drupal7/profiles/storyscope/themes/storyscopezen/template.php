@@ -93,10 +93,12 @@ function storyscopezen_field__field_fb_tags($variables) {
 			$topic = $item['entity']['field_collection_item'][$fcid]['field_topic'][0]['#markup'];
 		}
 		if (!empty($mid) && !empty($topic)) {
-			$relative_mid = end(explode("/", $mid));
-			$output .= l('<li class="tags">' . $topic . '</li>',  $path , array('html'=>'true', 'attributes' => array('target'=>'_self'), 'query' => array('tag'=> '/m/' . $relative_mid )));
-			
-			//$output .= '<div class="tags freebase-link">' . $topic . '</div>';
+			$id = explode('/',$mid);
+			$lenth = count($id) - 1;
+			$relative_mid = $id[$lenth];
+			$output .= '<li class="tags">';
+			$tags_link = l($topic,  $path , array('attributes' => array('target'=>'_self'), 'query' => array('tag'=> '/m/' . $relative_mid )));
+			$output .= $tags_link . '</li>'; 
 		}
 		elseif (empty($mid) && !empty($topic)) {
       $output .= '<li class="tags freebase-link">' . $topic . '</li>';
