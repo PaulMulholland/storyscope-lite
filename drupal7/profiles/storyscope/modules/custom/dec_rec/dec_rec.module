@@ -110,12 +110,12 @@ function dec_rec_menu(){
 //      'page arguments' => array(1),
 // 	'access callback' => TRUE,
 //      );
-   	$items['timeline_for_setting'] = array(
-	 'title' => 'Timeline',
-	 'description' => 'Display timeline for a setting.',
-	 'page callback' => 'dec_timeline_for_setting',
-	'access callback' => TRUE,
-     );
+//    	$items['timeline_for_setting'] = array(
+// 	 'title' => 'Timeline',
+// 	 'description' => 'Display timeline for a setting.',
+// 	 'page callback' => 'dec_timeline_for_setting',
+// 	'access callback' => TRUE,
+//      );
 //       $items['timeline/%/%'] = array(
 // 	 'title' => 'Timeline',
 // 	 'description' => 'Display timeline for a single freebase topic.',
@@ -920,22 +920,24 @@ function dec_timeline_for_setting($location, $time, $end) {
 	$output .= '    }
     </script>
     <script type="text/javascript" src="'.get_timeline_path().'"></script>';
-
+	
+	$output .= '<div style="clear:both; margin-top:1em">If the timeline sticks at LOADING TIMELINE... then use your browser reload button.</div>';
+	$output .= '<div style="clear:both; margin-bottom:1em">If the information displayed seems incomplete (e.g. events of a story tag with time information are not included) then use the Recalcuate button.</div>';
 	if(isset($event_type)) {
 		if($end) {
-			$output .= l("Reload", request_path(), array('query'=>array('timeline_for_setting'=>$location, 'time'=>$time, 'end'=>$end, 'event_type'=>$event_type, 'reload'=>'1')));
+			$output .= l("Recalcuate", request_path(), array('query'=>array('timeline_for_setting'=>$location, 'time'=>$time, 'end'=>$end, 'event_type'=>$event_type, 'reload'=>'1')));
 		}
 		else {
-			$output .= l("Reload", request_path(), array('query'=>array('timeline_for_setting'=>$location, 'time'=>$time, 'event_type'=>$event_type, 'reload'=>'1')));
+			$output .= l("Recalcuate", request_path(), array('query'=>array('timeline_for_setting'=>$location, 'time'=>$time, 'event_type'=>$event_type, 'reload'=>'1')));
 		}
 	}
 	else {
 		if($end) {
-			$output .= l("Reload", request_path(), array('query'=>array('timeline_for_setting'=>$location, 'time'=>$time, 'end'=>$end, 'reload'=>'1')));
+			$output .= l("Recalcuate", request_path(), array('query'=>array('timeline_for_setting'=>$location, 'time'=>$time, 'end'=>$end, 'reload'=>'1')));
 		}
 		else {
 			//request_path(), array('query'=>array('timeline_for_tags'=>$story_id, 'reload'=>'1')));
-			$output .= l("Reload", request_path(),  array('query'=>array('timeline_for_setting'=>$location, 'time'=>$time, 'reload'=>'1')));
+			$output .= l("Recalcuate", request_path(),  array('query'=>array('timeline_for_setting'=>$location, 'time'=>$time, 'reload'=>'1')));
 		}
 	}
 	
@@ -1007,12 +1009,14 @@ function dec_timeline_for_tags($story_id) {
 	$output .= '    }
     </script>
     <script type="text/javascript" src="'.get_timeline_path().'"></script>';
-	
+
+	$output .= '<div style="clear:both; margin-top:1em">If the timeline sticks at LOADING TIMELINE... then use your browser reload button.</div>';
+	$output .= '<div style="clear:both; margin-bottom:1em">If the information displayed seems incomplete (e.g. events of a story tag with time information are not included) then use the Recalcuate button.</div>';
 	if(isset($event_type)) {
-		$output .= l("Reload", request_path(), array('query'=>array('timeline_for_tags'=>$story_id, 'event_type'=>$event_type, 'reload'=>'1')));
+		$output .= l("Recalcuate", request_path(), array('query'=>array('timeline_for_tags'=>$story_id, 'event_type'=>$event_type, 'reload'=>'1')));
 	}
 	else {
-		$output .= l("Reload", request_path(), array('query'=>array('timeline_for_tags'=>$story_id, 'reload'=>'1')));
+		$output .= l("Recalcuate", request_path(), array('query'=>array('timeline_for_tags'=>$story_id, 'reload'=>'1')));
 	}
 	
 	return $output;	
@@ -1116,11 +1120,14 @@ function dec_timeline($topic) {
     $output .= '    }
     </script>
     <script type="text/javascript" src="'.get_timeline_path().'"></script>';
+    
+    $output .= '<div style="clear:both; margin-top:1em">If the timeline sticks at LOADING TIMELINE... then use your browser reload button.</div>';
+    $output .= '<div style="clear:both; margin-bottom:1em">If the information displayed seems incomplete (e.g. events of a story tag with time information are not included) then use the Recalcuate button.</div>';
     if($attribute) {
-    	$output .= l("Reload", request_path(), array('query'=>array('timeline'=>$topic, 'attribute'=>$attribute, 'reload'=>'1')));
+    	$output .= l("Recalculate", request_path(), array('query'=>array('timeline'=>$topic, 'attribute'=>$attribute, 'reload'=>'1')));
     }
     else {
-    	$output .= l("Reload", request_path(), array('query'=>array('timeline'=>$topic, 'reload'=>'1')));
+    	$output .= l("Recalculate", request_path(), array('query'=>array('timeline'=>$topic, 'reload'=>'1')));
     }
 	return $output;
 }
@@ -3556,7 +3563,8 @@ function dec_tag($topic) {
 
 	//l($setting->name." ".$setting->time,'setting',array('query' => array('location' => $setting->location, 'time' => $setting->time))).
 	
-	$output .= '<div class="button">'.l('Reload',request_path(), array('query' => array('tag'=>$topic, 'reload' => '1'))).'</div>';
+	$output .= '<div style="clear:both; margin-bottom:1em">If the information displayed seems incomplete (e.g. no title displayed for the story tag or broken image link) then use the recalcuate button.</div>';
+	$output .= '<div class="button">'.l('Recalculate',request_path(), array('query' => array('tag'=>$topic, 'reload' => '1'))).'</div>';
 	return $output;
 }
 
