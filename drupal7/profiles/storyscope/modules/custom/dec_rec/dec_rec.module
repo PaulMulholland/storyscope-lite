@@ -192,11 +192,18 @@ function dec_rec_menu(){
      return $items;
 }
 
+/**
+ * Ctools plugin directory
+ */
 function dec_rec_ctools_plugin_directory($owner, $plugin_type) {
   if ($owner == 'ctools' && $plugin_type == 'content_types') {
     return 'plugins/' . $plugin_type;
   }
 }
+
+/**
+ * Admin for story event space
+ */
 function dec_rec_story_event_space_admin_info($subtype, $conf, $contexts) {
 	if (!empty($conf)) {
 		$block = new stdClass;
@@ -205,6 +212,10 @@ function dec_rec_story_event_space_admin_info($subtype, $conf, $contexts) {
 		return $block;
 	}
 }
+
+/**
+ * Placeholder configuration form for the story event space
+ */
 function dec_rec_story_event_space_edit_form($form, &$form_state) {
 	$conf = $form_state['conf'];
 
@@ -218,6 +229,10 @@ function dec_rec_story_event_space_edit_form($form, &$form_state) {
 
 	return $form;
 }
+
+/**
+ * Form submit for the placeholder configuration form for the story event space
+ */
 function dec_rec_story_event_space_edit_form_submit($form, &$form_state) {
 	foreach (array_keys($form_state['plugin']['defaults']) as $key) {
 		if (isset($form_state['values'][$key])) {
@@ -226,6 +241,9 @@ function dec_rec_story_event_space_edit_form_submit($form, &$form_state) {
 	}
 }
 
+/**
+ * Constructs event space block from arguments passed from the view/ctools
+ */
 function story_event_space_block($type, $subtype, $args) {
 	$block = new stdClass();
 	$block->id = 'story_event_space_block';
@@ -283,6 +301,9 @@ function story_event_space_block($type, $subtype, $args) {
 	return $block;
 }
 
+/**
+ * Theme for the event space block
+ */
 function dec_rec_theme() {
 	return array(
 			'story_event_space_block' => array(
@@ -292,6 +313,9 @@ function dec_rec_theme() {
 	);
 }
 
+/**
+ * Information for the event space block
+ */
 function dec_rec_block_info() {
 	$blocks = array();
 	$blocks['story_event_space_block'] = array(
@@ -302,6 +326,9 @@ function dec_rec_block_info() {
 	return $blocks;
 }
 
+/**
+ * View for the event space block.
+ */
 function dec_rec_block_view($delta = '') {
 	ctools_include('content');
 	$block = array();
@@ -3011,7 +3038,7 @@ function dec_list_of_tags($tag_array, $max_value) {
 	//use this list for event table 
 	$event_list = event_list_for_story_id($max_value);
 	
-	$themes = top_n_themes_of_story($event_list, 10);
+	$themes = top_n_themes_of_story($max_value, 10);
 // 	$matching_themes = top_n_matching_themes_of_story2($event_list, $max_value, 10);	
 	$event_table = event_table_for_event_list($event_list);
 	$timeline_links = dec_tags_timeline_links($max_value);
@@ -4721,12 +4748,12 @@ WHERE frequency > 1 LIMIT ".$n." ;";
 /**
  * Top matching themes (whether or not tags of the story)
  */
-function top_n_themes_of_story($event_list, $n = 5) {
+function top_n_themes_of_story($story_id, $n = 5) {
 	$n = (int) $n;
 if($n == 0) {
 	$n = 5;
 }
-$query_list = "('".implode("','",$event_list)."')";
+// $query_list = "('".implode("','",$event_list)."')";
 //this version keeps locations in the theme list
 // 	$query = "SELECT COUNT(DISTINCT result.value) as tags, COUNT(DISTINCT result.event) as frequency, result.value, result.name
 // FROM
@@ -4738,16 +4765,26 @@ $query_list = "('".implode("','",$event_list)."')";
 // GROUP BY result.value
 // ORDER BY tags DESC, frequency DESC LIMIT ".$n.";";
 //this version of the query excludes locations
-$query = "SELECT COUNT(DISTINCT result.value) as tags, COUNT(DISTINCT result.event) as frequency, result.value, result.name
+// $query = "SELECT COUNT(DISTINCT result.value) as tags, COUNT(DISTINCT result.event) as frequency, result.value, result.name
+// FROM
+// (SELECT *
+// FROM event_attribute_value, tag_name
+// WHERE event_attribute_value.event IN ".$query_list." AND tag_name.tag = event_attribute_value.value
+// 	AND NOT EXISTS
+// (SELECT attribute_name.name FROM attribute_name WHERE event_attribute_value.attribute = attribute_name.attribute AND attribute_name.name = 'location')) as result
+// GROUP BY result.value
+// ORDER BY tags DESC, frequency DESC LIMIT ".$n.";";
+	$query ="SELECT *
 FROM
-(SELECT *
-FROM event_attribute_value, tag_name
-WHERE event_attribute_value.event IN ".$query_list." AND tag_name.tag = event_attribute_value.value
-	AND NOT EXISTS
-(SELECT attribute_name.name FROM attribute_name WHERE event_attribute_value.attribute = attribute_name.attribute AND attribute_name.name = 'location')) as result
-GROUP BY result.value
-ORDER BY tags DESC, frequency DESC LIMIT ".$n.";";
-
+(SELECT  COUNT(DISTINCT query_tag.tag) as tags, COUNT(DISTINCT value_table.event) as events, value_table.value
+FROM query_tag, tag_event_id, event_attribute_value as value_table
+WHERE query_tag.id = '".$story_id."' AND
+query_tag.tag = tag_event_id.tag AND
+value_table.event = tag_event_id.event_id AND
+value_table.attribute <> 'location'
+GROUP BY value_table.value
+ORDER BY tags DESC, events DESC) as tag_event_value, tag_name
+WHERE tag_event_value.value = tag_name.tag LIMIT ".$n.";";
 $result = db_query($query);
 
 $output = array();
