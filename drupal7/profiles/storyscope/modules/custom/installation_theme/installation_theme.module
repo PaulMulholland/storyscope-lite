@@ -1,0 +1,82 @@
+
+<?php
+/**
+ * file: installation_theme.module
+ *
+ * Themes of a dossier block. 
+ *
+ * Paul Mulholland <p.mulholland@open.ac.uk>
+ *
+ */
+
+/**
+* Implements hook_block_info().
+*/
+function installation_theme_block_info() {
+  $blocks = array();
+  $blocks['installation_theme_block'] = array(
+    'info' => t('Themes of an installation'),
+  	'visibility' => BLOCK_VISIBILITY_LISTED,
+  	'pages' => 'front',
+  );
+  return $blocks;
+}
+/**
+* Implements hook_block_view().
+*/
+function installation_theme_block_view($delta = '') {
+  $block = array();
+  switch ($delta) {
+    case 'installation_theme_block':
+      $block['subject'] = '';
+      $block['content'] = installation_theme_block_content();
+      break;
+  }
+  return $block;
+}
+
+function installation_theme_block_content() {
+	$path = request_path();
+	if($path == '') {
+		return dec_installation_themes();
+	}
+  return FALSE;
+}
+
+
+function dec_installation_themes() {
+	$themes = themes_for_an_installation(10);
+	$output = '';
+	if(!empty($themes)) {
+		$output .= '<div style="clear:both"><h2><i class="fa fa-link fa-lg">&nbsp;</i>Storyscope themes</h2></div>';
+		$output .=  '<ul class="field-name-field-fb-tags">';
+		foreach($themes as $theme) {
+			$output .= storytaglink('<li class="tags"">'.$theme->name."</li>", $theme->value, array("html"=>TRUE));
+		}
+		$output .=  '</ul>';
+	}
+	return $output;
+}
+
+/**
+ * Calculate themes for an installation
+ */
+function themes_for_an_installation($limit = 10) {
+	$output = array();
+	$query = "SELECT story_tag_event_value.value, story_tag_event_value.stories, story_tag_event_value.tags, story_tag_event_value.events, tag_name.name
+FROM
+(SELECT  COUNT(DISTINCT query_tag.id) as stories, COUNT(DISTINCT query_tag.tag) as tags, COUNT(DISTINCT value_table.event) as events, value_table.value
+FROM query_tag, tag_event_id, event_attribute_value as value_table
+WHERE
+query_tag.tag = tag_event_id.tag AND
+value_table.event = tag_event_id.event_id AND
+value_table.attribute <> 'location'
+GROUP BY value_table.value
+ORDER BY stories DESC, tags DESC, events DESC) as story_tag_event_value, tag_name
+WHERE story_tag_event_value.value = tag_name.tag LIMIT ".$limit.";";
+	$result = db_query($query);
+	foreach ($result as $record) {
+		$output[] = $record;
+	}
+	return $output;
+}

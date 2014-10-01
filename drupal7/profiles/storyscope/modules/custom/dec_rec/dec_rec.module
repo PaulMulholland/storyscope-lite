@@ -297,6 +297,20 @@ function story_event_space_block($type, $subtype, $args) {
 			$block->content = array('#theme'=>'story_event_space_block',
 					'#content'=> $data);
 		}
+		elseif($args['space'] == 'dossier_theme') {
+			$block->title = '';
+			$data['concept_space'] = dec_dossier_themes($args['focus']);
+			$data['title'] = 'Setting timeline';
+			$block->content = array('#theme'=>'story_event_space_block',
+					'#content'=> $data);
+		}
+		elseif($args['space'] == 'storyscope_theme') {
+			$block->title = '';
+			$data['concept_space'] = dec_installation_themes();
+			$data['title'] = 'Setting timeline';
+			$block->content = array('#theme'=>'story_event_space_block',
+					'#content'=> $data);
+		}
 	}
 	return $block;
 }
@@ -422,11 +436,31 @@ function dec_rec_block_view($delta = '') {
 				$block['subject'] = '';
 				$block['content'] = array('#markup' => $content);
 			}
+			elseif(isset($_GET['dossier_theme'])) {
+				$dossier_id = $_GET['dossier_theme'];
+				$args = array('space'=>'dossier_theme',
+						'focus'=>$dossier_id);
+				$data = ctools_content_render($type, $subtype, $conf, $keywords, $args, $contexts);
+				$content = theme('story_event_space_block', $data->content);
+				$block['subject'] = '';
+				$block['content'] = array('#markup' => $content);
+			}
+			elseif(isset($_GET['storyscope_theme'])) {
+				$storyscope = $_GET['storyscope_theme'];
+				if($storyscope) {
+					$args = array('space'=>'storyscope_theme');
+					$data = ctools_content_render($type, $subtype, $conf, $keywords, $args, $contexts);
+					$content = theme('story_event_space_block', $data->content);
+					$block['subject'] = '';
+					$block['content'] = array('#markup' => $content);
+				}
+			}
 			break;
 	}
 	// voila!
 	return($block);
 }
+
 
 /**
  * Update query_tag table on story node update
@@ -435,6 +469,7 @@ function dec_rec_node_insert($node) {
 	if($node->type == 'story') {
 		update_query_tags_for_story_node($node);
 	}
+	
 }
 
 /**
@@ -472,7 +507,6 @@ function read_mids_from_story_node($story_node) {
 	}
 	return $mids;
 }
-
 
 function update_query_tags_for_story_node($node) {
 	$mid_array = read_mids_from_story_node($node);
