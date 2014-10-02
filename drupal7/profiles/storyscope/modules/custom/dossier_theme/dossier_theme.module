@@ -1,0 +1,185 @@
+
+<?php
+/**
+ * file: dossier_theme.module
+ *
+ * Themes of a dossier block. 
+ *
+ * Paul Mulholland <p.mulholland@open.ac.uk>
+ *
+ */
+
+/**
+* Implements hook_block_info().
+*/
+function dossier_theme_block_info() {
+  $blocks = array();
+  $blocks['dossier_theme_block'] = array(
+    'info' => t('Themes of a dossier'),
+  );
+  return $blocks;
+}
+/**
+* Implements hook_block_view().
+*/
+function dossier_theme_block_view($delta = '') {
+  $block = array();
+  switch ($delta) {
+    case 'dossier_theme_block':
+      $block['subject'] = '';
+      $block['content'] = dossier_theme_block_content();
+      break;
+  }
+  return $block;
+}
+
+function dossier_theme_block_content() {
+	$path = request_path();
+	$path_array = explode('/',request_path());
+	if(isset($path_array[0]) && isset($path_array[1]) && !isset($path_array[2])) {
+		$dossier_nid = (int) $path_array[1];
+		if($path_array[0] == 'dossier' && $dossier_nid) {
+			return dec_dossier_themes($dossier_nid);
+		}
+	}
+  return FALSE;
+}
+
+function dec_dossier_themes($dossier_nid) {
+	$dossier_node = node_load($dossier_nid);
+	$story_array = read_stories_from_dossier_node($dossier_node);
+	$themes = themes_for_a_dossier($story_array, 10);
+	$output = '';
+	if(!empty($themes)) {
+		$output .= '<div style="clear:both"><h2><i class="fa fa-link fa-lg">&nbsp;</i>Dossier themes</h2></div>';
+		$output .=  '<div><ul class="field-name-field-fb-tags">';
+		foreach($themes as $theme) {
+			$output .= storytaglink('<li class="tags">'.$theme->name."</li>", $theme->value, array("html"=>TRUE));
+		}
+		$output .=  '</ul></div>';
+	}
+	$settings = settings_for_a_dossier($story_array, 10);
+	if(!empty($settings)) {
+		$output .= '<div style="clear:both"><h2><i class="fa fa-compass fa-lg">&nbsp;</i>Dossier settings</h2></div>';
+		$output .=  '<ul class="field-name-field-fb-tags">';
+		foreach($settings as $setting) {
+			if($setting->end && $setting->start && $setting->start !== $setting->end) {
+				$output .= storysettinglink('<li class="tags">'. $setting->name.", ".$setting->start." to ".$setting->end . '</li>','setting',array('html'=>'true', 'query' => array('location' => $setting->location, 'time' => $setting->start, 'end' => $setting->end)));				
+			}
+			elseif($setting->start == $setting->end) {
+				$output .= storysettinglink('<li class="tags">'. $setting->name.", ".$setting->start . '</li>','setting', array('html'=>'true', 'query' => array('location' => $setting->location, 'time' => $setting->start)));
+			}
+			elseif($setting->start && !$setting->end) {
+				$output .= storysettinglink('<li class="tags">'. $setting->name.", ".$setting->start . '</li>','setting',array('html'=>'true', 'query' => array('location' => $setting->location, 'time' => $setting->start)));
+			}
+			elseif($setting->end && !$setting->start) {
+				$output .= storysettinglink('<li class="tags">'. $setting->name.", ".$setting->end . '</li>','setting',array('html'=>'true', 'query' => array('location' => $setting->location, 'time' => $setting->end)));
+			}
+		
+		}
+	$output .=  '</ul>';
+	}
+	return $output;
+}
+
+
+/**
+ * Get settings for a story
+ */
+function settings_for_a_dossier($story_array, $n = 10) {
+	$output = array();
+	if(!empty($story_array)) {
+		$story_string = "('".implode("','", $story_array)."')";	
+		$query = "SELECT *
+FROM
+(SELECT COUNT(DISTINCT event_location_start.id) as stories, COUNT(DISTINCT event_location_start.tag) as tags, COUNT(DISTINCT event_location_start.event) as frequency, event_location_start.location, event_location_start.start, event_end.end
+FROM
+(
+SELECT events_table.id, events_table.tag, events_table.event, events_table.location, event_start_table.start
+FROM
+(SELECT DISTINCT query_tag.id, query_tag.tag, event_attribute_value.event, location_table.value as location
+FROM tag_event_id, query_tag, event_attribute_value, event_attribute_value as location_table, event_attribute_value as start_table, attribute_name as location_attribute_name, attribute_name as time_attribute_name
+WHERE query_tag.id IN ".$story_string." AND
+query_tag.tag = tag_event_id.tag AND
+tag_event_id.event_id = event_attribute_value.event AND
+event_attribute_value.event = location_table.event AND
+event_attribute_value.event = start_table.event AND
+location_table.attribute = location_attribute_name.attribute AND
+location_attribute_name.name = 'location' AND
+((start_table.attribute = time_attribute_name.attribute AND
+time_attribute_name.name = 'start_time') OR
+(start_table.attribute = time_attribute_name.attribute AND
+time_attribute_name.name = 'end_time'))) as events_table
+LEFT JOIN
+(SELECT DISTINCT query_tag.tag, event_attribute_value.event, location_table.value as location, start_table.value as start
+FROM tag_event_id, query_tag, event_attribute_value, event_attribute_value as location_table, event_attribute_value as start_table, attribute_name as location_attribute_name, attribute_name as time_attribute_name
+WHERE query_tag.id IN ".$story_string." AND
+query_tag.tag = tag_event_id.tag AND
+tag_event_id.event_id = event_attribute_value.event AND
+event_attribute_value.event = location_table.event AND
+event_attribute_value.event = start_table.event AND
+location_table.attribute = location_attribute_name.attribute AND
+location_attribute_name.name = 'location' AND
+start_table.attribute = time_attribute_name.attribute AND
+time_attribute_name.name = 'start_time') as event_start_table ON event_start_table.event = events_table.event
+) as event_location_start
+LEFT JOIN
+(SELECT event_attribute_value.event, end_table.value as end
+FROM tag_event_id, query_tag, event_attribute_value, event_attribute_value as end_table, attribute_name as time_attribute_name
+WHERE query_tag.id IN ".$story_string." AND
+query_tag.tag = tag_event_id.tag AND
+tag_event_id.event_id = event_attribute_value.event AND
+event_attribute_value.event = end_table.event AND
+end_table.attribute = time_attribute_name.attribute AND
+time_attribute_name.name = 'end_time') as event_end ON event_location_start.event = event_end.event
+GROUP BY event_location_start.location, event_location_start.start, event_end.end) as frequency_table
+JOIN tag_name ON tag_name.tag = frequency_table.location ORDER BY stories DESC, tags DESC, frequency DESC LIMIT ".$n.";";
+		$output = array();
+		$result = db_query($query);
+		$output = array();
+		foreach ($result as $record) {
+			$output[] = $record;
+		}
+	}
+	return $output;
+}
+
+/**
+ * Calculate themes for a dossier
+ */
+function themes_for_a_dossier($story_array, $limit = 10) {//****here
+	$output = array();
+	if(!empty($story_array)) {
+		$story_string = "('".implode("','", $story_array)."')";
+		$query = "SELECT story_tag_event_value.value, story_tag_event_value.stories, story_tag_event_value.tags, story_tag_event_value.events, tag_name.name
+FROM
+(SELECT  COUNT(DISTINCT query_tag.id) as stories, COUNT(DISTINCT query_tag.tag) as tags, COUNT(DISTINCT value_table.event) as events, value_table.value
+FROM query_tag, tag_event_id, event_attribute_value as value_table
+WHERE query_tag.id IN ".$story_string." AND
+query_tag.tag = tag_event_id.tag AND
+value_table.event = tag_event_id.event_id AND
+value_table.attribute <> 'location'
+GROUP BY value_table.value
+ORDER BY stories DESC, tags DESC, events DESC) as story_tag_event_value, tag_name
+WHERE story_tag_event_value.value = tag_name.tag LIMIT ".$limit.";";
+		$result = db_query($query);
+		foreach ($result as $record) {
+			$output[] = $record;
+		}
+	}
+	return $output;
+}
+
+function read_stories_from_dossier_node($dossier_node) {
+	$output = array();
+	$field_stories = $dossier_node->field_stories;
+	if(isset($field_stories['und'][0])) {
+		foreach($field_stories['und'] as $story_value) {
+			if(isset($story_value['target_id'])) {
+				$output[] = $story_value['target_id'];
+			}
+		}
+	}
+	return $output;
+}
+
