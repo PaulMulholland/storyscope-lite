@@ -336,6 +336,8 @@ function dec_rec_block_info() {
 			'info' => t('Story event space block'),
 			'region' => 'footer',
 			'status' => 1,
+			'visibility' => BLOCK_VISIBILITY_NOTLISTED,
+			'pages' => 'front',
 	);
 	return $blocks;
 }
@@ -2735,7 +2737,7 @@ function dec_setting($location, $time,  $end) {
 /**
  * Themes of a setting
  */
-function dec_get_themes_for_events_of_setting($location, $year, $end = 0) {
+function dec_get_themes_for_events_of_setting($location, $year, $end = 0, $limit = 10, $min_frequency = 2) {
 	$query = "SELECT * 
 FROM
 (SELECT event_attribute_value.value, COUNT(event_attribute_value.value) as frequency, tag_name.name
@@ -2785,7 +2787,7 @@ WHERE (start_end_location_result.start_time <= '".$end."' AND start_end_location
           WHERE combined_result.event = event_attribute_value.event AND
      event_attribute_value.value = tag_name.tag AND NOT EXISTS (SELECT attribute_name.name FROM attribute_name WHERE event_attribute_value.attribute = attribute_name.attribute AND attribute_name.name = 'location')
      group by event_attribute_value.value ORDER BY frequency DESC) as frequency_result
-     WHERE frequency > 1 LIMIT 5;";//excludes location by AND NOT EXISTS (SELECT attribute_name.name FROM attribute_name WHERE event_attribute_value.attribute = attribute_name.attribute AND attribute_name.name = 'location')
+     WHERE frequency >= ".$min_frequency." LIMIT ".$limit.";";//excludes location by AND NOT EXISTS (SELECT attribute_name.name FROM attribute_name WHERE event_attribute_value.attribute = attribute_name.attribute AND attribute_name.name = 'location')
 
 	$result = db_query($query);
 	$output = array();
@@ -4715,7 +4717,7 @@ function get_triple_ids_of_a_tag($topic) {
 /**
  * Calculation of themes for an individual story tag
  */
-function top_n_themes_of_tag($tag = '/m/01qwfk', $n = 5) {
+function top_n_themes_of_tag($tag = '/m/01qwfk', $n = 10, $min_frequency = 2) {
 	$n = (int) $n;
 	if($n == 0) {
 		$n = 5;
@@ -4769,7 +4771,7 @@ tag_name.tag = value_table.value AND NOT EXISTS (SELECT attribute_name.name FROM
 WHERE result.tag = data.tag
 GROUP BY result.tag
 ORDER BY frequency DESC) as frequency
-WHERE frequency > 1 LIMIT ".$n." ;";
+ WHERE frequency >= ".$min_frequency." LIMIT ".$n." ;";
 	$result = db_query($query, array(':tag' => $tag));
 	$output = array();
 	foreach ($result as $record) {
