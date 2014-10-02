@@ -29,7 +29,7 @@ function storyscope_content_help($path, $arg) {
 function storyscope_content_menu() {
   $items = array();
 
-  // Add brand new child content to a dossier, object story or plot.
+  // Add brand new child content to a dossier
   // ----------------------------------------------------------------
   // To a dossier.
   $items['dossier/%node/story/add'] = array(
@@ -38,7 +38,16 @@ function storyscope_content_menu() {
     'access callback' => 'user_is_logged_in',
     'type' => MENU_LOCAL_TASK,
   );
-
+  
+  // Add a new tag to a story
+  // ----------------------------------------------------------------
+  // To a dossier.
+  $items['dossier/%node/story/add'] = array(
+    'page callback' => 'storyscope_content_add_child_content_form',
+    'page arguments' => array('dossier', 1),
+    'access callback' => 'user_is_logged_in',
+    'type' => MENU_LOCAL_TASK,
+  );
   return $items;
 }
 

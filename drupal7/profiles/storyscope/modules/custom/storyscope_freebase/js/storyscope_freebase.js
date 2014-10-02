@@ -25,7 +25,7 @@ Drupal.behaviors.jquery_freebase = {
           var id_selector = (e.data.msg.id.replace(/topic/, "mid"));
           var topic_id_elem = $(id_selector);
           var topic_title_elem = $(e.data.msg.id);
-          $(topic_id_elem).val(Drupal.checkPlain('http://freebase.com' + data.mid));//
+          $(topic_id_elem).val(Drupal.checkPlain((data.mid).split('/')[2]));
 
 	  // ==============================================
           // Go fetch geocode data from Freebase if needed.
