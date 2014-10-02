@@ -183,3 +183,4 @@ function read_stories_from_dossier_node($dossier_node) {
 	return $output;
 }
 
+
