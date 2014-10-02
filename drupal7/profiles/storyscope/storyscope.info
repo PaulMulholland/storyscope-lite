@@ -79,6 +79,7 @@ dependencies[] = content_type_storyscope_story
 ;Storyscope Custom Views
 dependencies[] = views_dossiers
 dependencies[] = views_dossier_stories
+dependencies[] = views_tagged_stories
 
 ;Storyscope Custom Panels
 dependencies[] = annertech_panels
