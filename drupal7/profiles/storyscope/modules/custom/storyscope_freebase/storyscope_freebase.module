@@ -9,8 +9,9 @@ function storyscope_freebase_js_alter(&$javascript) {
   $storyscope_freebase_js = drupal_get_path('module', 'storyscope_freebase') . '/js/storyscope_freebase.js';
   $javascript[$jquery_freebase_js] = drupal_js_defaults($storyscope_freebase_js);
   // Load the external libraries instead of using a local library.
-  drupal_add_css('https://www.gstatic.com/freebase/suggest/4_1/suggest.min.css', 'external');
-  drupal_add_js('https://www.gstatic.com/freebase/suggest/4_1/suggest.min.js', 'external');  
+  drupal_add_css('https://www.gstatic.com/freebase/suggest/4_3/suggest.min.css', 'external');
+  drupal_add_js('https://www.gstatic.com/freebase/suggest/4_3/suggest.min.js', 'external');  
+  drupal_add_js('http://code.jquery.com/jquery-migrate-1.0.0.js' , 'external');
 }
 
 /**
