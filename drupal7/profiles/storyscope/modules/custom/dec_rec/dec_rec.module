@@ -3451,8 +3451,10 @@ function dec_tag($topic) {
 		//tag name
 		$name = get_topic_name($topic);
 		if($name) {
-			$output .= '<div class="topic-block"><h2><i class="fa fa-tag fa-lg">&nbsp;</i><span class="topic-title">' . $name . $topic_types . '&nbsp;&nbsp;</span>' . l('<i class="fa fa-search">&nbsp;</i>' . t('Find') , $current_path . '/tag/' . $name , array("html"=>TRUE)) . '</h2>';
-// 			drupal_set_title($name);
+			$output .= '<div class="button addtag-button">' . l( t('Add to Story') , $current_path . '/addtag' , array("html"=>TRUE, 'query'=>array('topic_name' => $name, 'mid' => $topic, 'destination' => (drupal_get_path_alias(current_path()) . '?tag=' . $topic)))) . '</div>';
+			$output .= '<div class="topic-block"><h2><i class="fa fa-tag fa-lg">&nbsp;</i><span class="topic-title">' . $name . $topic_types . '&nbsp;&nbsp;</span>' . l('<span class="topic-search"><i class="fa fa-search">&nbsp;</i>' . '</span>', $current_path . '/tag/' . $name , array("html"=>TRUE)) . '</h2>';
+			
+			// 			drupal_set_title($name);
 		}
 
 
@@ -3463,14 +3465,6 @@ function dec_tag($topic) {
 			$output .= '<div class="topic-image"><img src="'.$image.'"></div>';
 		}
 		
-		//tag type
-		$notable_tag_types = get_notable_tag_type_names($topic);
-		if(!empty($notable_tag_types)) {
-			$output .= '<div style="float:left; margin-bottom:20px; width:70%">';
-			$output .= '<div style="clear:both">Type: ';
-			$output .= implode(', ', $notable_tag_types);
-			$output .= '</div>';
-		}
 		//tag description
 		$description = get_topic_description($topic);
 		if($description) {

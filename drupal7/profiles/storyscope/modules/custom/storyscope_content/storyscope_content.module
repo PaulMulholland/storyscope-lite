@@ -30,8 +30,6 @@ function storyscope_content_menu() {
   $items = array();
 
   // Add brand new child content to a dossier
-  // ----------------------------------------------------------------
-  // To a dossier.
   $items['dossier/%node/story/add'] = array(
     'page callback' => 'storyscope_content_add_child_content_form',
     'page arguments' => array('dossier', 1),
@@ -40,14 +38,21 @@ function storyscope_content_menu() {
   );
   
   // Add a new tag to a story
-  // ----------------------------------------------------------------
-  // To a dossier.
-  $items['dossier/%node/story/add'] = array(
-    'page callback' => 'storyscope_content_add_child_content_form',
-    'page arguments' => array('dossier', 1),
+  $items['dossier/%/story/%/addtag'] = array(
+    'page callback' => 'storyscope_content_add_tag',
+    'page arguments' => array(3),
     'access callback' => 'user_is_logged_in',
     'type' => MENU_LOCAL_TASK,
   );
+
+  // Remove a tag 
+  $items['dossier/%/story/%/removetag'] = array(
+    'page callback' => 'storyscope_content_remove_tag',
+    'page arguments' => array(3),
+    'access callback' => 'user_is_logged_in',
+    'type' => MENU_LOCAL_TASK,
+  );
+  
   return $items;
 }
 
@@ -211,3 +216,87 @@ function storyscope_content_form_story_node_form_after_build(&$form, $form_state
   }
   return $form;
 }
+
+
+/**
+ * Create a Freebase Tag field collection entity from a topic name and mid and add it to the story
+ */
+function storyscope_content_add_tag($story_nid) {
+	$query = drupal_get_query_parameters($_GET);
+	//this gets the destination in the correct drupal manner - other paramenters are taken from the $query object
+	$destination = drupal_get_destination();
+	//make sure we are getting the required parameters
+	if(isset($query['topic_name'])) {
+		$topic_name = $query['topic_name'];
+	}
+	else {
+		drupal_set_message(t('There was no valid topic name in the request. No tag has been added.'));
+		drupal_goto($destination['destination']);
+		return;
+	}
+	if(isset($query['mid'])) {
+		$mid = $query['mid'];
+	}
+	else {
+		drupal_set_message(t('There was no valid mid in the request. No tag has been added.'), 'warning');
+		drupal_goto($destination['destination']);
+		return;
+	}
+	//load the story - we should probably check to see if it tis the correct type and whether it 
+	//already has this tag (both in the dec_rec created link that calls this function and also here)
+	// Should change to "Remove" when the tag exists in the story.
+	if (is_numeric($story_nid) && $story = node_load($story_nid)) {
+		$story = node_load($story_nid);
+	}
+	else {
+		drupal_set_message(t('There was no story in the request. No tag has been added.'), 'warning');
+		drupal_goto($destination['destination']);
+		return;
+	}
+	if($story->type !='story' || $story == NULL){
+		drupal_set_message(t('The Story does not exist or you are trying to add a tag to something other than a Story.'), 'warning');
+	 	drupal_goto($destination['destination']);
+		return;
+	}
+	
+    //make a new field collection item and bind it to the story node
+	$new_fb_tag = entity_create('field_collection_item', array('field_name' => 'field_fb_tags'));
+	$new_fb_tag->setHostEntity('node', $story);
+	$new_fb_tag->field_topic[LANGUAGE_NONE][0]['value'] = $topic_name;
+  	$new_fb_tag->field_mid[LANGUAGE_NONE][0]['value'] = $mid;
+	$new_fb_tag->save();
+	node_save($story);
+	drupal_set_message(t('Added ') . $topic_name . t(' Tag to the Story'));
+	drupal_goto($destination['destination']);
+	//watchdog('addtag', '<pre>'. print_r($query, TRUE) .'</pre>');
+
+
+}
+
+ /**
+	 * Remove a Freebase Tag field collection entity
+	 */
+	function storyscope_content_remove_tag($story_nid) {
+		$query = drupal_get_query_parameters($_GET);
+		//this gets the destination in the correct drupal manner - other paramenters are taken from the $query object
+		$destination = drupal_get_destination();
+		//make sure we are getting the required parameters
+		if (isset($query['fcid'])) {
+			$fcid = $query['fcid'];
+		} else {
+			drupal_set_message(t('There was no valid tag identifier in the request. No tag has been removed.'));
+			drupal_goto($destination['destination']);
+			return;
+		}
+		if ($tag = field_collection_item_load($fcid)) {
+			//the delet function removes both the fc item and the reference in the host entity
+			//(so no need to update the host node)
+			$tag -> delete();
+			drupal_set_message(t('Removed Tag from the Story'));
+			drupal_goto($destination['destination']);
+		} else {
+			return;
+
+		}
+
+	}
