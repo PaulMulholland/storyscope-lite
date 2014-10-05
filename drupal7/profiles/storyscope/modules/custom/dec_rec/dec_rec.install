@@ -385,7 +385,17 @@ function dec_rec_schema() {
 					'attribute_UNIQUE'     => array('position')
 			),
 	);
-	
+	$schema['theme_fact_property'] = array(
+			'description' => t('List of fact properties of a topic that are used in theme calculation for that topic.'),
+			'fields' => array(
+					'fb_property' => array(
+							'description' => t('Fact property used in concept space for the topic'),
+							'type' => 'varchar',
+							'length' => 45,
+					),
+			),
+			'primary key' => array('fb_property'),
+	);	
 	return $schema;
 }
 
@@ -481,6 +491,17 @@ function dec_rec_install() {
 			array('event_attribute'=>'tag', 'position'=>'6'),
 	);
 	$query = db_insert('event_attribute_position')->fields(array('event_attribute', 'position'));
+	foreach($values as $value) {
+		$query->values($value);
+	}
+	$query->execute();
+
+	//Populate fact theme properties
+	$values = array(
+			array('Associated artists'),
+			array('Associated period or movement'),
+	);
+	$query = db_insert('theme_fact_property')->fields(array('fb_property'));
 	foreach($values as $value) {
 		$query->values($value);
 	}

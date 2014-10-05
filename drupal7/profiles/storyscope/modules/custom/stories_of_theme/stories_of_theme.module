@@ -1,0 +1,226 @@
+
+<?php
+/**
+ * file: stories_of_theme.module
+ *
+ * Stories of theme block. 
+ *
+ * Paul Mulholland <p.mulholland@open.ac.uk>
+ *
+ */
+
+/**
+* Implements hook_block_info().
+*/
+function stories_of_theme_block_info() {
+  $blocks = array();
+  $blocks['stories_of_theme_block'] = array(
+    'info' => t('Stories of theme'),
+    'visibility' => BLOCK_VISIBILITY_LISTED,
+  	'pages' => 'front',
+  );
+  return $blocks;
+}
+
+/**
+* Implements hook_block_view().
+*/
+function stories_of_theme_block_view($delta = '') {
+  $block = array();
+  switch ($delta) {
+    case 'stories_of_theme_block':
+      $block['subject'] = '';
+      $block['content'] = stories_of_theme_block_content();
+      break;
+  }
+  return $block;
+}
+
+function stories_of_theme_block_content() {
+	//show if there is a tag variable
+	if(isset($_GET['tag'])) {
+		$tag = $_GET['tag'];
+		return stories_for_a_topic($tag);
+	}
+	if(isset($_GET['location']) && isset($_GET['time'])) {
+		$location = $_GET['location'];
+		$start = $_GET['time'];
+		if(isset($_GET['end'])) {
+			$end = $_GET['end'];
+		}
+		else {
+			$end = FALSE;
+		}
+		return stories_for_a_setting($location, $start, $end);
+	}
+  return FALSE;
+}
+
+function stories_for_a_topic($topic, $n = 8) {
+	$output = '';
+	//check event space for the topic has been calculated
+	new_event_space_of_a_topic($topic);
+	//list of themes for a topic
+	$name = get_topic_name($topic);
+		//stories ordered according to their theme match
+		$query = "SELECT  query_tag.id, COUNT(DISTINCT query_tag.tag) as tags, COUNT(DISTINCT value_table.event) as events
+FROM query_tag, tag_event_id, event_attribute_value as value_table
+WHERE
+value_table.value = '".$topic."' AND
+value_table.event = tag_event_id.event_id AND
+query_tag.tag = tag_event_id.tag AND
+value_table.attribute <> 'location'
+GROUP BY query_tag.id
+ORDER BY tags DESC, events DESC LIMIT ".$n.";";
+		$result = db_query($query);
+		$output .= '<div class="panel-middle-3"><div class="panel-pane pane-views pane-dossier-stories">';
+		$output .= '<h2 class="pane-title"><i class="fa fa-comments fa-lg">&nbsp;</i>Storyscope stories related to '.$name.'</h2>';
+		$output .= '<div class="pane-content"><div class="view view-dossier-stories view-id-dossier_stories view-display-id-default resource-container container-full wide-items view-dom-id-7450ee9ef1af82379eb82e6a617daa7a contextual-links-region"><div class = "view-content">';
+		foreach ($result as $record) {
+			$node = node_load($record->id);
+			if($node) {
+				$path = drupal_get_path_alias('node/'.$node->nid);
+				$title = $node->title;
+				$output .= '<article class="node-'.$node->nid.' node node-story node-promoted node-teaser contextual-links-region node-by-viewer clearfix"><div class="article-inner"><header><h2 class="title">'.l($title,$path).'</h2></header></div></article>';
+			}
+		}
+		$output .= '</div></div></div></div>';
+
+	return $output;
+}
+
+function get_dossier_for_story($story_nid) {
+	
+}
+
+function stories_for_a_setting($location, $start, $end = FALSE) {
+	$output = '';
+	if($start && $end) {
+		//query
+		$query = "SELECT result_table.id, COUNT(result_table.tag) as tags
+FROM
+(SELECT DISTINCT event_location_start.id, event_location_start.tag, event_location_start.event, event_location_start.location, event_location_start.start, event_end.end
+FROM
+(
+SELECT events_table.id, events_table.tag, events_table.event, events_table.location, event_start_table.start
+FROM
+(SELECT DISTINCT query_tag.id, query_tag.tag, event_attribute_value.event, location_table.value as location
+FROM tag_event_id, query_tag, event_attribute_value, event_attribute_value as location_table, event_attribute_value as start_table, attribute_name as location_attribute_name, attribute_name as time_attribute_name
+WHERE 
+query_tag.tag = tag_event_id.tag AND
+tag_event_id.event_id = event_attribute_value.event AND
+event_attribute_value.event = location_table.event AND
+event_attribute_value.event = start_table.event AND
+location_table.value = '".$location."' AND
+location_table.attribute = location_attribute_name.attribute AND
+location_attribute_name.name = 'location' AND
+((start_table.attribute = time_attribute_name.attribute AND
+time_attribute_name.name = 'start_time') OR
+(start_table.attribute = time_attribute_name.attribute AND
+time_attribute_name.name = 'end_time'))) as events_table
+LEFT JOIN
+(SELECT DISTINCT query_tag.tag, event_attribute_value.event, location_table.value as location, start_table.value as start
+FROM tag_event_id, query_tag, event_attribute_value, event_attribute_value as location_table, event_attribute_value as start_table, attribute_name as location_attribute_name, attribute_name as time_attribute_name
+WHERE 
+query_tag.tag = tag_event_id.tag AND
+tag_event_id.event_id = event_attribute_value.event AND
+event_attribute_value.event = location_table.event AND
+event_attribute_value.event = start_table.event AND
+location_table.attribute = location_attribute_name.attribute AND
+location_attribute_name.name = 'location' AND
+start_table.attribute = time_attribute_name.attribute AND
+time_attribute_name.name = 'start_time') as event_start_table ON event_start_table.event = events_table.event
+) as event_location_start
+LEFT JOIN
+(SELECT event_attribute_value.event, end_table.value as end
+FROM tag_event_id, query_tag, event_attribute_value, event_attribute_value as end_table, attribute_name as time_attribute_name
+WHERE 
+query_tag.tag = tag_event_id.tag AND
+tag_event_id.event_id = event_attribute_value.event AND
+event_attribute_value.event = end_table.event AND
+end_table.attribute = time_attribute_name.attribute AND
+time_attribute_name.name = 'end_time') as event_end ON event_location_start.event = event_end.event) as result_table
+WHERE (result_table.start < '".$end."' AND result_table.end > '".$start."') OR (result_table.start > '".$start."' AND result_table.start < '".$end."') OR (result_table.end > '".$start."' AND result_table.end < '".$end."')
+GROUP BY result_table.id
+ORDER BY tags;";
+	}
+	if($start || $end) {
+		if($start) {
+			$time = $start;
+		}
+		else {
+			$time = $end;
+		}
+		//query
+		$query = "SELECT result_table.id, COUNT(result_table.tag) as tags
+FROM
+(SELECT DISTINCT event_location_start.id, event_location_start.tag, event_location_start.event, event_location_start.location, event_location_start.start, event_end.end
+FROM
+(
+SELECT events_table.id, events_table.tag, events_table.event, events_table.location, event_start_table.start
+FROM
+(SELECT DISTINCT query_tag.id, query_tag.tag, event_attribute_value.event, location_table.value as location
+FROM tag_event_id, query_tag, event_attribute_value, event_attribute_value as location_table, event_attribute_value as start_table, attribute_name as location_attribute_name, attribute_name as time_attribute_name
+WHERE
+query_tag.tag = tag_event_id.tag AND
+tag_event_id.event_id = event_attribute_value.event AND
+event_attribute_value.event = location_table.event AND
+event_attribute_value.event = start_table.event AND
+location_table.value = '".$location."' AND
+location_table.attribute = location_attribute_name.attribute AND
+location_attribute_name.name = 'location' AND
+((start_table.attribute = time_attribute_name.attribute AND
+time_attribute_name.name = 'start_time') OR
+(start_table.attribute = time_attribute_name.attribute AND
+time_attribute_name.name = 'end_time'))) as events_table
+LEFT JOIN
+(SELECT DISTINCT query_tag.tag, event_attribute_value.event, location_table.value as location, start_table.value as start
+FROM tag_event_id, query_tag, event_attribute_value, event_attribute_value as location_table, event_attribute_value as start_table, attribute_name as location_attribute_name, attribute_name as time_attribute_name
+WHERE
+query_tag.tag = tag_event_id.tag AND
+tag_event_id.event_id = event_attribute_value.event AND
+event_attribute_value.event = location_table.event AND
+event_attribute_value.event = start_table.event AND
+location_table.attribute = location_attribute_name.attribute AND
+location_attribute_name.name = 'location' AND
+start_table.attribute = time_attribute_name.attribute AND
+time_attribute_name.name = 'start_time') as event_start_table ON event_start_table.event = events_table.event
+) as event_location_start
+LEFT JOIN
+(SELECT event_attribute_value.event, end_table.value as end
+FROM tag_event_id, query_tag, event_attribute_value, event_attribute_value as end_table, attribute_name as time_attribute_name
+WHERE
+query_tag.tag = tag_event_id.tag AND
+tag_event_id.event_id = event_attribute_value.event AND
+event_attribute_value.event = end_table.event AND
+end_table.attribute = time_attribute_name.attribute AND
+time_attribute_name.name = 'end_time') as event_end ON event_location_start.event = event_end.event) as result_table
+WHERE result_table.start = '".$time."' OR result_table.end = '".$time."' OR (result_table.start < '".$time."' AND result_table.end > '".$time."')
+GROUP BY result_table.id
+ORDER BY tags;";
+		
+	}
+
+	//stories ordered according to their match
+	$result = db_query($query);
+	if($start && $end) {
+		$label = get_topic_name($location).' '.$start.' to '.$end;
+	}
+	else {
+		$label = get_topic_name($location).' '.$time;
+	}
+	$output .= '<div class="panel-middle-3"><div class="panel-pane pane-views pane-dossier-stories">';
+	$output .= '<h2 class="pane-title"><i class="fa fa-comments fa-lg">&nbsp;</i>Storyscope stories related to '.$label.'</h2>';
+	$output .= '<div class="pane-content"><div class="view view-dossier-stories view-id-dossier_stories view-display-id-default resource-container container-full wide-items view-dom-id-7450ee9ef1af82379eb82e6a617daa7a contextual-links-region"><div class = "view-content">';
+	foreach ($result as $record) {
+		$node = node_load($record->id);
+		if($node) {
+			$path = drupal_get_path_alias('node/'.$node->nid);
+			$title = $node->title;
+			$output .= '<article class="node-'.$node->nid.' node node-story node-promoted node-teaser contextual-links-region node-by-viewer clearfix"><div class="article-inner"><header><h2 class="title">'.l($title,$path).'</h2></header></div></article>';
+		}
+	}
+	$output .= '</div></div></div></div>';
+	return $output;
+}
+
