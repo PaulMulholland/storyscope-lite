@@ -344,6 +344,62 @@ function storyscope_update_7008() {
   return t('Enabled views_tagged_stories - stories that share a topic tag');
 }
 
+//*****here
+function storyscope_update_7009() {
+	$schema['theme_fact_property'] = array(
+			'description' => t('List of fact properties of a topic that are used in theme calculation for that topic.'),
+			'fields' => array(
+					'fb_property' => array(
+							'description' => t('Fact property used in concept space for the topic'),
+							'type' => 'varchar',
+							'length' => 45,
+					),
+			),
+			'primary key' => array('fb_property'),
+	);
+	db_create_table('theme_fact_property', $schema['theme_fact_property']);
+	//Populate fact theme properties
+	$values = array(
+			array('Associated artists'),
+			array('Associated period or movement'),
+	);
+	$query = db_insert('theme_fact_property')->fields(array('fb_property'));
+	foreach($values as $value) {
+		$query->values($value);
+	}
+	$query->execute();
+}
+
+function storyscope_update_7010() {
+	$schema['fact_attribute_reverse'] = array(
+			'description' => t('Reverse names for fact properties for showing the inverse of a stored fact.'),
+			'fields' => array(
+					'attribute' => array(
+							'description' => t('Fact property'),
+							'type' => 'varchar',
+							'length' => 200,
+					),
+					'reverse' => array(
+							'description' => t('Inverse name'),
+							'type' => 'varchar',
+							'length' => 200,
+					),
+			),
+			'primary key' => array('attribute'),
+	);
+	db_create_table('fact_attribute_reverse', $schema['fact_attribute_reverse']);
+	//Populate fact name properties
+	$values = array(
+			array('Place of birth','Birthplace of'),
+			array('Place of death','Death place of'),
+	);
+	$query = db_insert('fact_attribute_reverse')->fields(array('attribute','reverse'));
+	foreach($values as $value) {
+		$query->values($value);
+	}
+	$query->execute();
+}
+
 /**
 * Revert specified features.
 *

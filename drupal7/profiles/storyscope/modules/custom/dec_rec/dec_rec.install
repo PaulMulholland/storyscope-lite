@@ -395,7 +395,23 @@ function dec_rec_schema() {
 					),
 			),
 			'primary key' => array('fb_property'),
-	);	
+	);
+	$schema['fact_attribute_reverse'] = array(
+			'description' => t('Reverse names for fact properties for showing the inverse of a stored fact.'),
+			'fields' => array(
+					'attribute' => array(
+							'description' => t('Fact property'),
+							'type' => 'varchar',
+							'length' => 200,
+					),
+					'reverse' => array(
+							'description' => t('Inverse name'),
+							'type' => 'varchar',
+							'length' => 200,
+					),
+			),
+			'primary key' => array('attribute'),
+	);
 	return $schema;
 }
 
@@ -502,6 +518,17 @@ function dec_rec_install() {
 			array('Associated period or movement'),
 	);
 	$query = db_insert('theme_fact_property')->fields(array('fb_property'));
+	foreach($values as $value) {
+		$query->values($value);
+	}
+	$query->execute();
+	
+	//Populate fact name properties
+	$values = array(
+			array('Place of birth','Birthplace of'),
+			array('Place of death','Death place of'),
+	);
+	$query = db_insert('fact_attribute_reverse')->fields(array('attribute','reverse'));
 	foreach($values as $value) {
 		$query->values($value);
 	}
