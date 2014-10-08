@@ -3473,19 +3473,20 @@ function dec_tag($topic) {
 
 		$output .= '<p>' . $description . '</p>';
 		//tag triples
-		$tag_attributes = get_triple_ids_of_a_tag($topic);
+		$tag_attributes = get_triple_ids_of_a_tag2($topic);
+
 		$output .= '<div class="event-space-tag-attibutes-wrapper">';
-		foreach($tag_attributes as $tag_attribute) {
-			$values = get_tag_attribute_id_values($tag_attribute->id);
+		
+		foreach($tag_attributes as $attribute_values) {
 			$output .=  '<div class="event-space-tag-attibutes"><ul class="field-name-field-fb-tags">';
-			$output .= ' <li class="plain">'.$tag_attribute->attribute."</li>";
+			$output .= ' <li class="plain">'.$attribute_values->fact_attribute."</li>";
 			
-				foreach($values as $value) {
+				foreach($attribute_values->value_list as $value) {
 					$name = get_topic_name($value);
 					if(!$name) {
 						$name = $value;
 					}
-					if($tag_attribute->link) {
+					if($attribute_values->link) {
 						$output .= storytaglink('<li class="tags">'.$name."</li>", $value, array("html"=>TRUE));
 					}
 					else {
@@ -4710,6 +4711,32 @@ function get_triple_ids_of_a_tag($topic) {
 }
 
 /**
+ * Get the direct triples associated with a tag
+ */
+function get_triple_ids_of_a_tag2($topic) {
+	$query = "SELECT results.fact_attribute, GROUP_CONCAT(results.fact_value) as value_list, results.link FROM
+(SELECT fact_attribute_reverse.reverse as fact_attribute, tag_attribute.tag as fact_value, tag_attribute.link 
+FROM tag_attribute, tag_attribute_id_value, fact_attribute_reverse 
+WHERE tag_attribute_id_value.value = '".$topic."' AND 
+tag_attribute_id_value.tag_attribute_id = tag_attribute.id AND 
+tag_attribute.attribute = fact_attribute_reverse.attribute
+UNION
+SELECT tag_attribute.attribute as fact_attribute, tag_attribute_id_value.value as fact_value, tag_attribute.link 
+FROM tag_attribute, tag_attribute_id_value
+WHERE tag_attribute.tag = '".$topic."' AND
+tag_attribute.id = tag_attribute_id_value.tag_attribute_id) as results
+GROUP BY results.fact_attribute;";
+	$result = db_query($query);
+
+	$output = array();
+	foreach ($result as $record) {
+		$record->value_list = explode(',',$record->value_list);
+		$output[] = $record;
+	}
+	return $output;
+}
+
+/**
  * Calculation of themes for an individual story tag
  */
 function top_n_themes_of_tag($tag = '/m/01qwfk', $n = 10, $min_frequency = 2) {
@@ -4755,16 +4782,19 @@ function top_n_themes_of_tag($tag = '/m/01qwfk', $n = 10, $min_frequency = 2) {
 FROM tag_name as result,
 (SELECT tag_name.tag
 FROM tag_attribute, tag_attribute_id_value, tag_name, theme_fact_property
-WHERE tag_attribute.tag = '/m/03xpqgs' AND
+WHERE tag_attribute.tag = :tag AND
 tag_attribute.attribute = theme_fact_property.fb_property AND
 tag_attribute.id = tag_attribute_id_value.tag_attribute_id and
 tag_name.tag = tag_attribute_id_value.value
 UNION ALL
-SELECT tag_name.tag
-FROM event_attribute_value as event_table, event_attribute_value as value_table, tag_name
-WHERE event_table.value = '/m/03xpqgs' AND event_table.event = value_table.event AND
-tag_name.tag = value_table.value 
-AND NOT EXISTS (SELECT attribute_name.name FROM attribute_name WHERE value_table.attribute = attribute_name.attribute AND attribute_name.name = 'location')) as data
+SELECT event_attribute_value.value as tag
+FROM 
+(SELECT DISTINCT event_attribute_value.event 
+FROM event_attribute_value
+WHERE event_attribute_value.value = :tag) as event_table, event_attribute_value, attribute_name
+WHERE event_table.event = event_attribute_value.event AND
+event_attribute_value.attribute = attribute_name.attribute AND
+attribute_name.attribute <> 'location') as data
 WHERE result.tag = data.tag
 GROUP BY result.tag
 ORDER BY frequency DESC) as frequency
@@ -4807,7 +4837,8 @@ if($n == 0) {
 // (SELECT attribute_name.name FROM attribute_name WHERE event_attribute_value.attribute = attribute_name.attribute AND attribute_name.name = 'location')) as result
 // GROUP BY result.value
 // ORDER BY tags DESC, frequency DESC LIMIT ".$n.";";
-	$query ="SELECT result.tag as value, COUNT(result.tag) as frequency, result.name, data.annotation, COUNT(DISTINCT data.annotation) as annotations
+	$query ="SELECT * FROM
+(SELECT result.tag as value, COUNT(result.tag) as frequency, result.name, data.annotation, COUNT(DISTINCT data.annotation) as annotations
 FROM tag_name as result,
 (SELECT tag_name.tag, query_tag.tag as annotation
 FROM tag_attribute, tag_attribute_id_value, tag_name, query_tag, theme_fact_property
@@ -4819,15 +4850,17 @@ tag_attribute.id = tag_attribute_id_value.tag_attribute_id and
 tag_name.tag = tag_attribute_id_value.value
 UNION ALL
 SELECT tag_name.tag, query_tag.tag as annotation
-FROM event_attribute_value as event_table, event_attribute_value as value_table, tag_name, query_tag
+FROM event_attribute_value as event_table, event_attribute_value as value_table, tag_name, query_tag, attribute_name
 WHERE 
 query_tag.id = '".$story_id."' AND
 query_tag.tag = event_table.value AND event_table.event = value_table.event AND
-tag_name.tag = value_table.value 
-AND NOT EXISTS (SELECT attribute_name.name FROM attribute_name WHERE value_table.attribute = attribute_name.attribute AND attribute_name.name = 'location')) as data
-WHERE result.tag = data.tag
+tag_name.tag = value_table.value AND
+value_table.attribute = attribute_name.attribute AND
+attribute_name.attribute <> 'location') as data
+WHERE result.tag = data.tag 
 GROUP BY result.tag
-ORDER BY annotations DESC,frequency DESC LIMIT ".$n.";";
+ORDER BY annotations DESC,frequency DESC LIMIT ".$n.") as result_table
+WHERE result_table.frequency >= 2;";
 $result = db_query($query);
 
 $output = array();
