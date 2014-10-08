@@ -368,6 +368,7 @@ function storyscope_update_7009() {
 		$query->values($value);
 	}
 	$query->execute();
+	return t('Added and populated table for calculating themes using selected topic facts.');
 }
 
 function storyscope_update_7010() {
@@ -398,6 +399,7 @@ function storyscope_update_7010() {
 		$query->values($value);
 	}
 	$query->execute();
+	return t('Added and populated table of names for the inverse of a fact property.');
 }
 
 /**
