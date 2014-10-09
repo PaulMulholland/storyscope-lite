@@ -9,6 +9,34 @@
  *
  */
 
+function stories_of_theme_menu() {
+	$items['dossier/%/story/%/stories'] = array(
+	 'title' => 'Stories',
+	 'description' => 'Stories related to a topic',
+	 'page callback' => 'stories_for_a_topic',
+	'access callback' => TRUE,
+	);
+	$items['dossier/%/stories'] = array(
+	 'title' => 'Stories',
+	 'description' => 'Stories related to a topic',
+	 'page callback' => 'stories_for_a_topic',
+	'access callback' => TRUE,
+	);
+	$items['front/stories'] = array(
+	 'title' => 'Stories',
+	 'description' => 'Stories related to a topic',
+	 'page callback' => 'stories_for_a_topic',
+	'access callback' => TRUE,
+	);
+	$items['stories'] = array(
+	 'title' => 'Stories',
+	 'description' => 'Stories related to a topic',
+	 'page callback' => 'stories_for_a_topic',
+	'access callback' => TRUE,
+	);
+	return $items;
+}
+
 /**
 * Implements hook_block_info().
 */
@@ -56,7 +84,13 @@ function stories_of_theme_block_content() {
   return FALSE;
 }
 
-function stories_for_a_topic($topic, $n = 8) {
+function stories_for_a_topic($n = 8) {
+	if(isset($_GET['storytag'])) {
+		$topic = $_GET['storytag'];
+	}
+	else {
+		return '';
+	}
 	$output = '';
 	//check event space for the topic has been calculated
 	new_event_space_of_a_topic($topic);
