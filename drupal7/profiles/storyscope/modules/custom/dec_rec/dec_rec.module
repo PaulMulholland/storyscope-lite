@@ -497,6 +497,7 @@ function read_mids_from_story_node($story_node) {
 		}
 	}
 	$fc_items = entity_load('field_collection_item',$output);
+
 	$mids = array();
 	foreach($fc_items as $fc_item) {
 		$fm = $fc_item->field_mid;
@@ -8103,7 +8104,6 @@ function new_event_space_of_a_topic($topic = "/m/01qwfk", $reload = FALSE) {
 		$res[] = "/time/event";
 		//subject of created artwork
 		$result = fb_event_happening_of_the_event($topic, $result);
-
 	}
 
 	save_events_to_db($result["events"]);
