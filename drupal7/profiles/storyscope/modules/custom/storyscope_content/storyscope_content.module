@@ -242,6 +242,11 @@ function storyscope_content_add_tag($story_nid) {
 		drupal_goto($destination['destination']);
 		return;
 	}
+	
+	//get mid value following /m/
+	$mid_as_array = (explode('/',$mid));
+	$mid_end = end($mid_as_array);
+	
 	//load the story - we should probably check to see if it tis the correct type and whether it 
 	//already has this tag (both in the dec_rec created link that calls this function and also here)
 	// Should change to "Remove" when the tag exists in the story.
@@ -263,7 +268,7 @@ function storyscope_content_add_tag($story_nid) {
 	$new_fb_tag = entity_create('field_collection_item', array('field_name' => 'field_fb_tags'));
 	$new_fb_tag->setHostEntity('node', $story);
 	$new_fb_tag->field_topic[LANGUAGE_NONE][0]['value'] = $topic_name;
-  	$new_fb_tag->field_mid[LANGUAGE_NONE][0]['value'] = $mid;
+  	$new_fb_tag->field_mid[LANGUAGE_NONE][0]['value'] = $mid_end;
 	$new_fb_tag->save();
 	node_save($story);
 	drupal_set_message(t('Added ') . $topic_name . t(' Tag to the Story'));

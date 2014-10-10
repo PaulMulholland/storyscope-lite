@@ -402,6 +402,11 @@ function storyscope_update_7010() {
 	return t('Added and populated table of names for the inverse of a fact property.');
 }
 
+function storyscope_update_7011() {
+	db_add_unique_key('query_tag', 'id_tag', array('id', 'tag'));
+	return t('Added unique key to query_tag table.');
+}
+
 /**
 * Revert specified features.
 *

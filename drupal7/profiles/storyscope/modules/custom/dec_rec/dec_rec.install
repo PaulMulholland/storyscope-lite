@@ -80,6 +80,9 @@ function dec_rec_schema() {
 				'length' => 45,
 			),
 		),
+		'unique keys' => array(
+				'id_tag' => array('id', 'tag')
+		),
   	);
 	$schema['tag_description'] = array(
 	    'description' => t('Tag and its displayed description'),

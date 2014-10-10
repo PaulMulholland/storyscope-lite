@@ -519,12 +519,18 @@ function update_query_tags_for_story_node($node) {
 	->condition('id', $nid)
 	->execute();
 	
-	//update query_tag table
-	$query = db_insert('query_tag')->fields(array('id', 'tag'));
+	//update query_tag table 
+	$values_list = "";
 	foreach($mid_array as $tag) {
-		$query->values(array("id"=>$nid, "tag"=>$tag));
+		$values_list .=", ('".$nid."', '".$tag."')";
 	}
-	$query->execute();
+	if($values_list == "") {
+		return;
+	}
+	$values_list = "VALUES".substr($values_list, 1)." ";
+	
+	$query = "INSERT INTO query_tag (id, tag) ".$values_list." ON DUPLICATE KEY UPDATE id = VALUES(id), tag = VALUES(tag);";
+	db_query($query);
 }
 
 /**
@@ -3402,6 +3408,21 @@ function get_notable_tag_type_names($topic) {
 }
 
 /**
+ * Check whether mid is tag of story
+ */
+function tag_of_story($topic, $storynid) {
+	$query = "SELECT * 
+FROM query_tag
+WHERE id = :id AND
+tag = :tag;";
+	$result = db_query($query, array(':id' => $storynid, ':tag' => $topic));
+	foreach ($result as $record) {
+		return TRUE;
+	}
+	return FALSE;
+}
+
+/**
  * Produce output for a single tag
  */
 function dec_tag($topic) {
@@ -3452,8 +3473,8 @@ function dec_tag($topic) {
 		$name = get_topic_name($topic);
 		if($name) {
 			$path_array = explode('/',request_path());
-			if(isset($path_array[2])) {
-				if($path_array[2] == 'story') {
+			if(isset($path_array[2]) && isset($path_array[3])) {
+				if($path_array[2] == 'story' && !tag_of_story($topic,$path_array[3])) {
 					$output .= '<div class="button addtag-button">' . l( t('Add to Story') , $current_path . '/addtag' , array("html"=>TRUE, 'query'=>array('topic_name' => $name, 'mid' => $topic, 'destination' => (drupal_get_path_alias(current_path()) . '?tag=' . $topic)))) . '</div>';
 				}
 			}
