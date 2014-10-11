@@ -1,0 +1,103 @@
+
+<?php
+/**
+ * file: story_search_theme.module
+ *
+ * Themes of a story search. 
+ *
+ * Paul Mulholland <p.mulholland@open.ac.uk>
+ *
+ */
+
+/**
+* Implements hook_block_info().
+*/
+function story_search_theme_block_info() {
+  $blocks = array();
+  $blocks['story_search_theme_block'] = array(
+    'info' => t('Themes of a story search'),
+  );
+  return $blocks;
+}
+/**
+* Implements hook_block_view().
+*/
+function story_search_theme_block_view($delta = '') {
+  $block = array();
+  switch ($delta) {
+    case 'story_search_theme_block':
+      $block['subject'] = '';
+      $block['content'] = story_search_theme_block_content();
+      break;
+  }
+  return $block;
+}
+
+function story_search_theme_block_content() {
+	$n = 8;
+	$path = request_path();
+	$path_array = explode('/',request_path());
+	if(isset($_GET['storytag'])) {
+		$story_tag = $_GET['storytag'];
+		$name = get_topic_name($story_tag);
+		if(!$name) {
+			$name = $story_tag;
+		}
+		//stories ordered according to their theme match
+		$query = "SELECT  query_tag.id, COUNT(DISTINCT query_tag.tag) as tags, COUNT(DISTINCT value_table.event) as events
+FROM query_tag, tag_event_id, event_attribute_value as value_table
+WHERE
+value_table.value = '".$story_tag."' AND
+value_table.event = tag_event_id.event_id AND
+query_tag.tag = tag_event_id.tag AND
+value_table.attribute <> 'location'
+GROUP BY query_tag.id
+ORDER BY tags DESC, events DESC LIMIT ".$n.";";
+		$result = db_query($query);
+		$story_array = array();
+		foreach ($result as $record) {
+			$story_array[] = $record->id;
+		}
+		
+		//themes for the set of stories
+		$themes = themes_for_a_dossier($story_array);
+		$output = '';
+		if(!empty($themes)) {
+			$output .= '<div style="clear:both"><h2><i class="fa fa-link fa-lg">&nbsp;</i>Themes of '.$name.' stories</h2></div>';
+			$output .=  '<div><ul class="field-name-field-fb-tags">';
+			foreach($themes as $theme) {
+				$output .= l('<li class="tags">'.$theme->name."</li>", request_path(), array("html"=>TRUE, "query"=>array("tag"=>$theme->value, "storytag"=>$story_tag)));
+			}
+			$output .=  '</ul></div>';
+		}
+		
+		//settings for the set of stories
+		$settings = settings_for_a_dossier($story_array);
+
+		if(!empty($settings)) {
+			$output .= '<div style="clear:both"><h2><i class="fa fa-compass fa-lg">&nbsp;</i>Settings of '.$name.' stories</h2></div>';
+			$output .=  '<ul class="field-name-field-fb-tags">';
+			foreach($settings as $setting) {
+				if($setting->end && $setting->start && $setting->start !== $setting->end) {
+					$output .= l('<li class="tags">'. $setting->name.", ".$setting->start." to ".$setting->end . '</li>',request_path() ,array('html'=>'true', 'query' => array("storytag"=>$story_tag, 'location' => $setting->location, 'time' => $setting->start, 'end' => $setting->end)));
+				}
+				elseif($setting->start == $setting->end) {
+					$output .= l('<li class="tags">'. $setting->name.", ".$setting->start . '</li>',request_path() , array('html'=>'true', 'query' => array("storytag"=>$story_tag, 'location' => $setting->location, 'time' => $setting->start)));
+				}
+				elseif($setting->start && !$setting->end) {
+					$output .= l('<li class="tags">'. $setting->name.", ".$setting->start . '</li>',request_path() ,array('html'=>'true', 'query' => array("storytag"=>$story_tag, 'location' => $setting->location, 'time' => $setting->start)));
+				}
+				elseif($setting->end && !$setting->start) {
+					$output .= l('<li class="tags">'. $setting->name.", ".$setting->end . '</li>',request_path() ,array('html'=>'true', 'query' => array("storytag"=>$story_tag, 'location' => $setting->location, 'time' => $setting->end)));
+				}
+		
+			}
+			$output .=  '</ul>';
+		}
+		
+		return $output;
+	}
+	return;
+}
+
+
