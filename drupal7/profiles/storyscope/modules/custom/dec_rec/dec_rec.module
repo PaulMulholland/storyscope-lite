@@ -32,9 +32,18 @@ function dec_rec_admin() {
 			'#description' => t("Google API key to be used to retrieve Freebase data."),
 			'#required' => TRUE,
 	);
+	$form['dec_rec_alchemy'] = array(
+			'#type' => 'textfield',
+			'#title' => t('AlchemyAPI Key'),
+			'#default_value' => variable_get('dec_rec_alchemy', ''),
+			'#size' => 60,
+			'#maxlength' => 100,
+			'#description' => t("AlchemyAPI key to be used to identify Freebase terms from story text."),
+			'#required' => TRUE,
+	);
 	$form['dec_rec_timeline'] = array(
 			'#type' => 'textfield',
-			'#title' => t('Location of timeline code'),
+			'#title' => t('Location of timeline.js code'),
 			'#default_value' => variable_get('dec_rec_timeline', ''),
 			'#size' => 60,
 			'#maxlength' => 100,
@@ -54,6 +63,19 @@ function get_google_api_key_path() {
 	}
 	else {
 		return "&key=".$googleapikey;
+	}
+}
+
+/**
+ * Retrieve AlchemyAPI key
+ */
+function get_alchemy_api_key_path() {
+	$key = variable_get("dec_rec_alchemy", "");
+	if($key == "") {
+		return "";
+	}
+	else {
+		return $key;
 	}
 }
 
@@ -1128,6 +1150,8 @@ function dec_timeline($topic) {
 			}
 		}
 	}
+	
+// 	dec_tag_timeline($topic, $attribute, request_path());
 	
 	$output = "";
 // 	if($attribute) {
@@ -8201,7 +8225,7 @@ function check_for_topic_name($topic = "/m/08tqtj") {
 		$values_list = "VALUES ('".$topic."', '".my_escape_string($name)."')";
 		$query = "INSERT INTO tag_name (tag, name) ".$values_list." ON DUPLICATE KEY UPDATE name = VALUES(name);";
 		$result = db_query($query, array(':tag'=>$topic));
-
+		return $name;
 	}
 }
 

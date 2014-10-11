@@ -407,6 +407,31 @@ function storyscope_update_7011() {
 	return t('Added unique key to query_tag table.');
 }
 
+function storyscope_update_7012() {
+	$schema['story_suggested_tags'] = array(
+			'description' => t('Suggested tags of a story'),
+			'fields' => array(
+					'story' => array(
+							'description' => t('Story nid'),
+							'type' => 'int',
+							'length' => 11,
+					),
+					'mid' => array(
+							'description' => t('Suggested mid'),
+							'type' => 'varchar',
+							'length' => 45,
+					),
+					'name' => array(
+							'description' => t('Suggested name'),
+							'type' => 'varchar',
+							'length' => 255,
+					),
+			),
+	);
+	db_create_table('story_suggested_tags', $schema['story_suggested_tags']);
+	return t('Table for suggested tags of a story.');
+}
+
 /**
 * Revert specified features.
 *
