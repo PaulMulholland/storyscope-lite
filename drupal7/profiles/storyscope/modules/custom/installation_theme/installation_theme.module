@@ -47,37 +47,37 @@ function installation_theme_block_content() {
 
 function dec_installation_themes() {
 	$themes = themes_for_an_installation(10);
-	$output = '';
+	$output = '<div>&nbsp';
 	if(!empty($themes)) {
-		$output .= '<div style="clear:both"><h2><i class="fa fa-link fa-lg">&nbsp;</i>Storyscope themes</h2></div>';
+		$output .= '<div class="topic-block"><h2 class="pane-title"><i class="fa fa-link fa-lg">&nbsp;</i><span class="topic-title">Storyscope themes&nbsp;&nbsp;</span>' . '</h2></div>';
 		$output .=  '<ul class="field-name-field-fb-tags">';
 		foreach($themes as $theme) {
-			$output .= storytaglink('<li class="tags"">'.$theme->name."</li>", $theme->value, array("html"=>TRUE));
+			$output .= '<li class="tags">'.l($theme->name, request_path(), array("html"=>TRUE, 'query'=>array('tag'=>$theme->value)))."</li>";
 		}
-		$output .=  '</ul>';
+		$output .=  '</ul><div style="clear:both;"></div>';
 	}
 	$settings = settings_for_an_installation(10);
 	if(!empty($settings)) {
-		$output .= '<div style="clear:both"><h2><i class="fa fa-compass fa-lg">&nbsp;</i>Storyscope settings</h2></div>';
+		$output .= '<div class="topic-block"><h2 class="pane-title"><i class="fa fa-compass fa-lg">&nbsp;</i><span class="topic-title">Storyscope settings&nbsp;&nbsp;</span>' . '</h2>';
 		$output .=  '<ul class="field-name-field-fb-tags">';
 		foreach($settings as $setting) {
 			if($setting->end && $setting->start && $setting->start !== $setting->end) {
-				$output .= storysettinglink('<li class="tags">'. $setting->name.", ".$setting->start." to ".$setting->end . '</li>','setting',array('html'=>'true', 'query' => array('location' => $setting->location, 'time' => $setting->start, 'end' => $setting->end)));
+				$output .= '<li class="tags">'.l($setting->name.", ".$setting->start." to ".$setting->end,request_path(),array('html'=>'true', 'query' => array('location' => $setting->location, 'time' => $setting->start, 'end' => $setting->end))) . '</li>';
 			}
 			elseif($setting->start == $setting->end) {
-				$output .= storysettinglink('<li class="tags">'. $setting->name.", ".$setting->start . '</li>','setting', array('html'=>'true', 'query' => array('location' => $setting->location, 'time' => $setting->start)));
+				$output .= '<li class="tags">'. l($setting->name.", ".$setting->start,request_path(), array('html'=>'true', 'query' => array('location' => $setting->location, 'time' => $setting->start))) . '</li>';
 			}
 			elseif($setting->start && !$setting->end) {
-				$output .= storysettinglink('<li class="tags">'. $setting->name.", ".$setting->start . '</li>','setting',array('html'=>'true', 'query' => array('location' => $setting->location, 'time' => $setting->start)));
+				$output .= '<li class="tags">'. l($setting->name.", ".$setting->start,request_path(),array('html'=>'true', 'query' => array('location' => $setting->location, 'time' => $setting->start))) . '</li>';
 			}
 			elseif($setting->end && !$setting->start) {
-				$output .= storysettinglink('<li class="tags">'. $setting->name.", ".$setting->end . '</li>','setting',array('html'=>'true', 'query' => array('location' => $setting->location, 'time' => $setting->end)));
+				$output .= '<li class="tags">'. l($setting->name.", ".$setting->end,request_path(),array('html'=>'true', 'query' => array('location' => $setting->location, 'time' => $setting->end))) . '</li>';
 			}
 	
 		}
-		$output .=  '</ul>';
+		$output .=  '</ul><div style="clear:both;"></div>';
 	}
-	return $output;
+	return $output.'</div>';
 }
 
 /**

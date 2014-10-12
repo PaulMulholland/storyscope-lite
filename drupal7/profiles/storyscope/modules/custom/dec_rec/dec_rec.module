@@ -9,8 +9,45 @@
  *
  */
 
+/*
+ * Add required parameters when tag or setting space is returned for a story search
+ */
+function story_search_link_check($title,$link,$args) {
+	$link_array = explode('/',$link);
+	$link_end = end($link_array);
+	$params = drupal_get_query_parameters();
+	//is last param stories
+	if($link_end == 'stories') {
+		//add storytag to $query
+		$args['query']['storytag'] = $params['storytag'];
+		
+	}
+	
+	//is last param settingstories
+	if($link_end == 'settingstories') {
+		//add storylocation storytime storyend to $query
+		$args['query']['storylocation'] = $params['storylocation'];
+		$args['query']['storytime'] = $params['storytime'];
+		$args['query']['storyend'] = $params['storyend'];
+	}
+	return l($title,$link,$args);
+}
+
+function add_story_search_parameters() {
+	$params = drupal_get_query_parameters();
+	$path_array = explode('/',request_path());
+	if(end($path_array) == 'stories') {
+		return '&storytag='.$params['storytag'];
+	}
+	elseif(end($path_array) == 'settingstories') {
+		return '&storylocation='.$params['storylocation'].'&storytime='.$params['storytime'].'&storyend='.$params['storyend'];
+	}
+	return '';
+}
+
 function storysettinglink($label, $link, $args = array()) {
-	return l($label,request_path(), $args);
+	$link_args = array_merge($args, array('query'=>array('tag'=>$link)));
+	return l($label,request_path(), $link_args);
 }
 
 function storytaglink($label, $link, $args = array()) {
@@ -1204,10 +1241,10 @@ function dec_timeline($topic) {
     }
 
 	if(isset($attribute)) {
-		$output .= 'source:             "'.$base_url.'/tagtimelinedata'.$topic_path.'?attribute='.$attribute.'&path='.request_path().'"';
+		$output .= 'source:             "'.$base_url.'/tagtimelinedata'.$topic_path.'?attribute='.$attribute.'&path='.request_path().add_story_search_parameters().'"';
 	}
     else {
-    	$output .= 'source:             "'.$base_url.'/tagtimelinedata'.$topic_path.'?path='.request_path().'"';
+    	$output .= 'source:             "'.$base_url.'/tagtimelinedata'.$topic_path.'?path='.request_path().add_story_search_parameters().'"';
     }
 
     $output .= '    }
@@ -1217,10 +1254,10 @@ function dec_timeline($topic) {
     $output .= '<div style="clear:both; margin-top:1em">If the timeline sticks at LOADING TIMELINE... then use your browser reload button.</div>';
     $output .= '<div style="clear:both; margin-bottom:1em">If the information displayed seems incomplete (e.g. events of a story tag with time information are not included) then use the Recalcuate button.</div>';
     if($attribute) {
-    	$output .= l("Recalculate", request_path(), array('query'=>array('timeline'=>$topic, 'attribute'=>$attribute, 'reload'=>'1')));
+    	$output .= story_search_link_check("Recalculate", request_path(), array('query'=>array('timeline'=>$topic, 'attribute'=>$attribute, 'reload'=>'1')));
     }
     else {
-    	$output .= l("Recalculate", request_path(), array('query'=>array('timeline'=>$topic, 'reload'=>'1')));
+    	$output .= story_search_link_check("Recalculate", request_path(), array('query'=>array('timeline'=>$topic, 'reload'=>'1')));
     }
 	return $output;
 }
@@ -1415,12 +1452,12 @@ function get_image_from_tag_list($tag_array) {
 function create_timeline_header($topic, $path) {
 	$header = array();
 	if(!get_topic_name($topic)) {
-		$header['headline'] = l($topic, $path, array('query'=>array('tag'=>$topic)));
+		$header['headline'] = story_search_link_check($topic, $path, array('query'=>array('tag'=>$topic)));
 		$header['type'] = 'default';
 		$header['text'] = 'Events connected to '.$topic;
 		return $header;
 	}
-	$header['headline'] = l(get_topic_name($topic), $path, array('query'=>array('tag'=>$topic)));
+	$header['headline'] = story_search_link_check(get_topic_name($topic), $path, array('query'=>array('tag'=>$topic)));
 	$description = get_topic_description($topic, 150);
 	if($description) {
 		$header['text'] = $description;
@@ -1446,7 +1483,7 @@ function create_timeline_header($topic, $path) {
 				$name = $value;
 			}
 			if($tag_attribute->link) {
-				$output_values[] = l($name, $path, array('query'=>array('tag'=>$value)));
+				$output_values[] = story_search_link_check($name, $path, array('query'=>array('tag'=>$value)));
 			}
 			else {
 				$output_values[] = $name;
@@ -1531,7 +1568,7 @@ function translate_events_for_timeline($events, $header, $path) {
 		}
 		if(is_array($event['title'])) {
 			if(is_array($event['title']['0'])) {
-				$entry['headline'] = l($event['title']['0']['1'], $path, array('query'=>array('tag'=>$event['title']['0']['0'])));
+				$entry['headline'] = story_search_link_check($event['title']['0']['1'], $path, array('query'=>array('tag'=>$event['title']['0']['0'])));
 			}
 			else {
 				$entry['headline'] = $event['title']['0'];
@@ -1749,7 +1786,7 @@ LEFT JOIN tag_name ON tag_name.tag = event_value_table.value;";
 			$output[$record->event] = array(array(),array(),array(),array(),array(),array(),array());
 		}
 		if($record->name) {
-			$output[$record->event][$record->position][] = storytaglink($record->name, $record->value);
+			$output[$record->event][$record->position][] = story_search_link_check($record->name, request_path(), array("query"=>array("tag"=>$record->value)));
 		}
 		elseif(!is_freebase_topic_id($record->value)) {
 			if($record->position == '1') {
@@ -1773,7 +1810,7 @@ LEFT JOIN tag_name ON tag_name.tag = event_value_table.value;";
 		$event_type = get_type_of_stored_event($event_id);
 		
 		if($event_name = get_topic_name($event_id)) {
-			$output_with_titles[$event_id][0] = storytaglink($event_name, $event_id);
+			$output_with_titles[$event_id][0] = story_search_link_check($event_name, request_path(), array("query"=>array("tag"=>$event_id)));
 			
 // 			$output['title'][] = array($event_id,$event_name);
 			//cache topic info
@@ -2653,7 +2690,7 @@ function complete_time_stamp($date, $start_end = 'start') {
 // 	}
 	
 function dec_setting($location, $time,  $end) {
-	$output = "";
+	$output = '<div>';
 	if($end) {
 		$full_start_time = complete_time_stamp($time, 'start');
 		$full_end_time = complete_time_stamp($end, 'end');		
@@ -2679,26 +2716,38 @@ function dec_setting($location, $time,  $end) {
 	$themes = dec_get_themes_for_events_of_setting($location, $full_start_time, $full_end_time);
 
 	$name = get_topic_name($location);
+	$path_array = explode('/',request_path());
+	if(end($path_array) == 'stories' || end($path_array) == 'settingstories') {
+		array_pop($path_array);
+	}
+	$path_array[] = 'settingstories';
+	$next_path = implode('/',$path_array);
 	if($end) {
 		if($name) {
-			$output .= '<h2><i class="fa fa-info fa-lg">&nbsp;</i>' . t('About : ') .$name.", ".$time." to ".$end.'</h2>';
+			$output .= '<h2><i class="fa fa-info fa-lg">&nbsp;</i><span class="topic-title">' . t('About : ').$name.", ".$time." to ".$end.'&nbsp;&nbsp;</span>' . l('<span class="topic-search"><i class="fa fa-search">&nbsp;</i>' . '</span>', $next_path, array("query"=>array('storylocation'=>$location, 'storytime'=>$time, 'storyend'=>$end), "html"=>TRUE)) . '</h2>';
+				
+// 			$output .= '<h2><i class="fa fa-info fa-lg">&nbsp;</i>' . t('About : ') .$name.", ".$time." to ".$end.'</h2>';
 // 			$output .= '<h2>'.$name.", ".$time." to ".$end.'</h2>';
 // 			drupal_set_title($name.", ".$time." to ".$end);
 		}
 		else {
-			$output .= '<h2><i class="fa fa-info fa-lg">&nbsp;</i>' . t('About : ') .$name.", ".$time." to ".$end.'</h2>';
+			$output .= '<h2><i class="fa fa-info fa-lg">&nbsp;</i><span class="topic-title">' . t('About : ').$location.", ".$time." to ".$end.'&nbsp;&nbsp;</span>' . l('<span class="topic-search"><i class="fa fa-search">&nbsp;</i>' . '</span>', $next_path, array("query"=>array('storylocation'=>$location, 'storytime'=>$time, 'storyend'=>$end), "html"=>TRUE)) . '</h2>';
+				
+// 			$output .= '<h2><i class="fa fa-info fa-lg">&nbsp;</i>' . t('About : ') .$name.", ".$time." to ".$end.'</h2>';
 // 			$output .= '<h2>'.$location.", ".$time." to ".$end.'</h2>';
 // 			drupal_set_title($location.", ".$time." to ".$end);
 		}		
 	}
 	else {
 		if($name) {
-			$output .= '<h2><i class="fa fa-info fa-lg">&nbsp;</i>' . t('About : ') .$name.", ".$time.'</h2>';
+			$output .= '<h2><i class="fa fa-info fa-lg">&nbsp;</i><span class="topic-title">' . t('About : ').$name.", ".$time.'&nbsp;&nbsp;</span>' . l('<span class="topic-search"><i class="fa fa-search">&nbsp;</i>' . '</span>', $next_path, array("query"=>array('storylocation'=>$location, 'storytime'=>$time), "html"=>TRUE)) . '</h2>';
+
 // 			$output .= '<h2>'.$name.", ".$time.'</h2>';
 // 			drupal_set_title($name.", ".$time);
 		}
 		else {
-			$output .= '<h2><i class="fa fa-info fa-lg">&nbsp;</i>' . t('About : ') .$name.", ".$time.'</h2>';
+			$output .= '<h2><i class="fa fa-info fa-lg">&nbsp;</i><span class="topic-title">' . t('About : ').$location.", ".$time.'&nbsp;&nbsp;</span>' . l('<span class="topic-search"><i class="fa fa-search">&nbsp;</i>' . '</span>', $next_path, array("query"=>array('storylocation'=>$location, 'storytime'=>$time), "html"=>TRUE)) . '</h2>';
+
 // 			$output .= '<h2>'.$location.", ".$time.'</h2>';
 // 			drupal_set_title($location.", ".$time);
 		}
@@ -2706,7 +2755,7 @@ function dec_setting($location, $time,  $end) {
 	
 	//tag name and description
 	if($name) {
-		$output .= '<div style="clear:both">Location: '.storytaglink($name, $location).'</div>';
+		$output .= '<div style="clear:both">Location: '.story_search_link_check($name, request_path(), array("query"=>array("tag"=>$location))).'</div>';
 	}
 	else {
 		$output .= '<div style="clear:both">Location: '.$location.'</div>';
@@ -2724,11 +2773,11 @@ function dec_setting($location, $time,  $end) {
 // 			$output .= l('<div style="float: left; white-space: nowrap; background-color: #ebebeb; margin: 5px;">'.$theme->name."</div>", "tag".$theme->value, array("html"=>TRUE));
 
 			//$output .= storytaglink('<div style="float: left; white-space: nowrap; background-color: #ebebeb; margin: 5px;">'.$theme->name."</div>", $theme->value, array("html"=>TRUE));
-			$output .= storytaglink('<li class="tags">'.$theme->name."</li>", $theme->value, array("html"=>TRUE));
+			$output .= story_search_link_check('<li class="tags">'.$theme->name."</li>", request_path(), array("html"=>TRUE, "query"=>array("tag"=>$theme->value)));
 		
 		}
 
-		$output .=  '</ul">';
+		$output .=  '</ul><div style="clear:both;"></div>';
 	}
 	
 	if(!empty($event_array)) {
@@ -2760,7 +2809,7 @@ function dec_setting($location, $time,  $end) {
 // 			}
 // 		}
 // 	}
-	return $output;
+	return $output.'</div>';
 	
 }
 
@@ -3070,7 +3119,7 @@ function dec_tags($list) {
  * Produce output for a list of tags
  */
 function dec_list_of_tags($tag_array, $max_value) {
-	$output = "";
+	$output = '<div>&nbsp';
 
 	//produce event spaces
 	foreach($tag_array as $tag) {
@@ -3088,7 +3137,8 @@ function dec_list_of_tags($tag_array, $max_value) {
 			$tag_name_array[] = $tag;
 		}		
 	}
-	//not for panel
+
+	$output .= '<h2><i class="fa fa-info fa-lg">&nbsp;</i>' . t('About : ') .implode(", ",$tag_name_array).'</h2>';
 // 	drupal_set_title(implode(", ",$tag_name_array));
 	
 	//do the calculations
@@ -3146,16 +3196,16 @@ function dec_list_of_tags($tag_array, $max_value) {
 		$output .=  '<ul class="field-name-field-fb-tags">';
 		foreach($overlapping_settings as $setting) {
 			if($setting->end && $setting->start && $setting->start !== $setting->end) {
-				$output .= storysettinglink('<li class="tags">'. $setting->name.", ".$setting->start." to ".$setting->end . '</li>','setting',array('html'=>'true', 'query' => array('location' => $setting->location, 'time' => $setting->start, 'end' => $setting->end)));				
+				$output .= l('<li class="tags">'. $setting->name.", ".$setting->start." to ".$setting->end . '</li>',request_path(),array('html'=>'true', 'query' => array('location' => $setting->location, 'time' => $setting->start, 'end' => $setting->end)));				
 			}
 			elseif($setting->start == $setting->end) {
-				$output .= storysettinglink('<li class="tags">'. $setting->name.", ".$setting->start . '</li>','setting', array('html'=>'true', 'query' => array('location' => $setting->location, 'time' => $setting->start)));
+				$output .= l('<li class="tags">'. $setting->name.", ".$setting->start . '</li>',request_path(), array('html'=>'true', 'query' => array('location' => $setting->location, 'time' => $setting->start)));
 			}
 			elseif($setting->start && !$setting->end) {
-				$output .= storysettinglink('<li class="tags">'. $setting->name.", ".$setting->start . '</li>','setting',array('html'=>'true', 'query' => array('location' => $setting->location, 'time' => $setting->start)));
+				$output .= l('<li class="tags">'. $setting->name.", ".$setting->start . '</li>',request_path(),array('html'=>'true', 'query' => array('location' => $setting->location, 'time' => $setting->start)));
 			}
 			elseif($setting->end && !$setting->start) {
-				$output .= storysettinglink('<li class="tags">'. $setting->name.", ".$setting->end . '</li>','setting',array('html'=>'true', 'query' => array('location' => $setting->location, 'time' => $setting->end)));
+				$output .= l('<li class="tags">'. $setting->name.", ".$setting->end . '</li>',request_path(),array('html'=>'true', 'query' => array('location' => $setting->location, 'time' => $setting->end)));
 			}
 		
 		}
@@ -3184,7 +3234,7 @@ function dec_list_of_tags($tag_array, $max_value) {
 
 	$output .= $event_table;
 	
-	return $output;
+	return $output.'</div>';
 }
 
 /**
@@ -3198,17 +3248,17 @@ function dec_setting_timeline_links($time, $end, $location, $event_array) {
 		$output .= '<ul class="field-name-field-fb-tags" style="clear:both">';
 		
 		if($end) {
-			$output .= l('<li class="tags">' . t('All') . '</li>', request_path(), array('html'=>'true', 'query'=>array('timeline_for_setting'=>$location, 'time'=>$time, 'end'=>$end)));
+			$output .= story_search_link_check('<li class="tags">' . t('All') . '</li>', request_path(), array('html'=>'true', 'query'=>array('timeline_for_setting'=>$location, 'time'=>$time, 'end'=>$end)));
 		}
 		else {
-			$output .= l('<li class="tags">' . t('All') . '</li>', request_path(), array('html'=>'true', 'query'=>array('timeline_for_setting'=>$location, 'time'=>$time)));
+			$output .= story_search_link_check('<li class="tags">' . t('All') . '</li>', request_path(), array('html'=>'true', 'query'=>array('timeline_for_setting'=>$location, 'time'=>$time)));
 		}
 		foreach($attribute_list as $attribute) {
 			if($end) {
-				$output .= l('<li class="tags">' . str_replace('_', ' ', ucfirst($attribute)) . '</li>', request_path(), array('html'=>'true', 'query'=>array('timeline_for_setting'=>$location, 'time'=>$time, 'event_type'=>$attribute, 'end'=>$end)));
+				$output .= story_search_link_check('<li class="tags">' . str_replace('_', ' ', ucfirst($attribute)) . '</li>', request_path(), array('html'=>'true', 'query'=>array('timeline_for_setting'=>$location, 'time'=>$time, 'event_type'=>$attribute, 'end'=>$end)));
 			}
 			else {
-				$output .= l('<li class="tags">' . str_replace('_', ' ', ucfirst($attribute)) . '</li>', request_path(), array('html'=>'true', 'query'=>array('timeline_for_setting'=>$location, 'time'=>$time, 'event_type'=>$attribute)));
+				$output .= story_search_link_check('<li class="tags">' . str_replace('_', ' ', ucfirst($attribute)) . '</li>', request_path(), array('html'=>'true', 'query'=>array('timeline_for_setting'=>$location, 'time'=>$time, 'event_type'=>$attribute)));
 			}
 		}
 		$output .= '</ul>';	
@@ -3228,9 +3278,9 @@ function dec_tag_timeline_links($topic, $event_array) {
 	if(!empty($attribute_list)) {
 		$output_list = array();
 		$output = '<div class="event-space-headings"><h2><i class="fa fa-clock-o fa-lg">&nbsp;</i>Timelimes</h2></div><ul class="field-name-field-fb-tags">';
-		$output .= l('<li class="tags">' . t('All') . '</li>', request_path(), array('html'=>'true', 'query'=>array('timeline'=>$topic)));
+		$output .= story_search_link_check('<li class="tags">' . t('All') . '</li>', request_path(), array('html'=>'true', 'query'=>array('timeline'=>$topic)));
 		foreach($attribute_list as $attribute) {
-			$output .= l('<li class="tags">' . str_replace('_', ' ', ucfirst($attribute)) . '</li>', request_path(), array('html'=>'true', 'query'=>array('timeline'=>$topic, 'attribute'=>$attribute)));
+			$output .= story_search_link_check('<li class="tags">' . str_replace('_', ' ', ucfirst($attribute)) . '</li>', request_path(), array('html'=>'true', 'query'=>array('timeline'=>$topic, 'attribute'=>$attribute)));
 		}
 		$output .= '</ul>';
 	}
@@ -3451,7 +3501,7 @@ tag = :tag;";
  */
 function dec_tag($topic) {
 	$current_path = drupal_get_path_alias(current_path());
-	$output = "";
+	$output = '<div>';
 
 	if(isset($_GET['reload'])) {
 		$reload = $_GET['reload'];
@@ -3497,17 +3547,19 @@ function dec_tag($topic) {
 		$name = get_topic_name($topic);
 		if($name) {
 			$path_array = explode('/',request_path());
+			$next_path = implode('/',$path_array);
 			if(isset($path_array[2]) && isset($path_array[3])) {
 				if($path_array[2] == 'story' && !tag_of_story($topic,$path_array[3]) && !isset($_GET['storytag'])) {
 					$output .= '<div class="button addtag-button">' . l( t('Add to Story') , $current_path . '/addtag' , array("html"=>TRUE, 'query'=>array('topic_name' => $name, 'mid' => $topic, 'destination' => (drupal_get_path_alias(current_path()) . '?tag=' . $topic)))) . '</div>';
 				}
 			}
-			if(isset($_GET['storytag'])) {
-				$output .= '<div class="topic-block"><h2><i class="fa fa-tag fa-lg">&nbsp;</i><span class="topic-title">' . $name . $topic_types . '&nbsp;&nbsp;</span>' . '</h2>';
+			$path_array = explode('/',request_path());
+			if(end($path_array) == 'stories' || end($path_array) == 'settingstories') {
+				array_pop($path_array);
 			}
-			else {
-				$output .= '<div class="topic-block"><h2><i class="fa fa-tag fa-lg">&nbsp;</i><span class="topic-title">' . $name . $topic_types . '&nbsp;&nbsp;</span>' . l('<span class="topic-search"><i class="fa fa-search">&nbsp;</i>' . '</span>', $current_path . '/stories', array("query"=>array('storytag'=>$topic), "html"=>TRUE)) . '</h2>';
-			}
+			$path_array[] = 'stories';
+			$next_path = implode('/',$path_array);
+			$output .= '<div class="topic-block"><h2><i class="fa fa-info fa-lg">&nbsp;</i><span class="topic-title">' . t('About : '). $name . $topic_types . '&nbsp;&nbsp;</span>' . l('<span class="topic-search"><i class="fa fa-search">&nbsp;</i>' . '</span>', $next_path, array("query"=>array('storytag'=>$topic), "html"=>TRUE)) . '</h2>';
 			
 			// 			drupal_set_title($name);
 		}
@@ -3524,41 +3576,40 @@ function dec_tag($topic) {
 		$description = get_topic_description($topic);
 		if($description) {
 			$output .= '<div class="topic-description">';
+			$output .= '<p>' . $description . '</p>';
+			$output .= '</div>';
 		}
-
-		$output .= '<p>' . $description . '</p>';
+		
 		//tag triples
 		$tag_attributes = get_triple_ids_of_a_tag2($topic);
-
-		$output .= '<div class="event-space-tag-attibutes-wrapper">';
 		
-		foreach($tag_attributes as $attribute_values) {
-			$output .=  '<div class="event-space-tag-attibutes"><ul class="field-name-field-fb-tags">';
-			$output .= ' <li class="plain">'.$attribute_values->fact_attribute."</li>";
+		if(!empty($tag_attributes)) {
+			$output .= '<div class="event-space-tag-attibutes-wrapper">';
 			
-				foreach($attribute_values->value_list as $value) {
-					$name = get_topic_name($value);
-					if(!$name) {
-						$name = $value;
+			foreach($tag_attributes as $attribute_values) {
+				$output .=  '<div class="event-space-tag-attibutes"><ul class="field-name-field-fb-tags">';
+				$output .= ' <li class="plain">'.$attribute_values->fact_attribute."</li>";
+				
+					foreach($attribute_values->value_list as $value) {
+						$name = get_topic_name($value);
+						if(!$name) {
+							$name = $value;
+						}
+						if($attribute_values->link) {
+							$output .= story_search_link_check('<li class="tags">'.$name."</li>", request_path(), array("html"=>TRUE, "query"=>array('tag'=>$value)));
+						}
+						else {
+							$output .= $name;//'<li>'.$name."</li>";
+						}
+						
 					}
-					if($attribute_values->link) {
-						$output .= storytaglink('<li class="tags">'.$name."</li>", $value, array("html"=>TRUE));
-					}
-					else {
-						$output .= '<li>'.$name."</li>";
-					}
-					
-				}
-
-			$output .=  '</ul></div>';
+				$output .=  '</ul><div style="clear:both;"></div></div>';
+			}
+			$output .= '</div>';
 		}
-		$output .= '</div>';
-		
-		$output .= '</div>';	
+	
 
-		$output .= '</div>';
-		
-		$output .= '</div>';
+
 		// end of topic-block
 
 	}
@@ -3574,9 +3625,9 @@ function dec_tag($topic) {
 		$output .= '<div style="clear:both"><h2><i class="fa fa-link fa-lg">&nbsp;</i>Themes</h2></div>';
 		$output .=  '<ul class="field-name-field-fb-tags">';
 		foreach($themes as $theme) {
-			$output .= storytaglink('<li class="tags">'.$theme->name."</li>", $theme->value, array("html"=>TRUE));
+			$output .= story_search_link_check('<li class="tags">'.$theme->name."</li>", request_path(), array("html"=>TRUE, "query"=>array('tag'=>$theme->value)));
 					}
-		$output .=  '</ul>';
+		$output .=  '</ul><div style="clear:both;"></div>';
 		
 	}
 	
@@ -3589,16 +3640,16 @@ function dec_tag($topic) {
 		
 		foreach($settings as $setting) {
 			if(isset($setting->end_time) && isset($setting->start_time) && $setting->start_time !== $setting->end_time) {
-				$output .= storysettinglink('<li class="tags">' .$setting->name.", ".$setting->start_time." to ".$setting->end_time . '</li>','setting',array('html'=>'true', 'query' => array('location' => $setting->location, 'time' => $setting->start_time, 'end' => $setting->end_time)));
+				$output .= story_search_link_check('<li class="tags">' .$setting->name.", ".$setting->start_time." to ".$setting->end_time . '</li>',request_path(),array('html'=>'true', 'query' => array('location' => $setting->location, 'time' => $setting->start_time, 'end' => $setting->end_time)));
 			}
 			elseif(isset($setting->start_time)) {
-				$output .= storysettinglink('<li class="tags">' .$setting->name.", ".$setting->start_time . '</li>','setting',array('html'=>'true', 'query' => array('location' => $setting->location, 'time' => $setting->start_time)));
+				$output .= story_search_link_check('<li class="tags">' .$setting->name.", ".$setting->start_time . '</li>',request_path(),array('html'=>'true', 'query' => array('location' => $setting->location, 'time' => $setting->start_time)));
 			}
 			elseif(isset($setting->end_time)) {
-				$output .= storysettinglink('<li class="tags">' .$setting->name.", ".$setting->end_time  . '</li>','setting',array('html'=>'true', 'query' => array('location' => $setting->location, 'time' => $setting->end_time)));
+				$output .= story_search_link_check('<li class="tags">' .$setting->name.", ".$setting->end_time  . '</li>',request_path(),array('html'=>'true', 'query' => array('location' => $setting->location, 'time' => $setting->end_time)));
 			}
 		}
-		$output .=  '</ul>';
+		$output .=  '</ul><div style="clear:both;"></div>';
 	}
 	
 // 	if(!empty($settings)) {
@@ -3678,8 +3729,8 @@ function dec_tag($topic) {
 	//l($setting->name." ".$setting->time,'setting',array('query' => array('location' => $setting->location, 'time' => $setting->time))).
 	
 	$output .= '<div style="clear:both; margin-bottom:1em">If the information displayed seems incomplete (e.g. no title displayed for the story tag or broken image link) then use the recalcuate button.</div>';
-	$output .= '<div class="button">'.l('Recalculate',request_path(), array('query' => array('tag'=>$topic, 'reload' => '1'))).'</div>';
-	return $output;
+	$output .= '<div class="button">'.story_search_link_check('Recalculate',request_path(), array('query' => array('tag'=>$topic, 'reload' => '1'))).'</div>';
+	return $output.'</div>';
 }
 
 /**
@@ -3696,7 +3747,7 @@ function produce_event_table_for_timeline($event, $path) {
 				$output .= '<div style="clear:both"><b>'.ucfirst($key).":</b> ";
 				foreach($elements as $element) {
 					if(is_array($element)) {
-						$value_array[] = l($element[1], $path, array('query' => array('tag'=>$element[0])));
+						$value_array[] = story_search_link_check($element[1], $path, array('query' => array('tag'=>$element[0])));
 					}
 					//comment this out to remove date links TODO
 					// 			elseif($key == 'start_time' || $key == 'end_time') {

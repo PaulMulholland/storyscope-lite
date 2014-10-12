@@ -875,14 +875,16 @@ function suggested_story_tags() {
 			$buttons = '';
 			//display suggested tags for the story
 			foreach($result as $record) {
-				$buttons .= '<div style="float:left" class="button addtag-button">' . l( t($record->name) , drupal_get_path_alias(current_path()) . '/addtag' , array("html"=>TRUE, 'query'=>array('topic_name' => $record->name, 'mid' => $record->mid, 'destination' => (drupal_get_path_alias(current_path()))))) . '</div>';
+				$buttons .= '&nbsp;<div style="float:left" class="button addtag-button">' . l( t($record->name) , drupal_get_path_alias(current_path()) . '/addtag' , array("html"=>TRUE, 'query'=>array('topic_name' => $record->name, 'mid' => $record->mid, 'destination' => (drupal_get_path_alias(current_path()))))) . '</div>';
 				
 			}
 			if(!empty($buttons)) {
-				$output .= '<div style="clear:both; margin-bottom:1em;">';
-				$output .= '<div style="clear:both; margin-bottom:1em;">Suggested story tags</div>';
+				$output .= '<div style="margin-bottom:1em;"><div style="clear:both;">';
+				$output .= '<div class="topic-block"><h2 class="pane-title"><i class="fa fa-tag fa-lg">&nbsp;</i><span class="topic-title">Suggested story tags&nbsp;&nbsp;</span>' . '</h2></div><div style="clear:both;">';
+				
+
 				$output .= $buttons;
-				$output .= '</div>';
+				$output .= '</div></div>';
 			}
 			return $output;
 		}
