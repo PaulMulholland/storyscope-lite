@@ -9,6 +9,20 @@
  *
  */
 
+function timeline_path_key() {
+	if(isset($_GET['storytag'])) {
+		return '/'.current_path().$_GET['storytag'];
+	}
+	else {
+		if(request_path()) {
+			return '/'.request_path();
+		}
+		else {
+			'/front';
+		}
+	}
+}
+
 /*
  * Add required parameters when tag or setting space is returned for a story search
  */
@@ -736,32 +750,34 @@ function tagtimelinedata($m, $id = FALSE) {
 		$path = $base_url;
 	}
 
-	//check for cached version of the timeline data
- 	$cached_data = check_for_cached_topic_timeline($topic, $attribute);
+	//check for cached version of the timeline data 
+ 	$cached_data = check_for_cached_topic_timeline($topic, $attribute, $path);
 
  	if($cached_data) {
  		return drupal_json_output(json_decode(stripslashes($cached_data)));
  	}
-
-	//generate new timeline data	
-	$timeline_data = drupal_json_encode(array('timeline'=>dec_tag_timeline($topic, $attribute, $path)));
-	//save new timeline data
- 	save_topic_timelime($topic, $attribute, $timeline_data);
+	else {
+		return drupal_json_output(array(array('timeline'=>array())));
+	}
+// 	//generate new timeline data	
+// 	$timeline_data = drupal_json_encode(array('timeline'=>dec_tag_timeline($topic, $attribute, $path)));
+// 	//save new timeline data
+//  	save_topic_timelime($topic, $attribute, $timeline_data);
 	
- 	return drupal_json_output(json_decode($timeline_data));
+//  	return drupal_json_output(json_decode($timeline_data));
 }
 
 /**
  * Check for cached timeline for a single tag
 */
-function check_for_cached_topic_timeline($topic, $attribute = FALSE) {
+function check_for_cached_topic_timeline($topic, $attribute = FALSE, $path) {
 	if(!$attribute) {
 		$attribute = 'no_attribute';
 	}
 
 	$query = "SELECT tag_timeline_data.timeline_data
 	FROM tag_timeline_data
-	WHERE tag_timeline_data.tag = '".$topic."' AND tag_timeline_data.attribute = '".$attribute."';";
+	WHERE tag_timeline_data.tag = '".$topic."' AND tag_timeline_data.attribute = '".$attribute."' AND request_path = '".$path."';";
 	$result = db_query($query);
 	$object = $result->fetchObject();		
 
@@ -779,33 +795,33 @@ function save_topic_timelime($topic, $attribute = FALSE, $timeline_data) {
 	$timeline_data = my_escape_string($timeline_data);
 	
 	if($attribute) {
-		$query = "INSERT INTO tag_timeline_data (tag, attribute, timeline_data) VALUES (:tag, :attribute, :data) ON DUPLICATE KEY UPDATE tag = VALUES(tag), attribute = VALUES(attribute), timeline_data = VALUES(timeline_data);";
-		db_query($query, array(':tag' => $topic, ':attribute' => $attribute, ':data' => $timeline_data));
+		$query = "INSERT INTO tag_timeline_data (tag, attribute, timeline_data, request_path) VALUES (:tag, :attribute, :data, :path) ON DUPLICATE KEY UPDATE tag = VALUES(tag), attribute = VALUES(attribute), timeline_data = VALUES(timeline_data), request_path = VALUES(request_path);";
+		db_query($query, array(':tag' => $topic, ':attribute' => $attribute, ':data' => $timeline_data, ':path'=>timeline_path_key()));
 	}
 	else {
-		$query = "INSERT INTO tag_timeline_data (tag, attribute, timeline_data) VALUES (:tag, 'no_attribute', :data) ON DUPLICATE KEY UPDATE tag = VALUES(tag), attribute = VALUES(attribute), timeline_data = VALUES(timeline_data);";
-		db_query($query, array(':tag' => $topic, ':data' => $timeline_data));
+		$query = "INSERT INTO tag_timeline_data (tag, attribute, timeline_data, request_path) VALUES (:tag, 'no_attribute', :data, :path) ON DUPLICATE KEY UPDATE tag = VALUES(tag), attribute = VALUES(attribute), timeline_data = VALUES(timeline_data), request_path = VALUES(request_path);";
+		db_query($query, array(':tag' => $topic, ':data' => $timeline_data, ':path'=>timeline_path_key()));
 	}
 }
 
 /**
  * Check for cached timeline for a story
 */
-function check_for_cached_story_timeline($story, $event_type = FALSE) {
+function check_for_cached_story_timeline($story, $event_type = FALSE, $path) {
 	if($event_type) {
 		$query = "SELECT story_timeline_data.timeline_data
 		FROM story_timeline_data
-		WHERE story_timeline_data.story = '".$story."' AND story_timeline_data.event_type = '".$event_type."';";
+		WHERE story_timeline_data.story = '".$story."' AND story_timeline_data.event_type = '".$event_type."' AND request_path = '".$path."';";
 		$result = db_query($query);		
 	}
 	else {
 		$query = "SELECT story_timeline_data.timeline_data
 		FROM story_timeline_data
-		WHERE story_timeline_data.story = '".$story."' AND story_timeline_data.event_type = 'no_event_type';";
-		$result = db_query($query);		
+		WHERE story_timeline_data.story = '".$story."' AND story_timeline_data.event_type = 'no_event_type' AND request_path = '".$path."';";
+		$result = db_query($query);	
 	}
 	$object = $result->fetchObject();
-	if(isset($object->timeline_data)) {
+	if(isset($object->timeline_data) && $object->timeline_data) {
 		return $object->timeline_data;
 	}
 	return FALSE;	
@@ -814,17 +830,17 @@ function check_for_cached_story_timeline($story, $event_type = FALSE) {
 /**
  * Check for cached timeline for a setting
  */
-function check_for_cached_setting_timeline($location, $start, $end, $event_type = FALSE) {
+function check_for_cached_setting_timeline($location, $start, $end, $event_type = FALSE, $path) {
 	if($event_type) {
 		$query = "SELECT setting_timeline_data.timeline_data
 		FROM setting_timeline_data
-		WHERE setting_timeline_data.location = '".$location."' AND setting_timeline_data.start = '".$start."' AND setting_timeline_data.end = '".$end."' AND setting_timeline_data.event_type = '".$event_type."';";
+		WHERE setting_timeline_data.location = '".$location."' AND setting_timeline_data.start = '".$start."' AND setting_timeline_data.end = '".$end."' AND setting_timeline_data.event_type = '".$event_type." AND request_path = '".$path."';";
 		$result = db_query($query);		
 	}
 	else {
 		$query = "SELECT setting_timeline_data.timeline_data
 		FROM setting_timeline_data
-		WHERE setting_timeline_data.location = '".$location."' AND setting_timeline_data.start = '".$start."' AND setting_timeline_data.end = '".$end."' AND setting_timeline_data.event_type = 'no_event_type';";
+		WHERE setting_timeline_data.location = '".$location."' AND setting_timeline_data.start = '".$start."' AND setting_timeline_data.end = '".$end."' AND setting_timeline_data.event_type = 'no_event_type' AND request_path = '".$path."';";
 		$result = db_query($query);		
 	}
 
@@ -841,12 +857,12 @@ function check_for_cached_setting_timeline($location, $start, $end, $event_type 
 function save_setting_timelime($location, $start, $end, $event_type, $timeline_data) {
 	$timeline_data = my_escape_string($timeline_data);
 	if($event_type) {
-		$query = "INSERT INTO setting_timeline_data (location, start, end, event_type, timeline_data) VALUES (:location, :start, :end, :event_type, :data) ON DUPLICATE KEY UPDATE location = VALUES(location), start = VALUES(start), end = VALUES(end), event_type = VALUES(event_type), timeline_data = VALUES(timeline_data);";
-		db_query($query, array(':location' => $location, ':start' => $start, ':end' => $end, ':event_type' => $event_type, ':data' => $timeline_data));
+		$query = "INSERT INTO setting_timeline_data (location, start, end, event_type, timeline_data, request_path) VALUES (:location, :start, :end, :event_type, :data, :path) ON DUPLICATE KEY UPDATE location = VALUES(location), start = VALUES(start), end = VALUES(end), event_type = VALUES(event_type), timeline_data = VALUES(timeline_data), request_path = VALUES(request_path);";
+		db_query($query, array(':location' => $location, ':start' => $start, ':end' => $end, ':event_type' => $event_type, ':data' => $timeline_data, ':path'=>timeline_path_key()));
 	}
 	else {
-		$query = "INSERT INTO setting_timeline_data (location, start, end, event_type, timeline_data) VALUES (:location, :start, :end, 'no_event_type', :data) ON DUPLICATE KEY UPDATE location = VALUES(location), start = VALUES(start), end = VALUES(end), event_type = VALUES(event_type), timeline_data = VALUES(timeline_data);";
-		db_query($query, array(':location' => $location, ':start' => $start, ':end' => $end, ':data' => $timeline_data));
+		$query = "INSERT INTO setting_timeline_data (location, start, end, event_type, timeline_data, request_path) VALUES (:location, :start, :end, 'no_event_type', :data, :path) ON DUPLICATE KEY UPDATE location = VALUES(location), start = VALUES(start), end = VALUES(end), event_type = VALUES(event_type), timeline_data = VALUES(timeline_data), request_path = VALUES(request_path);";
+		db_query($query, array(':location' => $location, ':start' => $start, ':end' => $end, ':data' => $timeline_data, ':path'=>timeline_path_key()));
 	}
 }
 
@@ -857,12 +873,12 @@ function save_story_timeline($story, $event_type = FALSE, $timeline_data) {
 	$timeline_data = my_escape_string($timeline_data);
 	
 	if($event_type) {
-		$query = "INSERT INTO story_timeline_data (story, event_type, timeline_data) VALUES (:story, :event_type, :data) ON DUPLICATE KEY UPDATE story = VALUES(story), event_type = VALUES(event_type), timeline_data = VALUES(timeline_data);";
-		db_query($query, array(':story' => $story, ':event_type' => $event_type, ':data' => $timeline_data));
+		$query = "INSERT INTO story_timeline_data (story, event_type, timeline_data, request_path) VALUES (:story, :event_type, :data, :path) ON DUPLICATE KEY UPDATE story = VALUES(story), event_type = VALUES(event_type), timeline_data = VALUES(timeline_data), request_path = VALUES(request_path);";
+		db_query($query, array(':story' => $story, ':event_type' => $event_type, ':data' => $timeline_data, ':path'=>timeline_path_key()));
 	}
 	else {
-		$query = "INSERT INTO story_timeline_data (story, event_type, timeline_data) VALUES (:story, 'no_event_type', :data) ON DUPLICATE KEY UPDATE story = VALUES(story), event_type = VALUES(event_type), timeline_data = VALUES(timeline_data);";
-		db_query($query, array(':story' => $story, ':data' => $timeline_data));
+		$query = "INSERT INTO story_timeline_data (story, event_type, timeline_data, request_path) VALUES (:story, 'no_event_type', :data, :path) ON DUPLICATE KEY UPDATE story = VALUES(story), event_type = VALUES(event_type), timeline_data = VALUES(timeline_data), request_path = VALUES(request_path);";
+		db_query($query, array(':story' => $story, ':data' => $timeline_data, ':path'=>timeline_path_key()));
 	}
 }
 
@@ -907,18 +923,22 @@ function settingtimelinedata() {
 	}
 
 	//check for cached version of setting timeline data
-	$cached_data = check_for_cached_setting_timeline($location, $time, $end, $event_type);
+	$cached_data = check_for_cached_setting_timeline($location, $time, $end, $event_type, $path);
 
 	if($cached_data) {
 		return drupal_json_output(json_decode(stripslashes($cached_data)));
 	}
+	else {
+		return drupal_json_output(array(array('timeline'=>array())));;
+	}
 	
-	$timeline_data = drupal_json_encode(array('timeline'=>dec_setting_timeline($location, $full_start_time, $full_end_time, $time, $end, $event_type, $path)));
+	
+// 	$timeline_data = drupal_json_encode(array('timeline'=>dec_setting_timeline($location, $full_start_time, $full_end_time, $time, $end, $event_type, $path)));
 
-	//save setting timeline data
-	save_setting_timelime($location, $time, $end, $event_type, $timeline_data);
+// 	//save setting timeline data
+// 	save_setting_timelime($location, $time, $end, $event_type, $timeline_data);
 
- 	return drupal_json_output(json_decode($timeline_data));
+//  	return drupal_json_output(json_decode($timeline_data));
 }
 
 /**
@@ -941,20 +961,24 @@ function tagstimelinedata($story_id) {
 	else {
 		$event_type = FALSE;
 	}
-	
+
 	//check for cached version of the timeline data
- 	$cached_data = check_for_cached_story_timeline($story_id, $event_type);
+ 	$cached_data = check_for_cached_story_timeline($story_id, $event_type, $path);
 	
  	if($cached_data) {
  		return drupal_json_output(json_decode(stripslashes($cached_data)));
  	}
- 
- 	$timeline_data = drupal_json_encode(array('timeline'=>dec_tags_timeline($story_id, $event_type, $path)));
+ 	else {
+ 		return drupal_json_output(array(array('timeline'=>array())));;
+ 	}
+ 	
+ 	
+//  	$timeline_data = drupal_json_encode(array('timeline'=>dec_tags_timeline($story_id, $event_type, $path)));
 
-	//save new timeline data
-	save_story_timeline($story_id, $event_type, $timeline_data);
+// 	//save new timeline data
+// 	save_story_timeline($story_id, $event_type, $timeline_data);
 	
-	return drupal_json_output(json_decode($timeline_data));
+// 	return drupal_json_output(json_decode($timeline_data));
 }
 
 /**
@@ -990,20 +1014,9 @@ function dec_timeline_for_setting($location, $time, $end) {
 // 	$name = get_topic_name($location);
 	if(isset($_GET['event_type'])) {
 		$event_type = $_GET['event_type'];
-// 		if($end) {
-// 			drupal_set_title($name.", ".$time." to ".$end.': '.$event_type);			
-// 		}
-// 		else {
-// 			drupal_set_title($name.", ".$time.': '.$event_type);			
-// 		}
-// 	}
-// 	else {
-// 		if($end) {
-// 			drupal_set_title($name.", ".$time." to ".$end);
-// 		}
-// 		else {
-// 			drupal_set_title($name.", ".$time);
-// 		}
+	}
+	else {
+		$event_type = FALSE;
 	}
 
 	//check for reload 
@@ -1011,16 +1024,48 @@ function dec_timeline_for_setting($location, $time, $end) {
 		$reload = $_GET['reload'];
 		if($reload) {
 			//clear cache
-			if(isset($event_type)) {
-				$query = "delete from setting_timeline_data where location = '".$location."' AND start = '".$time."' AND end = '".$end."' AND event_type = '".$event_type."';";
+			if($event_type) {
+				$query = "delete from setting_timeline_data where location = '".$location."' AND start = '".$time."' AND end = '".$end."' AND event_type = '".$event_type."' AND request_path = '".timeline_path_key()."';";
 				db_query($query);
 			}
 			else {
-				$query = "delete from setting_timeline_data where location = '".$location."' AND start = '".$time."' AND end = '".$end."' AND event_type = 'no_event_type';";
+				$query = "delete from setting_timeline_data where location = '".$location."' AND start = '".$time."' AND end = '".$end."' AND event_type = 'no_event_type' AND request_path = '".timeline_path_key()."';";
 				db_query($query);
 			}
 		}
 	}
+	
+	if($end) {
+		$full_start_time = complete_time_stamp($time, 'start');
+		$full_end_time = complete_time_stamp($end, 'end');
+	}
+	else {
+		$full_start_time = complete_time_stamp($time, 'start');
+		$full_end_time = complete_time_stamp($time, 'end');
+	}
+	
+	$cached_data = check_for_cached_setting_timeline($location, $time, $end, $event_type, timeline_path_key());
+
+	if(!$cached_data) {
+		//calculate
+		//get events for a setting
+		$all_events = get_all_events_for_setting($location, $full_start_time, $full_end_time);
+		$event_array = flat_list_of_events($all_events);
+		if($event_type) {
+			$event_list = temporal_event_list_for_event_array_and_activity($event_type, $event_array);
+		}
+		else {
+			$event_list = temporal_event_list_for_event_array($event_array);
+		}
+		
+		//event table and timeline links
+		$a = create_timeline_setting_header($location, $time, $end, request_path());
+		$a['date'] = event_timeline_for_event_list($event_list);
+		$timeline_data = drupal_json_encode(array('timeline'=>$a));
+		
+		save_setting_timelime($location, $time, $end, $event_type, $timeline_data);
+	}
+	
 	
 	//timeline
 	$output = '<div id="timeline-embed"></div>
@@ -1030,18 +1075,18 @@ function dec_timeline_for_setting($location, $time, $end) {
             height:             "600",';
 	if(isset($event_type)) {
 		if($end) {
-			$output .= 'source:             "'.$base_url.'/settingtimelinedata?settinglocation='.$location.'&time='.$time.'&event_type='.$event_type.'&end='.$end.'&path='.request_path().'&path='.request_path().'&path='.request_path().'"';
+			$output .= 'source:             "'.$base_url.'/settingtimelinedata?settinglocation='.$location.'&time='.$time.'&event_type='.$event_type.'&end='.$end.'&path='.timeline_path_key().'"';
 		}
 		else {
-			$output .= 'source:             "'.$base_url.'/settingtimelinedata?settinglocation='.$location.'&time='.$time.'&event_type='.$event_type.'&path='.request_path().'"';
+			$output .= 'source:             "'.$base_url.'/settingtimelinedata?settinglocation='.$location.'&time='.$time.'&event_type='.$event_type.'&path='.timeline_path_key().'"';
 		}
 	}
 	else {
 		if($end) {
-			$output .= 'source:             "'.$base_url.'/settingtimelinedata?settinglocation='.$location.'&time='.$time.'&end='.$end.'&path='.request_path().'"';
+			$output .= 'source:             "'.$base_url.'/settingtimelinedata?settinglocation='.$location.'&time='.$time.'&end='.$end.'&path='.timeline_path_key().'"';
 		}
 		else {
-			$output .= 'source:             "'.$base_url.'/settingtimelinedata?settinglocation='.$location.'&time='.$time.'&path='.request_path().'"';
+			$output .= 'source:             "'.$base_url.'/settingtimelinedata?settinglocation='.$location.'&time='.$time.'&path='.timeline_path_key().'"';
 		}
 	}
 	
@@ -1082,26 +1127,13 @@ function dec_timeline_for_tags($story_id) {
 		return "No topic list found";
 	}
 	$output = "";
-	
-	//story topics for title
-	$tag_array = get_tags_names_for_a_story($story_id);
-	$headline = array();
-	foreach($tag_array as $tag) {
-		if($tag['1']) {
-			$headline[] =  $tag['1'];
-		}
-		else {
-			$headline[] = $tag['0'];
-		}
-	}
-	
-	$story_title = implode(', ',$headline);
-	
 
 	if(isset($_GET['event_type'])) {
 		$event_type = $_GET['event_type'];
 	}
-
+	else {
+		$event_type = FALSE;
+	}
 
 	//check for reload 
 	if(isset($_GET['reload'])) {
@@ -1109,14 +1141,33 @@ function dec_timeline_for_tags($story_id) {
 		if($reload) {
 			//clear cache
 			if(isset($event_type)) {
-				$query = "delete from story_timeline_data where story = '".$story_id."' AND event_type = '".$event_type."';";
+				$query = "delete from story_timeline_data where story = '".$story_id."' AND event_type = '".$event_type."' AND request_path = '".timeline_path_key()."';";
 				db_query($query);
 			}
 			else {
-				$query = "delete from story_timeline_data where story = '".$story_id."'AND event_type = 'no_event_type';";
+				$query = "delete from story_timeline_data where story = '".$story_id."'AND event_type = 'no_event_type' AND request_path = '".timeline_path_key()."';";
 				db_query($query);
 			}
 		}
+	}
+
+	//check for cached version of the timeline data
+	$cached_data = check_for_cached_story_timeline($story_id, $event_type, timeline_path_key());
+
+	if(!$cached_data) {
+		//calculate timeline****here
+		//get event list
+		$a = event_timeline_header_for_story($story_id);
+		$event_list = event_list_for_story_id($story_id);
+		if($event_type) {
+			$event_list = temporal_event_list_for_event_array_and_activity($event_type, $event_list);
+		}
+		else {
+			$event_list = temporal_event_list_for_event_array($event_list);
+		}
+		$a['date'] = event_timeline_for_event_list($event_list);
+		$timeline_data = drupal_json_encode(array('timeline'=>$a));
+		save_story_timeline($story_id, $event_type, $timeline_data);
 	}
 	
 	//timeline
@@ -1128,10 +1179,10 @@ function dec_timeline_for_tags($story_id) {
 	
 // 		$output .= 'source:             "'.'http://localhost/my-data2.json'.'"';
 	if(isset($event_type)) {
-		$output .= 'source:             "'.$base_url.'/tagstimelinedata/'.$story_id.'?event_type='.$event_type.'&path='.request_path().'"';
+		$output .= 'source:             "'.$base_url.'/tagstimelinedata/'.$story_id.'?event_type='.$event_type.'&path='.timeline_path_key().'"';
 	}
 	else {
-		$output .= 'source:             "'.$base_url.'/tagstimelinedata/'.$story_id.'?path='.request_path().'"';
+		$output .= 'source:             "'.$base_url.'/tagstimelinedata/'.$story_id.'?path='.timeline_path_key().'"';
 	}
 	
 	$output .= '    }
@@ -1178,17 +1229,43 @@ function dec_timeline($topic) {
 		if($reload) {
 			//clear cache
 			if($attribute) {
-				$query = "delete from tag_timeline_data where tag = '".$topic."' AND attribute = '".$attribute."';";
+				$query = "delete from tag_timeline_data where tag = '".$topic."' AND attribute = '".$attribute."' AND request_path = '".timeline_path_key()."';";
 				db_query($query);
 			}
 			else {
-				$query = "delete from tag_timeline_data where tag = '".$topic."'AND attribute = 'no_attribute';";
+				$query = "delete from tag_timeline_data where tag = '".$topic."'AND attribute = 'no_attribute' AND request_path = '".timeline_path_key()."';";
 				db_query($query);
 			}
 		}
 	}
 	
-// 	dec_tag_timeline($topic, $attribute, request_path());
+	//***here
+	//check for timeline data
+	$cached_data = check_for_cached_topic_timeline($topic, $attribute, timeline_path_key());
+	
+	if(!$cached_data) {
+		//generate new timeline data
+		
+		$a = event_timeline_header_for_topic($topic);
+		$all_events = get_all_events_for_tag($topic);
+		$event_list = flat_list_of_single_tag_events($all_events);
+
+		if($attribute) {
+			$event_list = temporal_event_list_for_event_array_and_activity($attribute, $event_list);
+		}
+		else {
+			$event_list = temporal_event_list_for_event_array($event_list);
+		}
+
+		$a['date'] = event_timeline_for_event_list($event_list);
+
+		$timeline_data = drupal_json_encode(array('timeline'=>$a));
+		
+		
+// 		$timeline_data = drupal_json_encode(array('timeline'=>dec_tag_timeline($topic, $attribute, request_path())));
+		//save new timeline data
+		save_topic_timelime($topic, $attribute, $timeline_data);
+	}
 	
 	$output = "";
 // 	if($attribute) {
@@ -1241,10 +1318,10 @@ function dec_timeline($topic) {
     }
 
 	if(isset($attribute)) {
-		$output .= 'source:             "'.$base_url.'/tagtimelinedata'.$topic_path.'?attribute='.$attribute.'&path='.request_path().add_story_search_parameters().'"';
+		$output .= 'source:             "'.$base_url.'/tagtimelinedata'.$topic_path.'?attribute='.$attribute.'&path='.timeline_path_key().'"';
 	}
     else {
-    	$output .= 'source:             "'.$base_url.'/tagtimelinedata'.$topic_path.'?path='.request_path().add_story_search_parameters().'"';
+    	$output .= 'source:             "'.$base_url.'/tagtimelinedata'.$topic_path.'?path='.timeline_path_key().'"';
     }
 
     $output .= '    }
@@ -1337,6 +1414,7 @@ function dec_tag_timeline($topic = '/m/01qwfk', $attribute = FALSE, $path) {
 // 		$events = temporal_events_for_tag($topic);
 		$events = temporal_event_list_for_event_array($event_list);
 	}
+
 	foreach($events as $event) {
 		$output[] = load_art_event_dec_tag($event, $types, TRUE);
 	}
@@ -1352,6 +1430,9 @@ function dec_tag_timeline($topic = '/m/01qwfk', $attribute = FALSE, $path) {
  */
 function translate_time_for_timeline($time) {
 	return str_replace('-',',',$time['0']);
+}
+function translate_time_for_timeline2($time) {
+	return str_replace('-',',',$time);
 }
 
 /**
@@ -1768,10 +1849,190 @@ function dec_reset() {
 	return "database reset";
 }
 
+
+/**
+ * Produces event timeline header for story
+ */
+function event_timeline_header_for_story($story) {
+	$tag_array = get_tags_names_for_a_story($story);
+	$headline = array();
+	foreach($tag_array as $tag) {
+		if($tag['1']) {
+			$headline[] = $tag['1'];
+		}
+		else {
+			$headline[] = $tag['0'];
+		}
+	}
+	
+	$header = array();
+	$header['headline'] = l(implode(', ',$headline), request_path(), array('query'=>array('story'=>$story)));
+	$header['text'] = "&nbsp;";
+	$header['type'] = 'default';
+	
+	$image_result = get_image_from_tag_list($tag_array);
+	if($image_result) {
+		$header['asset']['media'] = $image_result['image'];
+		$header['asset']['caption'] = $image_result['tag']['1'];
+		$header['asset']['credit'] = "";
+	}
+	else {
+		$header['asset']['media'] = "";
+		$header['asset']['caption'] = "";
+		$header['asset']['credit'] = "";		
+	}
+	return $header;
+}
+
+/**
+ * Produces event timeline header for topic
+ */
+function event_timeline_header_for_topic($topic) {
+	$name = get_topic_name($topic);
+	if($name) {
+		$header['headline'] = story_search_link_check($name, request_path(), array('query'=>array('tag'=>$topic)));
+	}
+	else {
+		$header['headline'] = $topic;
+	}
+	$header['text'] = get_topic_description($topic, 150);
+	$header['type'] = 'default';
+	$image = check_freebase_saved_image($topic);
+	$header['asset'] = array('media'=>$image,'credit'=>"",'caption'=>$name);
+	return $header;
+}
+
+/**
+ * Produces event timeline for a list of events
+ */
+function event_timeline_for_event_list($event_list) {
+	$event_string = "('".implode("','", $event_list)."')";
+	$query = "SELECT event_value_table.event, event_value_table.position, event_value_table.value, tag_name.name  FROM
+(SELECT event_attribute_value.event, attribute_name.name, event_attribute_position.position, event_attribute_value.value FROM event_attribute_value, attribute_name, event_attribute_position
+WHERE event_attribute_value.event IN ".$event_string." AND
+event_attribute_value.attribute = attribute_name.attribute AND
+attribute_name.name = event_attribute_position.event_attribute) as event_value_table
+LEFT JOIN tag_name ON tag_name.tag = event_value_table.value;";
+	$output = array();
+	$result = db_query($query);
+	foreach($result as $record) {
+		if(!isset($output[$record->event])) {
+			$output[$record->event] = array(array(),array(),array(),array(),array(),array(),array());
+		}
+		if($record->name) {
+			$output[$record->event][$record->position][] = story_search_link_check($record->name, request_path(), array("query"=>array("tag"=>$record->value)));
+		}
+		elseif(!is_freebase_topic_id($record->value)) {
+			if($record->position == '1') {
+				$output[$record->event][$record->position][] = str_replace("_"," ",$record->value);
+			}
+			else {
+				$output[$record->event][$record->position][] = $record->value;
+			}
+		}
+	}
+
+	$output_with_titles = array();
+	foreach($output as $event_id=>$event_row) {
+		$row = array();
+		foreach($event_row as $event_cell) {
+			$row[] = implode(', ', $event_cell);
+		}
+		$output_with_titles[$event_id] = $row;
+
+		//add title to the event array
+		$event_type = get_type_of_stored_event($event_id);
+
+		if($event_name = get_topic_name($event_id)) {
+			$output_with_titles[$event_id][0] = story_search_link_check($event_name, request_path(), array("query"=>array("tag"=>$event_id)));
+				
+			// 			$output['title'][] = array($event_id,$event_name);
+			//cache topic info
+			$handle = background_process_start_locked('dontrunconcurrently','check_topic_name_image_description', $event_id);
+
+		}
+		elseif($event_type == 'exhibition_creation') {
+			$output_with_titles[$event_id][0] = get_event_label($event_id, '/exhibitions/exhibition').' at '
+					.get_event_label($event_id, '/exhibitions/exhibition_run/venue');
+		}
+		elseif($event_type == 'award_won') {
+			$output_with_titles[$event_id][0] = get_event_label_with_event_attribute_name($event_id, 'agent').' won '
+					.get_event_label($event_id, '/award/award_honor/award');
+		}
+		elseif($event_type == 'award_nomination') {
+			$output_with_titles[$event_id][0] = get_event_label_with_event_attribute_name($event_id, 'agent').' nominated for '
+					.get_event_label($event_id, '/award/award_nomination/award');
+		}
+		// 		elseif($event_type == 'education') {
+		// 			$output_with_titles[$event_id][0] = get_event_label_with_event_attribute_name($event_id, 'agent').' educated at '
+		// 					.get_event_label_with_event_attribute_name($event_id, 'location');
+		// 		}
+		elseif($event_type == 'education') {
+			$output_with_titles[$event_id][0] = get_event_label($event_id, '/education/education/student').' educated at '
+					.get_event_label($event_id, '/education/education/institution');
+		}
+		elseif($event_type == 'place_lived') {
+			$output_with_titles[$event_id][0] = get_event_label_with_event_attribute_name($event_id, 'agent').' lived in '
+					.get_event_label_with_event_attribute_name($event_id, 'location');
+		}
+		elseif($event_type == 'exhibition_run') {
+			$output_with_titles[$event_id][0] = get_event_label($event_id, '/exhibitions/exhibition_run/venue').' exhibited '
+					.$output['title'][] = get_event_label($event_id, '/exhibitions/exhibition_run/exhibition');
+		}
+		elseif($event_type == 'object_location') {
+			$output_with_titles[$event_id][0] = get_event_label($event_id, '/visual_art/artwork_location_relationship/artwork').' in '
+					.get_event_label($event_id, '/visual_art/artwork_location_relationship/location');
+		}
+		elseif($event_type == 'object_ownership') {
+			$output_with_titles[$event_id][0] = get_event_label($event_id, '/visual_art/artwork_owner_relationship/artwork').' owned by '
+					.get_event_label($event_id, '/visual_art/artwork_owner_relationship/owner');
+		}
+		elseif($event_type == 'organization_membership') {
+			$output_with_titles[$event_id][0] = get_event_label($event_id, '/organization/organization_membership/member').' member of '
+					.get_event_label($event_id, '/organization/organization_membership/organization');
+		}
+
+	}
+	
+	$timeline_output = array();
+
+	foreach($output_with_titles as $key=>$output_with_title) {
+		$row = array();
+		$row['headline'] = $output_with_title[0];
+		$row['tag'] = $output_with_title[1];
+		if($output_with_title[4] && !$output_with_title[3]) {
+			$row['startDate'] = translate_time_for_timeline2($output_with_title[4]);
+			$row['endDate'] = translate_time_for_timeline2($output_with_title[3]);			
+		}
+		else {
+			$row['startDate'] = translate_time_for_timeline2($output_with_title[3]);
+			$row['endDate'] = translate_time_for_timeline2($output_with_title[4]);
+		}
+		$row['text'] = 'Agent: '.$output_with_title[2].'<br/>'.'Location: '.$output_with_title[5].'<br/>'.'Tag: '.$output_with_title[6];
+		$image = check_freebase_saved_image($key);
+		if($image) {
+			$thumbnail = check_freebase_saved_image($key,TRUE);
+			$name = get_topic_name($key);
+			if($name) {
+				$row['asset'] = array('media'=>$image,'credit'=>"",'caption'=>$name, 'thumbnail'=>$thumbnail);
+			}
+			else {
+				$row['asset'] = array('media'=>$image,'credit'=>"",'caption'=>"", 'thumbnail'=>$thumbnail);
+			}		
+		}
+		else {
+			$row['asset'] = array('media'=>"",'credit'=>"",'caption'=>"");			
+		}
+		$timeline_output[] = $row;	
+	}
+	return $timeline_output;
+}
+
+
 /**
  * Produces event table for a list of events
  */
-function event_table_for_event_list($event_list = array('/m/0b34d','/m/04y9zg6','/m/053_g0','/m/047lvl3','/m/013v45','/m/0hnb6fd','/m/022840','/m/0hccjyn','/m/0hccjz1')) {
+function event_table_for_event_list($event_list) {
 	$event_string = "('".implode("','", $event_list)."')";
 	$query = "SELECT event_value_table.event, event_value_table.position, event_value_table.value, tag_name.name  FROM
 (SELECT event_attribute_value.event, attribute_name.name, event_attribute_position.position, event_attribute_value.value FROM event_attribute_value, attribute_name, event_attribute_position
@@ -1859,6 +2120,7 @@ LEFT JOIN tag_name ON tag_name.tag = event_value_table.value;";
 		}
 
 	}
+	
 	$table = theme(
 				'table', 
 				array(	'rows' => $output_with_titles, 
@@ -3332,7 +3594,7 @@ function temporal_event_list_for_event_array_and_activity($activity = 'military_
 }
 
 /**
- * Events in the array that have the specified activity type and temporal information
+ * Events in the array that have temporal information
  */
 function temporal_event_list_for_event_array($event_list = array('/m/0b34d','/m/04y9zg6','/m/053_g0','/m/047lvl3','/m/013v45','/m/0hnb6fd','/m/022840','/m/0hccjyn','/m/0hccjz1')) {
 	$event_string = "('".implode("','", $event_list)."')";
@@ -3400,6 +3662,7 @@ function event_list_for_story_id($story_id) {
 	FROM query_tag, tag_event_id
 	WHERE query_tag.id = '".$story_id."' AND
 	query_tag.tag = tag_event_id.tag;";
+
 	$result = db_query($query);
 	$event_list = array();
 	foreach($result as $event) {
@@ -3407,6 +3670,7 @@ function event_list_for_story_id($story_id) {
 	}
 	return $event_list;
 }
+
 /**
  * Flatten list of events of a story
 */
@@ -3952,6 +4216,7 @@ LEFT JOIN tag_name ON tag_name.tag = events.value;";
 	$records = array();
 
 	foreach ($result as $record) {
+
 // 		if(in_array($record->attribute, array('activity','location','agent','start_time','end_time'))) {
 			$attribute = $record->attribute;
 // 		}
@@ -3994,7 +4259,6 @@ LEFT JOIN tag_name ON tag_name.tag = events.value;";
 		$handle = background_process_start_locked('dontrunconcurrently','check_topic_name_image_description', $event_id);
 		
 	}
-	//*
 	elseif($event_type == 'exhibition_creation') {
 		$output['title'][] = get_event_label($event_id, '/exhibitions/exhibition').' at '
 				.get_event_label($event_id, '/exhibitions/exhibition_run/venue');
