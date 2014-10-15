@@ -18,7 +18,7 @@ function timeline_path_key() {
 			return '/'.request_path();
 		}
 		else {
-			'/front';
+			return '/front';
 		}
 	}
 }
@@ -1001,7 +1001,7 @@ function get_attribute_reverse_title($attribute = '/visual_art/artwork/artist') 
 */
 function dec_timeline_for_setting($location, $time, $end) {
 	global $base_url;
-	$output = "";
+	$output = "title goes here";
 
 	if(!$location && !$time) {
 		return "No setting found";
@@ -1068,12 +1068,12 @@ function dec_timeline_for_setting($location, $time, $end) {
 	
 	
 	//timeline
-	$output = '<div id="timeline-embed"></div>
+	$output .= '<div id="timeline-embed"></div>
     <script type="text/javascript">
         var timeline_config = {
             width:              "100%",
             height:             "600",';
-	if(isset($event_type)) {
+	if($event_type) {
 		if($end) {
 			$output .= 'source:             "'.$base_url.'/settingtimelinedata?settinglocation='.$location.'&time='.$time.'&event_type='.$event_type.'&end='.$end.'&path='.timeline_path_key().'"';
 		}
@@ -1096,7 +1096,7 @@ function dec_timeline_for_setting($location, $time, $end) {
 	
 	$output .= '<div style="clear:both; margin-top:1em">If the timeline sticks at LOADING TIMELINE... then use your browser reload button.</div>';
 	$output .= '<div style="clear:both; margin-bottom:1em">If the information displayed seems incomplete (e.g. events of a story tag with time information are not included) then use the Recalcuate button.</div>';
-	if(isset($event_type)) {
+	if($event_type) {
 		if($end) {
 			$output .= l("Recalcuate", request_path(), array('query'=>array('timeline_for_setting'=>$location, 'time'=>$time, 'end'=>$end, 'event_type'=>$event_type, 'reload'=>'1')));
 		}
@@ -1126,7 +1126,7 @@ function dec_timeline_for_tags($story_id) {
 	if(!$story_id) {
 		return "No topic list found";
 	}
-	$output = "";
+	$output = "title goes here";
 
 	if(isset($_GET['event_type'])) {
 		$event_type = $_GET['event_type'];
@@ -1140,7 +1140,7 @@ function dec_timeline_for_tags($story_id) {
 		$reload = $_GET['reload'];
 		if($reload) {
 			//clear cache
-			if(isset($event_type)) {
+			if($event_type) {
 				$query = "delete from story_timeline_data where story = '".$story_id."' AND event_type = '".$event_type."' AND request_path = '".timeline_path_key()."';";
 				db_query($query);
 			}
@@ -1171,14 +1171,14 @@ function dec_timeline_for_tags($story_id) {
 	}
 	
 	//timeline
-	$output = '<div id="timeline-embed"></div>
+	$output .= '<div id="timeline-embed"></div>
     <script type="text/javascript">
         var timeline_config = {
             width:              "100%",
             height:             "600",';
 	
 // 		$output .= 'source:             "'.'http://localhost/my-data2.json'.'"';
-	if(isset($event_type)) {
+	if($event_type) {
 		$output .= 'source:             "'.$base_url.'/tagstimelinedata/'.$story_id.'?event_type='.$event_type.'&path='.timeline_path_key().'"';
 	}
 	else {
@@ -1191,7 +1191,7 @@ function dec_timeline_for_tags($story_id) {
 
 	$output .= '<div style="clear:both; margin-top:1em">If the timeline sticks at LOADING TIMELINE... then use your browser reload button.</div>';
 	$output .= '<div style="clear:both; margin-bottom:1em">If the information displayed seems incomplete (e.g. events of a story tag with time information are not included) then use the Recalcuate button.</div>';
-	if(isset($event_type)) {
+	if($event_type) {
 		$output .= l("Recalcuate", request_path(), array('query'=>array('timeline_for_tags'=>$story_id, 'event_type'=>$event_type, 'reload'=>'1')));
 	}
 	else {
@@ -1268,6 +1268,21 @@ function dec_timeline($topic) {
 	}
 	
 	$output = "";
+	//title
+	//tag type
+	$notable_tag_types = get_notable_tag_type_names($topic);
+	if(!empty($notable_tag_types)) {
+		$topic_types = ' (' . implode(', ', $notable_tag_types) . ')';
+	}
+	else {
+		$topic_types = '';
+	}
+	//tag name
+	$name = get_topic_name($topic);
+	if($name) {
+		$output .= '<div class="topic-block"><h2><i class="fa fa-info fa-lg">&nbsp;</i><span class="topic-title">' . t('About : '). $name . $topic_types . '&nbsp;&nbsp;</span>' . '</h2>';
+	}
+	
 // 	if($attribute) {
 // 		if($attribute_title = get_attribute_reverse_title($attribute)) {
 // 			$name = get_topic_name($topic);
@@ -1304,7 +1319,7 @@ function dec_timeline($topic) {
 // 		}
 // 	}
 	
-	$output = '<div id="timeline-embed"></div>
+	$output .= '<div id="timeline-embed"></div>
     <script type="text/javascript">
         var timeline_config = {
             width:              "100%",
@@ -1317,7 +1332,7 @@ function dec_timeline($topic) {
     	$topic_path = '/'.$topic;
     }
 
-	if(isset($attribute)) {
+	if($attribute) {
 		$output .= 'source:             "'.$base_url.'/tagtimelinedata'.$topic_path.'?attribute='.$attribute.'&path='.timeline_path_key().'"';
 	}
     else {
