@@ -1001,8 +1001,12 @@ function get_attribute_reverse_title($attribute = '/visual_art/artwork/artist') 
 */
 function dec_timeline_for_setting($location, $time, $end) {
 	global $base_url;
-	$output = "title goes here";
-
+	$output = "";
+	$name = get_topic_name($location);
+	if($name) {
+		$output .= '<h2><i class="fa fa-info fa-lg">&nbsp;</i><span class="topic-title">' . t('About : ').$name.", ".$time." to ".$end.'&nbsp;&nbsp;</span>';
+	}
+	
 	if(!$location && !$time) {
 		return "No setting found";
 	}
@@ -1126,7 +1130,31 @@ function dec_timeline_for_tags($story_id) {
 	if(!$story_id) {
 		return "No topic list found";
 	}
-	$output = "title goes here";
+	$output = "";
+	
+	//tags title
+	$query = "SELECT query_tag.tag, tag_name.name FROM query_tag
+LEFT JOIN tag_name ON query_tag.tag = tag_name.tag
+WHERE query_tag.id = '".$story_id."';";
+	$result = db_query($query);
+	
+	$tag_array = array();
+	foreach ($result as $record) {
+		$tag_array[] = $record->tag;
+	}
+	$tag_name_array = array();
+	foreach($tag_array as $tag) {
+		$name = get_topic_name($tag);
+		if($name) {
+			$tag_name_array[] = $name;
+		}
+		else {
+			$tag_name_array[] = $tag;
+		}
+	}
+	
+	$output .= '<h2><i class="fa fa-info fa-lg">&nbsp;</i>' . t('About : ') .implode(", ",$tag_name_array).'</h2>';
+	
 
 	if(isset($_GET['event_type'])) {
 		$event_type = $_GET['event_type'];
