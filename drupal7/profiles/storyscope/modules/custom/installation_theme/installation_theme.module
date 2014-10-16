@@ -82,14 +82,16 @@ function dec_installation_themes() {
 
 /**
  * Calculate themes for an installation
+ * Find how many times a concept appears in the concept spaces of the annotations of the stoires across all dossiers
+ * Group by number of stories they connect to, number of annotations they connect to, and finally frequency
  */
 function themes_for_an_installation($limit = 10) {
 	$output = array();
-	$query = "SELECT * FROM
-(SELECT result.tag as value, COUNT(result.tag) as frequency, result.name, data.annotation, COUNT(DISTINCT data.annotation) as annotations
-FROM tag_name as result,
-(
-SELECT tag_name.tag, query_tag.tag as annotation
+	$query = "SELECT *
+FROM
+(SELECT tag_name.tag as value, tag_name.name, COUNT(tag_name.tag) as frequency, COUNT(DISTINCT data.annotation) annotations, COUNT(DISTINCT data.id) as stories 
+FROM tag_name,
+(SELECT tag_name.tag, query_tag.tag as annotation, query_tag.id
 FROM tag_attribute, tag_attribute_id_value, tag_name, query_tag, theme_fact_property
 WHERE 
 query_tag.tag = tag_attribute.tag AND
@@ -97,7 +99,7 @@ tag_attribute.attribute = theme_fact_property.fb_property AND
 tag_attribute.id = tag_attribute_id_value.tag_attribute_id and
 tag_name.tag = tag_attribute_id_value.value
 UNION ALL
-SELECT tag_name.tag, query_tag.tag as annotation
+SELECT tag_name.tag, query_tag.tag as annotation, query_tag.id
 FROM tag_attribute, tag_attribute_id_value, tag_name, query_tag, theme_fact_property, fact_attribute_reverse
 WHERE 
 query_tag.tag = tag_attribute_id_value.value AND
@@ -106,19 +108,19 @@ tag_attribute.attribute = fact_attribute_reverse.attribute AND
 fact_attribute_reverse.reverse = theme_fact_property.fb_property AND
 tag_name.tag = tag_attribute.tag
 UNION ALL
-SELECT event_attribute_value.value as tag, event_table.tag as annotation
+SELECT event_attribute_value.value as tag, event_table.tag as annotation, event_table.id
 FROM 
-(SELECT DISTINCT query_tag.tag, event_attribute_value.event
+(SELECT DISTINCT query_tag.tag, event_attribute_value.event, query_tag.id
 FROM query_tag, event_attribute_value
 WHERE 
 query_tag.tag = event_attribute_value.value) as event_table, event_attribute_value, attribute_name
 WHERE event_table.event = event_attribute_value.event AND
 event_attribute_value.attribute = attribute_name.attribute AND
 attribute_name.attribute <> 'location') as data
-WHERE result.tag = data.tag 
-GROUP BY result.tag
-ORDER BY annotations DESC,frequency DESC LIMIT ".$limit.") as result_table
-WHERE result_table.frequency >= 2;";
+WHERE tag_name.tag = data.tag
+GROUP BY tag_name.tag
+ORDER BY stories DESC, annotations DESC, frequency DESC) as result
+WHERE result.frequency >= 2 LIMIT ".$limit.";";
 	$result = db_query($query);
 	foreach ($result as $record) {
 		$output[] = $record;
