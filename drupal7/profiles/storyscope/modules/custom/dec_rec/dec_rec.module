@@ -613,7 +613,7 @@ function dec_rec_entity_insert($entity, $type) {
   // Insert the new entity into a fictional table of all entities.
 	if($type == 'field_collection_item') {
 		if(isset($entity->field_mid['und'][0]['value'])) {
-			$mid = extract_mid_from_freebase_uri($entity->field_mid['und'][0]['value']);
+			$mid = '/m/'.$entity->field_mid['und'][0]['value'];
 			$handle = background_process_start('new_event_space_of_a_topic', $mid);
 		}
 	}
@@ -626,7 +626,7 @@ function dec_rec_entity_update($entity, $type) {
 	// Insert the new entity into a fictional table of all entities.
 	if($type == 'field_collection_item') {
 		if(isset($entity->field_mid['und'][0]['value'])) {
-			$mid = extract_mid_from_freebase_uri($entity->field_mid['und'][0]['value']);
+			$mid = '/m/'.$entity->field_mid['und'][0]['value'];
 			$handle = background_process_start('new_event_space_of_a_topic', $mid);
 		}
 	}
