@@ -445,8 +445,8 @@ function storyscope_update_7013() {
 }
 
 function storyscope_update_7014() {
-	db_drop_unique_key('story_timeline_data', 'data_key');
-	db_add_unique_key('story_timeline_data', 'data_key', array('tag', 'attribute', 'request_path'));
+	db_drop_unique_key('tag_timeline_data', 'data_key');
+	db_add_unique_key('tag_timeline_data', 'data_key', array('tag', 'attribute', 'request_path'));
 	return t('Update unique key for tag_timeline_data table');
 }
 
@@ -463,8 +463,8 @@ function storyscope_update_7015() {
 }
 
 function storyscope_update_7016() {
-	db_drop_unique_key('tag_timeline_data', 'data_key');
-	db_add_unique_key('tag_timeline_data', 'data_key', array('tag', 'attribute', 'request_path'));
+	db_drop_unique_key('story_timeline_data', 'data_key');
+	db_add_unique_key('story_timeline_data', 'data_key', array('story', 'event_type', 'request_path'));
 	return t('Update unique key for tag_timeline_data table');
 }
 
