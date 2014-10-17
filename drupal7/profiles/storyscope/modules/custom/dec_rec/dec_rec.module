@@ -107,13 +107,13 @@ function dec_rec_admin() {
 /**
  * Retrieve API key from configuration variable and build URL variable
  */
-function get_google_api_key_path() {
+function get_google_api_key_path($connector = '&') {
 	$googleapikey = variable_get("dec_rec_key", "");
 	if($googleapikey == "") {
 		return "";
 	}
 	else {
-		return "&key=".$googleapikey;
+		return $connector."key=".$googleapikey;
 	}
 }
 
@@ -614,7 +614,8 @@ function dec_rec_entity_insert($entity, $type) {
 	if($type == 'field_collection_item') {
 		if(isset($entity->field_mid['und'][0]['value'])) {
 			$mid = '/m/'.$entity->field_mid['und'][0]['value'];
-			$handle = background_process_start('new_event_space_of_a_topic', $mid);
+// 			$handle = background_process_start('new_event_space_of_a_topic', $mid);
+			$handle = background_process_start('update_tag_event_mapping', $mid);
 		}
 	}
 }
@@ -627,7 +628,7 @@ function dec_rec_entity_update($entity, $type) {
 	if($type == 'field_collection_item') {
 		if(isset($entity->field_mid['und'][0]['value'])) {
 			$mid = '/m/'.$entity->field_mid['und'][0]['value'];
-			$handle = background_process_start('new_event_space_of_a_topic', $mid);
+			$handle = background_process_start('update_tag_event_mapping', $mid);
 		}
 	}
 }
@@ -1870,13 +1871,13 @@ function dec_save_image_curl($url, $filename) {
  */
 function save_fb_image($topic, $thumbnail_url = FALSE) {
 
-	$imageUrl = 'https://usercontent.googleapis.com/freebase/v1/image'.$topic.'?maxwidth=200&maxheight=200';
-	$imageUrlthumbnail = 'https://usercontent.googleapis.com/freebase/v1/image'.$topic;
+	$imageUrl = 'https://usercontent.googleapis.com/freebase/v1/image'.$topic.'?maxwidth=200&maxheight=200'.get_google_api_key_path();
+	$imageUrlthumbnail = 'https://usercontent.googleapis.com/freebase/v1/image'.$topic.get_google_api_key_path('?');;
 	
 	$id = substr($topic,3);
 	$filename = 'fbimages/'.$id.'.jpeg';
 	$filenamethunbnail = 'fbimages/'.$id.'_sm.jpeg';
-
+	
 	dec_save_image($imageUrl, $filename);
 	dec_save_image($imageUrlthumbnail, $filenamethunbnail);
 	
@@ -1888,7 +1889,7 @@ function save_fb_image($topic, $thumbnail_url = FALSE) {
  */
 function dec_reset() {
 	//if the line below is uncommented then this function can reset local cached databases of freebase data
-	reset_recommender_database();
+// 	reset_recommender_database();
 	return "database reset";
 }
 
@@ -3418,6 +3419,24 @@ function dec_tags($list) {
 	$query->execute();
 	
 	return dec_list_of_tags($tag_array, $max_value);
+}
+
+/**
+ * Update tag event mapping for single tag
+ */
+function update_tag_event_mapping($tag) {
+	new_event_space_of_a_topic($tag);
+	$event_array = flat_list_of_single_tag_events(get_all_events_for_tag($tag));
+	save_tag_event_results($tag, $event_array);
+	
+	//get the event ids of a topic
+	$event_list = flat_list_of_single_tag_events(get_all_events_for_tag($tag));
+
+	//check_topic_name_image_description($topic) for each event id for use on timelines
+	foreach($event_list as $event) {
+		$handle = background_process_start('check_topic_name_image_description',$event);
+	}	
+	
 }
 
 /**
