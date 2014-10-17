@@ -614,7 +614,6 @@ function dec_rec_entity_insert($entity, $type) {
 	if($type == 'field_collection_item') {
 		if(isset($entity->field_mid['und'][0]['value'])) {
 			$mid = '/m/'.$entity->field_mid['und'][0]['value'];
-// 			$handle = background_process_start('new_event_space_of_a_topic', $mid);
 			$handle = background_process_start('update_tag_event_mapping', $mid);
 		}
 	}
@@ -1992,7 +1991,7 @@ LEFT JOIN tag_name ON tag_name.tag = event_value_table.value;";
 				
 			// 			$output['title'][] = array($event_id,$event_name);
 			//cache topic info
-			$handle = background_process_start_locked('dontrunconcurrently','check_topic_name_image_description', $event_id);
+// 			$handle = background_process_start_locked('dontrunconcurrently','check_topic_name_image_description', $event_id);
 
 		}
 		elseif($event_type == 'exhibition_creation') {
@@ -2119,7 +2118,7 @@ LEFT JOIN tag_name ON tag_name.tag = event_value_table.value;";
 			
 // 			$output['title'][] = array($event_id,$event_name);
 			//cache topic info
-			$handle = background_process_start_locked('dontrunconcurrently','check_topic_name_image_description', $event_id);
+// 			$handle = background_process_start_locked('dontrunconcurrently','check_topic_name_image_description', $event_id);
 		
 		}
 		elseif($event_type == 'exhibition_creation') {
@@ -2229,7 +2228,7 @@ LEFT JOIN tag_name ON tag_name.tag = event_value_table.value;";
 		if($event_name = get_topic_name($event_id)) {
 			$output_with_titles[$event_id][0] = storytaglink($event_name, $event_id);
 			//cache topic info
-			$handle = background_process_start_locked('dontrunconcurrently','check_topic_name_image_description', $event_id);
+// 			$handle = background_process_start_locked('dontrunconcurrently','check_topic_name_image_description', $event_id);
 	
 		}
 		elseif($event_type == 'award_won') {
@@ -4205,7 +4204,7 @@ event_attribute_value.attribute = attribute_name.attribute AND
 	$object = $result->fetchObject();
 	if(isset($object->value) && isset($object->name)) {
 		//pre-cache topic for timelines
-		$handle = background_process_start_locked('dontrunconcurrently','check_topic_name_image_description', $object->value);
+// 		$handle = background_process_start_locked('dontrunconcurrently','check_topic_name_image_description', $object->value);
 		return array($object->value, $object->name);
 	}
 	else {
@@ -4249,7 +4248,7 @@ function get_event_value($event_id, $attribute) {
 	$object = $result->fetchObject();
 	if(isset($object->value) && isset($object->name)) {
 		//pre-cache topic for timelines
-		$handle = background_process_start_locked('dontrunconcurrently','check_topic_name_image_description', $object->value);
+// 		$handle = background_process_start_locked('dontrunconcurrently','check_topic_name_image_description', $object->value);
 		return array($object->value, $object->name);
 	}
 	else {
@@ -4318,7 +4317,7 @@ LEFT JOIN tag_name ON tag_name.tag = events.value;";
 	if($event_name = get_topic_name($event_id)) {
 		$output['title'][] = array($event_id,$event_name);
 		//cache topic info
-		$handle = background_process_start_locked('dontrunconcurrently','check_topic_name_image_description', $event_id);
+// 		$handle = background_process_start_locked('dontrunconcurrently','check_topic_name_image_description', $event_id);
 		
 	}
 	elseif($event_type == 'exhibition_creation') {
@@ -4422,7 +4421,7 @@ LEFT JOIN tag_name ON tag_name.tag = events.value;";
 		if($event_name = get_topic_name($event_id)) {
 			$output['title'][] = array($event_id,$event_name);
 		//cache topic info
-		$handle = background_process_start_locked('dontrunconcurrently','check_topic_name_image_description', $event_id);
+// 		$handle = background_process_start_locked('dontrunconcurrently','check_topic_name_image_description', $event_id);
 		
 		}
 	elseif($event_type == 'exhibition_creation') {
