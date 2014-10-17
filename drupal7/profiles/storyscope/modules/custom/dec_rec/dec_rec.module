@@ -3433,7 +3433,8 @@ function update_tag_event_mapping($tag) {
 
 	//check_topic_name_image_description($topic) for each event id for use on timelines
 	foreach($event_list as $event) {
-		$handle = background_process_start('check_topic_name_image_description',$event);
+		check_topic_name_image_description($event);
+// 		$handle = background_process_start('check_topic_name_image_description',$event);
 	}	
 	
 }
