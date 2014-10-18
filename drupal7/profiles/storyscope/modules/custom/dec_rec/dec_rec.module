@@ -633,6 +633,15 @@ function dec_rec_entity_update($entity, $type) {
 }
 
 /**
+ * 
+ */
+function async_check_for_name_description_image($event_list) {
+	foreach($event_list as $event_id) {
+		$handle = background_process_start('check_topic_name_image_description', $event_id);
+	}
+}
+
+/**
  * Check for the name, description and image of a topic
  * Retrieve if not stored in the database
 */
@@ -1183,7 +1192,7 @@ WHERE query_tag.id = '".$story_id."';";
 	$cached_data = check_for_cached_story_timeline($story_id, $event_type, timeline_path_key());
 
 	if(!$cached_data) {
-		//calculate timeline****here
+		//calculate timeline
 		//get event list
 		$a = event_timeline_header_for_story($story_id);
 		$event_list = event_list_for_story_id($story_id);
@@ -1267,7 +1276,6 @@ function dec_timeline($topic) {
 		}
 	}
 	
-	//***here
 	//check for timeline data
 	$cached_data = check_for_cached_topic_timeline($topic, $attribute, timeline_path_key());
 	
@@ -3422,6 +3430,9 @@ function dec_tags($list) {
 
 /**
  * Update tag event mapping for single tag
+ * Checks that the concept space fro that tag has been generated
+ * Saves links between that tag and associated events
+ * Loads (if necessary) the top name, image and description for each event of the tag for use in timelines
  */
 function update_tag_event_mapping($tag) {
 	new_event_space_of_a_topic($tag);
@@ -3477,6 +3488,9 @@ function dec_list_of_tags($tag_array, $max_value) {
 	
 	//use this list for event table 
 	$event_list = event_list_for_story_id($max_value);
+	
+	//retrieve title, description and image for events******here
+	async_check_for_name_description_image($event_list);
 	
 	$themes = top_n_themes_of_story($max_value, 10);
 // 	$matching_themes = top_n_matching_themes_of_story2($event_list, $max_value, 10);	
@@ -3886,14 +3900,11 @@ function dec_tag($topic) {
 			$path_array[] = 'stories';
 			$next_path = implode('/',$path_array);
 			$output .= '<div class="topic-block"><h2><i class="fa fa-info fa-lg">&nbsp;</i><span class="topic-title">' . t('About : '). $name . $topic_types . '&nbsp;&nbsp;</span>' . l('<span class="topic-search"><i class="fa fa-search">&nbsp;</i>' . '</span>', $next_path, array("query"=>array('storytag'=>$topic), "html"=>TRUE)) . '</h2>';
-			
-			// 			drupal_set_title($name);
 		}
 
 
 		
 		$output .= '<div class="description-attribute-block">';
-// 		$output .= image_html_for_a_freebase_topic($topic);
 		if($image = check_freebase_saved_image($topic, FALSE, $reload)) {
 			$output .= '<div class="topic-image"><img src="'.$image.'"></div>';
 		}
@@ -4021,6 +4032,9 @@ function dec_tag($topic) {
 // 	}
 	
 	$event_list = flat_list_of_single_tag_events($all_events);
+	
+	//retrieve title, description and images for events*******here
+	async_check_for_name_description_image($event_list);
 	if(!empty($event_list)) {
 		$output .= dec_tag_timeline_links($topic, $event_list);
 		$output .= '<div style="clear:both"><h2><i class="fa fa-cloud fa-lg">&nbsp;</i>Event Space : <span class="event-space-filter"><input id="event-space-filter" type="text"></span></h2></div>';
@@ -6113,7 +6127,7 @@ function fb_topic_exhibition_producer($topic, $previous_output = array("events"=
 }
 
 /**
- * Retrieve exhibition data of an exhibition curator//****here no date info
+ * Retrieve exhibition data of an exhibition curator//no date info
  */
 function fb_topic_exhibition_curator($topic, $previous_output = array("events"=>array(),"names"=>array(), "links"=>array())) {
 	$query = array(array(
@@ -6188,7 +6202,7 @@ function fb_topic_exhibition_curator($topic, $previous_output = array("events"=>
 }
 
 /**
- * Retrieve exhibition data of an exhibition subject//****here no date info
+ * Retrieve exhibition data of an exhibition subject// no date info
  */
 function fb_topic_exhibition_subject($topic, $previous_output = array("events"=>array(),"names"=>array(), "links"=>array())) {
 	$query = array(array(
@@ -7105,7 +7119,7 @@ function fb_object_award_winning_work($topic, $previous_output = array("events"=
 }
 
 /**
- * Retrieve exhibition history of an object//****here no date info
+ * Retrieve exhibition history of an object// no date info
  */
 function fb_object_exhibited($topic, $previous_output = array("events"=>array(),"names"=>array(), "links"=>array())) {
 	$query = array(array(
@@ -7179,7 +7193,7 @@ function fb_object_exhibited($topic, $previous_output = array("events"=>array(),
 }
 
 /**
- * Retrieve exhibition data for topic that is an exhibition//****here no date info
+ * Retrieve exhibition data for topic that is an exhibition// no date info
 */
 //fb_exhibition_production_of_the_exhibition("/m/052tvg1")
 //fb_exhibition_production_of_the_exhibition
