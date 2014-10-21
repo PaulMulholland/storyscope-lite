@@ -130,44 +130,6 @@ function panels_node_story_default_page_manager_handlers() {
     $display->content['new-db01f179-5a13-41d4-b6a8-89eddf9c3e2d'] = $pane;
     $display->panels['middle_2_1'][0] = 'new-db01f179-5a13-41d4-b6a8-89eddf9c3e2d';
     $pane = new stdClass();
-    $pane->pid = 'new-345df191-fb76-46a3-9fb0-a4fd3e0aed49';
-    $pane->panel = 'middle_2_1';
-    $pane->type = 'entity_field';
-    $pane->subtype = 'node:field_fb_tags';
-    $pane->shown = TRUE;
-    $pane->access = array();
-    $pane->configuration = array(
-      'label' => 'hidden',
-      'formatter' => 'field_collection_view',
-      'delta_limit' => '0',
-      'delta_offset' => '0',
-      'delta_reversed' => 0,
-      'formatter_settings' => array(
-        'view_mode' => 'full',
-        'edit' => '',
-        'delete' => 'Delete',
-        'add' => 'Add',
-        'description' => 1,
-      ),
-      'context' => 'argument_entity_id:node_1',
-      'override_title' => 1,
-      'override_title_text' => '<i class="fa fa-tags fa-lg">&nbsp;</i>Story Tags',
-    );
-    $pane->cache = array();
-    $pane->style = array(
-      'settings' => NULL,
-    );
-    $pane->css = array(
-      'css_id' => '',
-      'css_class' => 'resource-container container-full wide-items',
-    );
-    $pane->extras = array();
-    $pane->position = 1;
-    $pane->locks = array();
-    $pane->uuid = '345df191-fb76-46a3-9fb0-a4fd3e0aed49';
-    $display->content['new-345df191-fb76-46a3-9fb0-a4fd3e0aed49'] = $pane;
-    $display->panels['middle_2_1'][1] = 'new-345df191-fb76-46a3-9fb0-a4fd3e0aed49';
-    $pane = new stdClass();
     $pane->pid = 'new-f5501261-ef8b-4f87-b70f-124d5fdc32cf';
     $pane->panel = 'middle_2_2';
     $pane->type = 'entity_field';
@@ -208,6 +170,66 @@ function panels_node_story_default_page_manager_handlers() {
     $pane->uuid = 'f5501261-ef8b-4f87-b70f-124d5fdc32cf';
     $display->content['new-f5501261-ef8b-4f87-b70f-124d5fdc32cf'] = $pane;
     $display->panels['middle_2_2'][0] = 'new-f5501261-ef8b-4f87-b70f-124d5fdc32cf';
+    $pane = new stdClass();
+    $pane->pid = 'new-345df191-fb76-46a3-9fb0-a4fd3e0aed49';
+    $pane->panel = 'middle_4_1';
+    $pane->type = 'entity_field';
+    $pane->subtype = 'node:field_fb_tags';
+    $pane->shown = TRUE;
+    $pane->access = array();
+    $pane->configuration = array(
+      'label' => 'hidden',
+      'formatter' => 'field_collection_view',
+      'delta_limit' => '0',
+      'delta_offset' => '0',
+      'delta_reversed' => 0,
+      'formatter_settings' => array(
+        'view_mode' => 'full',
+        'edit' => '',
+        'delete' => 'Delete',
+        'add' => 'Add',
+        'description' => 1,
+      ),
+      'context' => 'argument_entity_id:node_1',
+      'override_title' => 1,
+      'override_title_text' => '<i class="fa fa-tags fa-lg">&nbsp;</i>Story Tags',
+    );
+    $pane->cache = array();
+    $pane->style = array(
+      'settings' => NULL,
+    );
+    $pane->css = array(
+      'css_id' => '',
+      'css_class' => 'resource-container container-full wide-items',
+    );
+    $pane->extras = array();
+    $pane->position = 0;
+    $pane->locks = array();
+    $pane->uuid = '345df191-fb76-46a3-9fb0-a4fd3e0aed49';
+    $display->content['new-345df191-fb76-46a3-9fb0-a4fd3e0aed49'] = $pane;
+    $display->panels['middle_4_1'][0] = 'new-345df191-fb76-46a3-9fb0-a4fd3e0aed49';
+    $pane = new stdClass();
+    $pane->pid = 'new-cbdcd1ff-f9a9-47b5-895c-eac1fd6a282c';
+    $pane->panel = 'middle_4_2';
+    $pane->type = 'block';
+    $pane->subtype = 'suggested_story_tags-suggested_story_tags_block';
+    $pane->shown = TRUE;
+    $pane->access = array();
+    $pane->configuration = array(
+      'override_title' => 1,
+      'override_title_text' => '<i class="fa fa-thumbs-o-up"></i>&nbsp;</i>Suggested Tags',
+    );
+    $pane->cache = array();
+    $pane->style = array(
+      'settings' => NULL,
+    );
+    $pane->css = array();
+    $pane->extras = array();
+    $pane->position = 0;
+    $pane->locks = array();
+    $pane->uuid = 'cbdcd1ff-f9a9-47b5-895c-eac1fd6a282c';
+    $display->content['new-cbdcd1ff-f9a9-47b5-895c-eac1fd6a282c'] = $pane;
+    $display->panels['middle_4_2'][0] = 'new-cbdcd1ff-f9a9-47b5-895c-eac1fd6a282c';
   $display->hide_title = PANELS_TITLE_FIXED;
   $display->title_pane = '0';
   $handler->conf['display'] = $display;
