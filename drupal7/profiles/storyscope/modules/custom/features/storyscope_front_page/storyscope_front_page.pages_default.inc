@@ -232,6 +232,28 @@ function storyscope_front_page_default_page_manager_pages() {
     $pane->uuid = 'd835ec32-4543-46d5-a997-f844aeb4492f';
     $display->content['new-d835ec32-4543-46d5-a997-f844aeb4492f'] = $pane;
     $display->panels['middle_3'][1] = 'new-d835ec32-4543-46d5-a997-f844aeb4492f';
+    $pane = new stdClass();
+    $pane->pid = 'new-e9a8224c-fdb2-42bf-98eb-17dfa626fe63';
+    $pane->panel = 'middle_3';
+    $pane->type = 'block';
+    $pane->subtype = 'installation_theme-installation_theme_block';
+    $pane->shown = TRUE;
+    $pane->access = array();
+    $pane->configuration = array(
+      'override_title' => 0,
+      'override_title_text' => '',
+    );
+    $pane->cache = array();
+    $pane->style = array(
+      'settings' => NULL,
+    );
+    $pane->css = array();
+    $pane->extras = array();
+    $pane->position = 2;
+    $pane->locks = array();
+    $pane->uuid = 'e9a8224c-fdb2-42bf-98eb-17dfa626fe63';
+    $display->content['new-e9a8224c-fdb2-42bf-98eb-17dfa626fe63'] = $pane;
+    $display->panels['middle_3'][2] = 'new-e9a8224c-fdb2-42bf-98eb-17dfa626fe63';
   $display->hide_title = PANELS_TITLE_FIXED;
   $display->title_pane = 'new-24210847-5004-46f8-9aa9-6fd83a935d32';
   $handler->conf['display'] = $display;
