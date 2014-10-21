@@ -62,20 +62,22 @@ ORDER BY tags DESC, events DESC LIMIT ".$n.";";
 		//themes for the set of stories
 		$themes = themes_for_a_dossier($story_array);
 		$output = '';
+		$output = '<div>&nbsp';
 		if(!empty($themes)) {
-			$output .= '<div style="clear:both"><h2><i class="fa fa-link fa-lg">&nbsp;</i>Themes of '.$name.' stories</h2></div>';
+			$output .= '<div class="topic-block"><h2 class="pane-title"><i class="fa fa-link fa-lg">&nbsp;</i><span class="topic-title">Themes of stories&nbsp;&nbsp;</span>' . '</h2></div>';
 			$output .=  '<div><ul class="field-name-field-fb-tags">';
 			foreach($themes as $theme) {
 				$output .= l('<li class="tags">'.$theme->name."</li>", request_path(), array("html"=>TRUE, "query"=>array("tag"=>$theme->value, "storytag"=>$story_tag)));
 			}
-			$output .=  '</ul></div>';
+			$output .=  '</ul><div style="clear:both;"></div>';
+			$output .=  '</div>';
 		}
 		
 		//settings for the set of stories
 		$settings = settings_for_a_dossier($story_array);
 
 		if(!empty($settings)) {
-			$output .= '<div style="clear:both"><h2><i class="fa fa-compass fa-lg">&nbsp;</i>Settings of '.$name.' stories</h2></div>';
+			$output .= '<div class="topic-block"><h2 class="pane-title"><i class="fa fa-compass fa-lg">&nbsp;</i><span class="topic-title">Settings of stories&nbsp;&nbsp;</span>' . '</h2></div>';
 			$output .=  '<ul class="field-name-field-fb-tags">';
 			foreach($settings as $setting) {
 				if($setting->end && $setting->start && $setting->start !== $setting->end) {
@@ -92,8 +94,145 @@ ORDER BY tags DESC, events DESC LIMIT ".$n.";";
 				}
 		
 			}
-			$output .=  '</ul>';
+			$output .=  '</ul><div style="clear:both;"></div>';
 		}
+		
+		return $output.'</div>';
+	}
+	elseif(isset($_GET['storylocation'])) {
+		$location = $_GET['storylocation'];
+		$start = $_GET['storytime'];
+		if(isset($params['storyend'])) {
+			$end = $params['storyend'];
+		}
+		else {
+			$end = 0;
+		}
+		
+		if($start && $end) {
+			//query
+			$query = "SELECT result_table.id, COUNT(result_table.tag) as tags
+FROM
+(SELECT DISTINCT event_location_start.id, event_location_start.tag, event_location_start.event, event_location_start.location, event_location_start.start, event_end.end
+FROM
+(
+SELECT events_table.id, events_table.tag, events_table.event, events_table.location, event_start_table.start
+FROM
+(SELECT DISTINCT query_tag.id, query_tag.tag, event_attribute_value.event, location_table.value as location
+FROM tag_event_id, query_tag, event_attribute_value, event_attribute_value as location_table, event_attribute_value as start_table, attribute_name as location_attribute_name, attribute_name as time_attribute_name
+WHERE
+query_tag.tag = tag_event_id.tag AND
+tag_event_id.event_id = event_attribute_value.event AND
+event_attribute_value.event = location_table.event AND
+event_attribute_value.event = start_table.event AND
+location_table.value = '".$location."' AND
+location_table.attribute = location_attribute_name.attribute AND
+location_attribute_name.name = 'location' AND
+((start_table.attribute = time_attribute_name.attribute AND
+time_attribute_name.name = 'start_time') OR
+(start_table.attribute = time_attribute_name.attribute AND
+time_attribute_name.name = 'end_time'))) as events_table
+LEFT JOIN
+(SELECT DISTINCT query_tag.tag, event_attribute_value.event, location_table.value as location, start_table.value as start
+FROM tag_event_id, query_tag, event_attribute_value, event_attribute_value as location_table, event_attribute_value as start_table, attribute_name as location_attribute_name, attribute_name as time_attribute_name
+WHERE
+query_tag.tag = tag_event_id.tag AND
+tag_event_id.event_id = event_attribute_value.event AND
+event_attribute_value.event = location_table.event AND
+event_attribute_value.event = start_table.event AND
+location_table.attribute = location_attribute_name.attribute AND
+location_attribute_name.name = 'location' AND
+start_table.attribute = time_attribute_name.attribute AND
+time_attribute_name.name = 'start_time') as event_start_table ON event_start_table.event = events_table.event
+) as event_location_start
+LEFT JOIN
+(SELECT event_attribute_value.event, end_table.value as end
+FROM tag_event_id, query_tag, event_attribute_value, event_attribute_value as end_table, attribute_name as time_attribute_name
+WHERE
+query_tag.tag = tag_event_id.tag AND
+tag_event_id.event_id = event_attribute_value.event AND
+event_attribute_value.event = end_table.event AND
+end_table.attribute = time_attribute_name.attribute AND
+time_attribute_name.name = 'end_time') as event_end ON event_location_start.event = event_end.event) as result_table
+WHERE (result_table.start < '".$end."' AND result_table.end > '".$start."') OR (result_table.start > '".$start."' AND result_table.start < '".$end."') OR (result_table.end > '".$start."' AND result_table.end < '".$end."')
+GROUP BY result_table.id
+ORDER BY tags;";
+		}
+		if($start || $end) {
+			if($start) {
+				$time = $start;
+			}
+			else {
+				$time = $end;
+			}
+			//query
+			$query = "SELECT result_table.id, COUNT(result_table.tag) as tags
+FROM
+(SELECT DISTINCT event_location_start.id, event_location_start.tag, event_location_start.event, event_location_start.location, event_location_start.start, event_end.end
+FROM
+(
+SELECT events_table.id, events_table.tag, events_table.event, events_table.location, event_start_table.start
+FROM
+(SELECT DISTINCT query_tag.id, query_tag.tag, event_attribute_value.event, location_table.value as location
+FROM tag_event_id, query_tag, event_attribute_value, event_attribute_value as location_table, event_attribute_value as start_table, attribute_name as location_attribute_name, attribute_name as time_attribute_name
+WHERE
+query_tag.tag = tag_event_id.tag AND
+tag_event_id.event_id = event_attribute_value.event AND
+event_attribute_value.event = location_table.event AND
+event_attribute_value.event = start_table.event AND
+location_table.value = '".$location."' AND
+location_table.attribute = location_attribute_name.attribute AND
+location_attribute_name.name = 'location' AND
+((start_table.attribute = time_attribute_name.attribute AND
+time_attribute_name.name = 'start_time') OR
+(start_table.attribute = time_attribute_name.attribute AND
+time_attribute_name.name = 'end_time'))) as events_table
+LEFT JOIN
+(SELECT DISTINCT query_tag.tag, event_attribute_value.event, location_table.value as location, start_table.value as start
+FROM tag_event_id, query_tag, event_attribute_value, event_attribute_value as location_table, event_attribute_value as start_table, attribute_name as location_attribute_name, attribute_name as time_attribute_name
+WHERE
+query_tag.tag = tag_event_id.tag AND
+tag_event_id.event_id = event_attribute_value.event AND
+event_attribute_value.event = location_table.event AND
+event_attribute_value.event = start_table.event AND
+location_table.attribute = location_attribute_name.attribute AND
+location_attribute_name.name = 'location' AND
+start_table.attribute = time_attribute_name.attribute AND
+time_attribute_name.name = 'start_time') as event_start_table ON event_start_table.event = events_table.event
+) as event_location_start
+LEFT JOIN
+(SELECT event_attribute_value.event, end_table.value as end
+FROM tag_event_id, query_tag, event_attribute_value, event_attribute_value as end_table, attribute_name as time_attribute_name
+WHERE
+query_tag.tag = tag_event_id.tag AND
+tag_event_id.event_id = event_attribute_value.event AND
+event_attribute_value.event = end_table.event AND
+end_table.attribute = time_attribute_name.attribute AND
+time_attribute_name.name = 'end_time') as event_end ON event_location_start.event = event_end.event) as result_table
+WHERE result_table.start = '".$time."' OR result_table.end = '".$time."' OR (result_table.start < '".$time."' AND result_table.end > '".$time."')
+GROUP BY result_table.id
+ORDER BY tags;";
+		
+		}
+		$result = db_query($query);
+		$story_array = array();
+		foreach ($result as $record) {
+			$story_array[] = $record->id;
+		}
+		//themes for the set of stories
+		$themes = themes_for_a_dossier($story_array);
+		$output = '';
+		$output = '<div>&nbsp';
+		if(!empty($themes)) {
+			$output .= '<div class="topic-block"><h2 class="pane-title"><i class="fa fa-link fa-lg">&nbsp;</i><span class="topic-title">Themes of stories&nbsp;&nbsp;</span>' . '</h2></div>';
+			$output .=  '<div><ul class="field-name-field-fb-tags">';
+			foreach($themes as $theme) {
+				$output .= l('<li class="tags">'.$theme->name."</li>", request_path(), array("html"=>TRUE, "query"=>array("tag"=>$theme->value, 'storylocation'=>$location, 'storytime'=>$start, 'storyend'=>$end)));
+			}
+			$output .=  '</ul><div style="clear:both;"></div>';
+			$output .=  '</div>';
+		}
+		$output .= '</div>';
 		
 		return $output;
 	}

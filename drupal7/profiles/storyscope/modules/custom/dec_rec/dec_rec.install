@@ -227,9 +227,15 @@ function dec_rec_schema() {
 						'size' => 'medium',
 						'not null' => TRUE,
 				),
+				'request_path' => array(
+					'type' => 'varchar',
+					'description' => "Request path of a timeline",
+					'length' => 100,
+					'not null' => FALSE,
+				),
 			),
 			'unique keys' => array(
-					'data_key'     => array('tag', 'attribute')
+					'data_key'     => array('tag', 'attribute', 'request_path')
 			),
 	);
 	$schema['story_timeline_data'] = array(
@@ -252,9 +258,15 @@ function dec_rec_schema() {
 						'size' => 'medium',
 						'not null' => TRUE,
 				),
+				'request_path' => array(
+					'type' => 'varchar',
+					'description' => "Request path of a timeline",
+					'length' => 100,
+					'not null' => FALSE,
+				),
 			),
 			'unique keys' => array(
-					'data_key'     => array('story', 'event_type')
+					'data_key'     => array('story', 'event_type', 'request_path')
 			),
 	);
 	$schema['setting_timeline_data'] = array(
@@ -287,9 +299,15 @@ function dec_rec_schema() {
 						'size' => 'medium',
 						'not null' => TRUE,
 				),
+				'request_path' => array(
+					'type' => 'varchar',
+					'description' => "Request path of a timeline",
+					'length' => 100,
+					'not null' => FALSE,
+				),
 			),
 			'unique keys' => array(
-					'data_key'     => array('location', 'start', 'end', 'event_type')
+					'data_key'     => array('location', 'start', 'end', 'event_type', 'request_path')
 			),
 	);
 	$schema['location_container'] = array(

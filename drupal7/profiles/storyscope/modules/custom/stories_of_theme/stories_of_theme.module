@@ -34,54 +34,31 @@ function stories_of_theme_menu() {
 	 'page callback' => 'stories_for_a_topic',
 	'access callback' => TRUE,
 	);
+	$items['dossier/%/story/%/settingstories'] = array(
+	 'title' => 'Stories',
+	 'description' => 'Stories related to a topic',
+	 'page callback' => 'setting_stories_for_a_topic',
+	'access callback' => TRUE,
+	);
+	$items['dossier/%/settingstories'] = array(
+	 'title' => 'Stories',
+	 'description' => 'Stories related to a topic',
+	 'page callback' => 'setting_stories_for_a_topic',
+	'access callback' => TRUE,
+	);
+	$items['front/settingstories'] = array(
+	 'title' => 'Stories',
+	 'description' => 'Stories related to a topic',
+	 'page callback' => 'setting_stories_for_a_topic',
+	'access callback' => TRUE,
+	);
+	$items['settingstories'] = array(
+	 'title' => 'Stories',
+	 'description' => 'Stories related to a topic',
+	 'page callback' => 'setting_stories_for_a_topic',
+	'access callback' => TRUE,
+	);
 	return $items;
-}
-
-/**
-* Implements hook_block_info().
-*/
-function stories_of_theme_block_info() {
-  $blocks = array();
-  $blocks['stories_of_theme_block'] = array(
-    'info' => t('Stories of theme'),
-    'visibility' => BLOCK_VISIBILITY_LISTED,
-  	'pages' => 'front',
-  );
-  return $blocks;
-}
-
-/**
-* Implements hook_block_view().
-*/
-function stories_of_theme_block_view($delta = '') {
-  $block = array();
-  switch ($delta) {
-    case 'stories_of_theme_block':
-      $block['subject'] = '';
-      $block['content'] = stories_of_theme_block_content();
-      break;
-  }
-  return $block;
-}
-
-function stories_of_theme_block_content() {
-	//show if there is a tag variable
-	if(isset($_GET['tag'])) {
-		$tag = $_GET['tag'];
-		return stories_for_a_topic($tag);
-	}
-	if(isset($_GET['location']) && isset($_GET['time'])) {
-		$location = $_GET['location'];
-		$start = $_GET['time'];
-		if(isset($_GET['end'])) {
-			$end = $_GET['end'];
-		}
-		else {
-			$end = FALSE;
-		}
-		return stories_for_a_setting($location, $start, $end);
-	}
-  return FALSE;
 }
 
 function stories_for_a_topic($n = 8) {
@@ -106,25 +83,51 @@ query_tag.tag = tag_event_id.tag AND
 value_table.attribute <> 'location'
 GROUP BY query_tag.id
 ORDER BY tags DESC, events DESC LIMIT ".$n.";";
+		
+		drupal_set_title(t('Storyscope stories: '.$name));
 		$result = db_query($query);
 		$output .= '<div class="panel-middle-3"><div class="panel-pane pane-views pane-dossier-stories">';
-		$output .= '<h2 class="pane-title"><i class="fa fa-comments fa-lg">&nbsp;</i>Storyscope stories related to '.$name.'</h2>';
+		$output .= '<h2 class="pane-title"><i class="fa fa-comments fa-lg">&nbsp;</i>Stories</h2>';
 		$output .= '<div class="pane-content"><div class="view view-dossier-stories view-id-dossier_stories view-display-id-default resource-container container-full wide-items view-dom-id-7450ee9ef1af82379eb82e6a617daa7a contextual-links-region"><div class = "view-content">';
+
+		$story_output = '';
 		foreach ($result as $record) {
 			$node = node_load($record->id);
 			if($node) {
 				$path = drupal_get_path_alias('node/'.$node->nid);
 				$title = $node->title;
-				$output .= '<article class="node-'.$node->nid.' node node-story node-promoted node-teaser contextual-links-region node-by-viewer clearfix"><div class="article-inner"><header><h2 class="title">'.l($title,$path).'</h2></header></div></article>';
+				$story_output .= '<article class="node-'.$node->nid.' node node-story node-promoted node-teaser contextual-links-region node-by-viewer clearfix"><div class="article-inner"><header><h2 class="title">'.l($title,$path).'</h2></header></div></article>';
 			}
+		}
+		if(empty($story_output)) {
+			$output .= 'No stories have been written related to this tag.';
+		}
+		else {
+			$output .= $story_output;
 		}
 		$output .= '</div></div></div></div>';
 
 	return $output;
 }
 
-function get_dossier_for_story($story_nid) {
-	
+function setting_stories_for_a_topic() {
+	$params = drupal_get_query_parameters();
+	$location = $params['storylocation'];
+	$time = $params['storytime'];
+	if(isset($params['storyend'])) {
+		$end = $params['storyend'];
+	}
+	else {
+		$end = 0;
+	}
+
+	if($location) {
+		$output = stories_for_a_setting($location, $time, $end);
+	}
+	else {
+		$output = '';
+	}
+	return $output;
 }
 
 function stories_for_a_setting($location, $start, $end = FALSE) {
@@ -243,8 +246,10 @@ ORDER BY tags;";
 	else {
 		$label = get_topic_name($location).' '.$time;
 	}
+	drupal_set_title(t('Storyscope stories: '.$label));
+	
 	$output .= '<div class="panel-middle-3"><div class="panel-pane pane-views pane-dossier-stories">';
-	$output .= '<h2 class="pane-title"><i class="fa fa-comments fa-lg">&nbsp;</i>Storyscope stories related to '.$label.'</h2>';
+	$output .= '<h2 class="pane-title"><i class="fa fa-comments fa-lg">&nbsp;</i>Stories</h2>';
 	$output .= '<div class="pane-content"><div class="view view-dossier-stories view-id-dossier_stories view-display-id-default resource-container container-full wide-items view-dom-id-7450ee9ef1af82379eb82e6a617daa7a contextual-links-region"><div class = "view-content">';
 	foreach ($result as $record) {
 		$node = node_load($record->id);

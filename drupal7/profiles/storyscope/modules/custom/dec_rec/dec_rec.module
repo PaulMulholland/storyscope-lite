@@ -9,8 +9,59 @@
  *
  */
 
+function timeline_path_key() {
+	if(isset($_GET['storytag'])) {
+		return '/'.current_path().$_GET['storytag'];
+	}
+	else {
+		if(request_path()) {
+			return '/'.request_path();
+		}
+		else {
+			return '/front';
+		}
+	}
+}
+
+/*
+ * Add required parameters when tag or setting space is returned for a story search
+ */
+function story_search_link_check($title,$link,$args) {
+	$link_array = explode('/',$link);
+	$link_end = end($link_array);
+	$params = drupal_get_query_parameters();
+	//is last param stories
+	if($link_end == 'stories') {
+		//add storytag to $query
+		$args['query']['storytag'] = $params['storytag'];
+		
+	}
+	
+	//is last param settingstories
+	if($link_end == 'settingstories') {
+		//add storylocation storytime storyend to $query
+		$args['query']['storylocation'] = $params['storylocation'];
+		$args['query']['storytime'] = $params['storytime'];
+		$args['query']['storyend'] = $params['storyend'];
+	}
+	return l($title,$link,$args);
+}
+
+function add_story_search_parameters() {
+	$params = drupal_get_query_parameters();
+	$path_array = explode('/',request_path());
+	if(end($path_array) == 'stories') {
+		return '&storytag='.$params['storytag'];
+	}
+	elseif(end($path_array) == 'settingstories') {
+		return '&storylocation='.$params['storylocation'].'&storytime='.$params['storytime'].'&storyend='.$params['storyend'];
+	}
+	return '';
+}
+
 function storysettinglink($label, $link, $args = array()) {
-	return l($label,request_path(), $args);
+	$link_args = array_merge($args, array('query'=>array('tag'=>$link)));
+	return l($label,request_path(), $link_args);
 }
 
 function storytaglink($label, $link, $args = array()) {
@@ -56,13 +107,13 @@ function dec_rec_admin() {
 /**
  * Retrieve API key from configuration variable and build URL variable
  */
-function get_google_api_key_path() {
+function get_google_api_key_path($connector = '&') {
 	$googleapikey = variable_get("dec_rec_key", "");
 	if($googleapikey == "") {
 		return "";
 	}
 	else {
-		return "&key=".$googleapikey;
+		return $connector."key=".$googleapikey;
 	}
 }
 
@@ -562,8 +613,8 @@ function dec_rec_entity_insert($entity, $type) {
   // Insert the new entity into a fictional table of all entities.
 	if($type == 'field_collection_item') {
 		if(isset($entity->field_mid['und'][0]['value'])) {
-			$mid = extract_mid_from_freebase_uri($entity->field_mid['und'][0]['value']);
-			$handle = background_process_start('new_event_space_of_a_topic', $mid);
+			$mid = '/m/'.$entity->field_mid['und'][0]['value'];
+			$handle = background_process_start('update_tag_event_mapping', $mid);
 		}
 	}
 }
@@ -575,9 +626,18 @@ function dec_rec_entity_update($entity, $type) {
 	// Insert the new entity into a fictional table of all entities.
 	if($type == 'field_collection_item') {
 		if(isset($entity->field_mid['und'][0]['value'])) {
-			$mid = extract_mid_from_freebase_uri($entity->field_mid['und'][0]['value']);
-			$handle = background_process_start('new_event_space_of_a_topic', $mid);
+			$mid = '/m/'.$entity->field_mid['und'][0]['value'];
+			$handle = background_process_start('update_tag_event_mapping', $mid);
 		}
+	}
+}
+
+/**
+ * 
+ */
+function async_check_for_name_description_image($event_list) {
+	foreach($event_list as $event_id) {
+		$handle = background_process_start('check_topic_name_image_description', $event_id);
 	}
 }
 
@@ -699,32 +759,34 @@ function tagtimelinedata($m, $id = FALSE) {
 		$path = $base_url;
 	}
 
-	//check for cached version of the timeline data
- 	$cached_data = check_for_cached_topic_timeline($topic, $attribute);
+	//check for cached version of the timeline data 
+ 	$cached_data = check_for_cached_topic_timeline($topic, $attribute, $path);
 
  	if($cached_data) {
  		return drupal_json_output(json_decode(stripslashes($cached_data)));
  	}
-
-	//generate new timeline data	
-	$timeline_data = drupal_json_encode(array('timeline'=>dec_tag_timeline($topic, $attribute, $path)));
-	//save new timeline data
- 	save_topic_timelime($topic, $attribute, $timeline_data);
+	else {
+		return drupal_json_output(array(array('timeline'=>array())));
+	}
+// 	//generate new timeline data	
+// 	$timeline_data = drupal_json_encode(array('timeline'=>dec_tag_timeline($topic, $attribute, $path)));
+// 	//save new timeline data
+//  	save_topic_timelime($topic, $attribute, $timeline_data);
 	
- 	return drupal_json_output(json_decode($timeline_data));
+//  	return drupal_json_output(json_decode($timeline_data));
 }
 
 /**
  * Check for cached timeline for a single tag
 */
-function check_for_cached_topic_timeline($topic, $attribute = FALSE) {
+function check_for_cached_topic_timeline($topic, $attribute = FALSE, $path) {
 	if(!$attribute) {
 		$attribute = 'no_attribute';
 	}
 
 	$query = "SELECT tag_timeline_data.timeline_data
 	FROM tag_timeline_data
-	WHERE tag_timeline_data.tag = '".$topic."' AND tag_timeline_data.attribute = '".$attribute."';";
+	WHERE tag_timeline_data.tag = '".$topic."' AND tag_timeline_data.attribute = '".$attribute."' AND request_path = '".$path."';";
 	$result = db_query($query);
 	$object = $result->fetchObject();		
 
@@ -742,33 +804,33 @@ function save_topic_timelime($topic, $attribute = FALSE, $timeline_data) {
 	$timeline_data = my_escape_string($timeline_data);
 	
 	if($attribute) {
-		$query = "INSERT INTO tag_timeline_data (tag, attribute, timeline_data) VALUES (:tag, :attribute, :data) ON DUPLICATE KEY UPDATE tag = VALUES(tag), attribute = VALUES(attribute), timeline_data = VALUES(timeline_data);";
-		db_query($query, array(':tag' => $topic, ':attribute' => $attribute, ':data' => $timeline_data));
+		$query = "INSERT INTO tag_timeline_data (tag, attribute, timeline_data, request_path) VALUES (:tag, :attribute, :data, :path) ON DUPLICATE KEY UPDATE tag = VALUES(tag), attribute = VALUES(attribute), timeline_data = VALUES(timeline_data), request_path = VALUES(request_path);";
+		db_query($query, array(':tag' => $topic, ':attribute' => $attribute, ':data' => $timeline_data, ':path'=>timeline_path_key()));
 	}
 	else {
-		$query = "INSERT INTO tag_timeline_data (tag, attribute, timeline_data) VALUES (:tag, 'no_attribute', :data) ON DUPLICATE KEY UPDATE tag = VALUES(tag), attribute = VALUES(attribute), timeline_data = VALUES(timeline_data);";
-		db_query($query, array(':tag' => $topic, ':data' => $timeline_data));
+		$query = "INSERT INTO tag_timeline_data (tag, attribute, timeline_data, request_path) VALUES (:tag, 'no_attribute', :data, :path) ON DUPLICATE KEY UPDATE tag = VALUES(tag), attribute = VALUES(attribute), timeline_data = VALUES(timeline_data), request_path = VALUES(request_path);";
+		db_query($query, array(':tag' => $topic, ':data' => $timeline_data, ':path'=>timeline_path_key()));
 	}
 }
 
 /**
  * Check for cached timeline for a story
 */
-function check_for_cached_story_timeline($story, $event_type = FALSE) {
+function check_for_cached_story_timeline($story, $event_type = FALSE, $path) {
 	if($event_type) {
 		$query = "SELECT story_timeline_data.timeline_data
 		FROM story_timeline_data
-		WHERE story_timeline_data.story = '".$story."' AND story_timeline_data.event_type = '".$event_type."';";
+		WHERE story_timeline_data.story = '".$story."' AND story_timeline_data.event_type = '".$event_type."' AND request_path = '".$path."';";
 		$result = db_query($query);		
 	}
 	else {
 		$query = "SELECT story_timeline_data.timeline_data
 		FROM story_timeline_data
-		WHERE story_timeline_data.story = '".$story."' AND story_timeline_data.event_type = 'no_event_type';";
-		$result = db_query($query);		
+		WHERE story_timeline_data.story = '".$story."' AND story_timeline_data.event_type = 'no_event_type' AND request_path = '".$path."';";
+		$result = db_query($query);	
 	}
 	$object = $result->fetchObject();
-	if(isset($object->timeline_data)) {
+	if(isset($object->timeline_data) && $object->timeline_data) {
 		return $object->timeline_data;
 	}
 	return FALSE;	
@@ -777,17 +839,17 @@ function check_for_cached_story_timeline($story, $event_type = FALSE) {
 /**
  * Check for cached timeline for a setting
  */
-function check_for_cached_setting_timeline($location, $start, $end, $event_type = FALSE) {
+function check_for_cached_setting_timeline($location, $start, $end, $event_type = FALSE, $path) {
 	if($event_type) {
 		$query = "SELECT setting_timeline_data.timeline_data
 		FROM setting_timeline_data
-		WHERE setting_timeline_data.location = '".$location."' AND setting_timeline_data.start = '".$start."' AND setting_timeline_data.end = '".$end."' AND setting_timeline_data.event_type = '".$event_type."';";
+		WHERE setting_timeline_data.location = '".$location."' AND setting_timeline_data.start = '".$start."' AND setting_timeline_data.end = '".$end."' AND setting_timeline_data.event_type = '".$event_type." AND request_path = '".$path."';";
 		$result = db_query($query);		
 	}
 	else {
 		$query = "SELECT setting_timeline_data.timeline_data
 		FROM setting_timeline_data
-		WHERE setting_timeline_data.location = '".$location."' AND setting_timeline_data.start = '".$start."' AND setting_timeline_data.end = '".$end."' AND setting_timeline_data.event_type = 'no_event_type';";
+		WHERE setting_timeline_data.location = '".$location."' AND setting_timeline_data.start = '".$start."' AND setting_timeline_data.end = '".$end."' AND setting_timeline_data.event_type = 'no_event_type' AND request_path = '".$path."';";
 		$result = db_query($query);		
 	}
 
@@ -804,12 +866,12 @@ function check_for_cached_setting_timeline($location, $start, $end, $event_type 
 function save_setting_timelime($location, $start, $end, $event_type, $timeline_data) {
 	$timeline_data = my_escape_string($timeline_data);
 	if($event_type) {
-		$query = "INSERT INTO setting_timeline_data (location, start, end, event_type, timeline_data) VALUES (:location, :start, :end, :event_type, :data) ON DUPLICATE KEY UPDATE location = VALUES(location), start = VALUES(start), end = VALUES(end), event_type = VALUES(event_type), timeline_data = VALUES(timeline_data);";
-		db_query($query, array(':location' => $location, ':start' => $start, ':end' => $end, ':event_type' => $event_type, ':data' => $timeline_data));
+		$query = "INSERT INTO setting_timeline_data (location, start, end, event_type, timeline_data, request_path) VALUES (:location, :start, :end, :event_type, :data, :path) ON DUPLICATE KEY UPDATE location = VALUES(location), start = VALUES(start), end = VALUES(end), event_type = VALUES(event_type), timeline_data = VALUES(timeline_data), request_path = VALUES(request_path);";
+		db_query($query, array(':location' => $location, ':start' => $start, ':end' => $end, ':event_type' => $event_type, ':data' => $timeline_data, ':path'=>timeline_path_key()));
 	}
 	else {
-		$query = "INSERT INTO setting_timeline_data (location, start, end, event_type, timeline_data) VALUES (:location, :start, :end, 'no_event_type', :data) ON DUPLICATE KEY UPDATE location = VALUES(location), start = VALUES(start), end = VALUES(end), event_type = VALUES(event_type), timeline_data = VALUES(timeline_data);";
-		db_query($query, array(':location' => $location, ':start' => $start, ':end' => $end, ':data' => $timeline_data));
+		$query = "INSERT INTO setting_timeline_data (location, start, end, event_type, timeline_data, request_path) VALUES (:location, :start, :end, 'no_event_type', :data, :path) ON DUPLICATE KEY UPDATE location = VALUES(location), start = VALUES(start), end = VALUES(end), event_type = VALUES(event_type), timeline_data = VALUES(timeline_data), request_path = VALUES(request_path);";
+		db_query($query, array(':location' => $location, ':start' => $start, ':end' => $end, ':data' => $timeline_data, ':path'=>timeline_path_key()));
 	}
 }
 
@@ -820,12 +882,12 @@ function save_story_timeline($story, $event_type = FALSE, $timeline_data) {
 	$timeline_data = my_escape_string($timeline_data);
 	
 	if($event_type) {
-		$query = "INSERT INTO story_timeline_data (story, event_type, timeline_data) VALUES (:story, :event_type, :data) ON DUPLICATE KEY UPDATE story = VALUES(story), event_type = VALUES(event_type), timeline_data = VALUES(timeline_data);";
-		db_query($query, array(':story' => $story, ':event_type' => $event_type, ':data' => $timeline_data));
+		$query = "INSERT INTO story_timeline_data (story, event_type, timeline_data, request_path) VALUES (:story, :event_type, :data, :path) ON DUPLICATE KEY UPDATE story = VALUES(story), event_type = VALUES(event_type), timeline_data = VALUES(timeline_data), request_path = VALUES(request_path);";
+		db_query($query, array(':story' => $story, ':event_type' => $event_type, ':data' => $timeline_data, ':path'=>timeline_path_key()));
 	}
 	else {
-		$query = "INSERT INTO story_timeline_data (story, event_type, timeline_data) VALUES (:story, 'no_event_type', :data) ON DUPLICATE KEY UPDATE story = VALUES(story), event_type = VALUES(event_type), timeline_data = VALUES(timeline_data);";
-		db_query($query, array(':story' => $story, ':data' => $timeline_data));
+		$query = "INSERT INTO story_timeline_data (story, event_type, timeline_data, request_path) VALUES (:story, 'no_event_type', :data, :path) ON DUPLICATE KEY UPDATE story = VALUES(story), event_type = VALUES(event_type), timeline_data = VALUES(timeline_data), request_path = VALUES(request_path);";
+		db_query($query, array(':story' => $story, ':data' => $timeline_data, ':path'=>timeline_path_key()));
 	}
 }
 
@@ -870,18 +932,22 @@ function settingtimelinedata() {
 	}
 
 	//check for cached version of setting timeline data
-	$cached_data = check_for_cached_setting_timeline($location, $time, $end, $event_type);
+	$cached_data = check_for_cached_setting_timeline($location, $time, $end, $event_type, $path);
 
 	if($cached_data) {
 		return drupal_json_output(json_decode(stripslashes($cached_data)));
 	}
+	else {
+		return drupal_json_output(array(array('timeline'=>array())));;
+	}
 	
-	$timeline_data = drupal_json_encode(array('timeline'=>dec_setting_timeline($location, $full_start_time, $full_end_time, $time, $end, $event_type, $path)));
+	
+// 	$timeline_data = drupal_json_encode(array('timeline'=>dec_setting_timeline($location, $full_start_time, $full_end_time, $time, $end, $event_type, $path)));
 
-	//save setting timeline data
-	save_setting_timelime($location, $time, $end, $event_type, $timeline_data);
+// 	//save setting timeline data
+// 	save_setting_timelime($location, $time, $end, $event_type, $timeline_data);
 
- 	return drupal_json_output(json_decode($timeline_data));
+//  	return drupal_json_output(json_decode($timeline_data));
 }
 
 /**
@@ -904,20 +970,24 @@ function tagstimelinedata($story_id) {
 	else {
 		$event_type = FALSE;
 	}
-	
+
 	//check for cached version of the timeline data
- 	$cached_data = check_for_cached_story_timeline($story_id, $event_type);
+ 	$cached_data = check_for_cached_story_timeline($story_id, $event_type, $path);
 	
  	if($cached_data) {
  		return drupal_json_output(json_decode(stripslashes($cached_data)));
  	}
- 
- 	$timeline_data = drupal_json_encode(array('timeline'=>dec_tags_timeline($story_id, $event_type, $path)));
+ 	else {
+ 		return drupal_json_output(array(array('timeline'=>array())));;
+ 	}
+ 	
+ 	
+//  	$timeline_data = drupal_json_encode(array('timeline'=>dec_tags_timeline($story_id, $event_type, $path)));
 
-	//save new timeline data
-	save_story_timeline($story_id, $event_type, $timeline_data);
+// 	//save new timeline data
+// 	save_story_timeline($story_id, $event_type, $timeline_data);
 	
-	return drupal_json_output(json_decode($timeline_data));
+// 	return drupal_json_output(json_decode($timeline_data));
 }
 
 /**
@@ -941,7 +1011,11 @@ function get_attribute_reverse_title($attribute = '/visual_art/artwork/artist') 
 function dec_timeline_for_setting($location, $time, $end) {
 	global $base_url;
 	$output = "";
-
+	$name = get_topic_name($location);
+	if($name) {
+		$output .= '<h2><i class="fa fa-info fa-lg">&nbsp;</i><span class="topic-title">' . t('About : ').$name.", ".$time." to ".$end.'&nbsp;&nbsp;</span>';
+	}
+	
 	if(!$location && !$time) {
 		return "No setting found";
 	}
@@ -953,20 +1027,9 @@ function dec_timeline_for_setting($location, $time, $end) {
 // 	$name = get_topic_name($location);
 	if(isset($_GET['event_type'])) {
 		$event_type = $_GET['event_type'];
-// 		if($end) {
-// 			drupal_set_title($name.", ".$time." to ".$end.': '.$event_type);			
-// 		}
-// 		else {
-// 			drupal_set_title($name.", ".$time.': '.$event_type);			
-// 		}
-// 	}
-// 	else {
-// 		if($end) {
-// 			drupal_set_title($name.", ".$time." to ".$end);
-// 		}
-// 		else {
-// 			drupal_set_title($name.", ".$time);
-// 		}
+	}
+	else {
+		$event_type = FALSE;
 	}
 
 	//check for reload 
@@ -974,37 +1037,69 @@ function dec_timeline_for_setting($location, $time, $end) {
 		$reload = $_GET['reload'];
 		if($reload) {
 			//clear cache
-			if(isset($event_type)) {
-				$query = "delete from setting_timeline_data where location = '".$location."' AND start = '".$time."' AND end = '".$end."' AND event_type = '".$event_type."';";
+			if($event_type) {
+				$query = "delete from setting_timeline_data where location = '".$location."' AND start = '".$time."' AND end = '".$end."' AND event_type = '".$event_type."' AND request_path = '".timeline_path_key()."';";
 				db_query($query);
 			}
 			else {
-				$query = "delete from setting_timeline_data where location = '".$location."' AND start = '".$time."' AND end = '".$end."' AND event_type = 'no_event_type';";
+				$query = "delete from setting_timeline_data where location = '".$location."' AND start = '".$time."' AND end = '".$end."' AND event_type = 'no_event_type' AND request_path = '".timeline_path_key()."';";
 				db_query($query);
 			}
 		}
 	}
 	
+	if($end) {
+		$full_start_time = complete_time_stamp($time, 'start');
+		$full_end_time = complete_time_stamp($end, 'end');
+	}
+	else {
+		$full_start_time = complete_time_stamp($time, 'start');
+		$full_end_time = complete_time_stamp($time, 'end');
+	}
+	
+	$cached_data = check_for_cached_setting_timeline($location, $time, $end, $event_type, timeline_path_key());
+
+	if(!$cached_data) {
+		//calculate
+		//get events for a setting
+		$all_events = get_all_events_for_setting($location, $full_start_time, $full_end_time);
+		$event_array = flat_list_of_events($all_events);
+		if($event_type) {
+			$event_list = temporal_event_list_for_event_array_and_activity($event_type, $event_array);
+		}
+		else {
+			$event_list = temporal_event_list_for_event_array($event_array);
+		}
+		
+		//event table and timeline links
+		$a = create_timeline_setting_header($location, $time, $end, request_path());
+		$a['date'] = event_timeline_for_event_list($event_list);
+		$timeline_data = drupal_json_encode(array('timeline'=>$a));
+		
+		save_setting_timelime($location, $time, $end, $event_type, $timeline_data);
+	}
+	
+	
 	//timeline
-	$output = '<div id="timeline-embed"></div>
+	$output .= '<div id="timeline-embed"></div>
     <script type="text/javascript">
         var timeline_config = {
             width:              "100%",
             height:             "600",';
-	if(isset($event_type)) {
+	if($event_type) {
 		if($end) {
-			$output .= 'source:             "'.$base_url.'/settingtimelinedata?settinglocation='.$location.'&time='.$time.'&event_type='.$event_type.'&end='.$end.'&path='.request_path().'&path='.request_path().'&path='.request_path().'"';
+			$output .= 'source:             "'.$base_url.'/settingtimelinedata?settinglocation='.$location.'&time='.$time.'&event_type='.$event_type.'&end='.$end.'&path='.timeline_path_key().'"';
 		}
 		else {
-			$output .= 'source:             "'.$base_url.'/settingtimelinedata?settinglocation='.$location.'&time='.$time.'&event_type='.$event_type.'&path='.request_path().'"';
+			$output .= 'source:             "'.$base_url.'/settingtimelinedata?settinglocation='.$location.'&time='.$time.'&event_type='.$event_type.'&path='.timeline_path_key().'"';
 		}
 	}
 	else {
 		if($end) {
-			$output .= 'source:             "'.$base_url.'/settingtimelinedata?settinglocation='.$location.'&time='.$time.'&end='.$end.'&path='.request_path().'"';
+			$output .= 'source:             "'.$base_url.'/settingtimelinedata?settinglocation='.$location.'&time='.$time.'&end='.$end.'&path='.timeline_path_key().'"';
 		}
 		else {
-			$output .= 'source:             "'.$base_url.'/settingtimelinedata?settinglocation='.$location.'&time='.$time.'&path='.request_path().'"';
+			$output .= 'source:             "'.$base_url.'/settingtimelinedata?settinglocation='.$location.'&time='.$time.'&path='.timeline_path_key().'"';
 		}
 	}
 	
@@ -1014,7 +1109,7 @@ function dec_timeline_for_setting($location, $time, $end) {
 	
 	$output .= '<div style="clear:both; margin-top:1em">If the timeline sticks at LOADING TIMELINE... then use your browser reload button.</div>';
 	$output .= '<div style="clear:both; margin-bottom:1em">If the information displayed seems incomplete (e.g. events of a story tag with time information are not included) then use the Recalcuate button.</div>';
-	if(isset($event_type)) {
+	if($event_type) {
 		if($end) {
 			$output .= l("Recalcuate", request_path(), array('query'=>array('timeline_for_setting'=>$location, 'time'=>$time, 'end'=>$end, 'event_type'=>$event_type, 'reload'=>'1')));
 		}
@@ -1046,55 +1141,85 @@ function dec_timeline_for_tags($story_id) {
 	}
 	$output = "";
 	
-	//story topics for title
-	$tag_array = get_tags_names_for_a_story($story_id);
-	$headline = array();
+	//tags title
+	$query = "SELECT query_tag.tag, tag_name.name FROM query_tag
+LEFT JOIN tag_name ON query_tag.tag = tag_name.tag
+WHERE query_tag.id = '".$story_id."';";
+	$result = db_query($query);
+	
+	$tag_array = array();
+	foreach ($result as $record) {
+		$tag_array[] = $record->tag;
+	}
+	$tag_name_array = array();
 	foreach($tag_array as $tag) {
-		if($tag['1']) {
-			$headline[] =  $tag['1'];
+		$name = get_topic_name($tag);
+		if($name) {
+			$tag_name_array[] = $name;
 		}
 		else {
-			$headline[] = $tag['0'];
+			$tag_name_array[] = $tag;
 		}
 	}
 	
-	$story_title = implode(', ',$headline);
+	$output .= '<h2><i class="fa fa-info fa-lg">&nbsp;</i>' . t('About : ') .implode(", ",$tag_name_array).'</h2>';
 	
 
 	if(isset($_GET['event_type'])) {
 		$event_type = $_GET['event_type'];
 	}
-
+	else {
+		$event_type = FALSE;
+	}
 
 	//check for reload 
 	if(isset($_GET['reload'])) {
 		$reload = $_GET['reload'];
 		if($reload) {
 			//clear cache
-			if(isset($event_type)) {
-				$query = "delete from story_timeline_data where story = '".$story_id."' AND event_type = '".$event_type."';";
+			if($event_type) {
+				$query = "delete from story_timeline_data where story = '".$story_id."' AND event_type = '".$event_type."' AND request_path = '".timeline_path_key()."';";
 				db_query($query);
 			}
 			else {
-				$query = "delete from story_timeline_data where story = '".$story_id."'AND event_type = 'no_event_type';";
+				$query = "delete from story_timeline_data where story = '".$story_id."'AND event_type = 'no_event_type' AND request_path = '".timeline_path_key()."';";
 				db_query($query);
 			}
 		}
 	}
+
+	//check for cached version of the timeline data
+	$cached_data = check_for_cached_story_timeline($story_id, $event_type, timeline_path_key());
+
+	if(!$cached_data) {
+		//calculate timeline
+		//get event list
+		$a = event_timeline_header_for_story($story_id);
+		$event_list = event_list_for_story_id($story_id);
+		if($event_type) {
+			$event_list = temporal_event_list_for_event_array_and_activity($event_type, $event_list);
+		}
+		else {
+			$event_list = temporal_event_list_for_event_array($event_list);
+		}
+		$a['date'] = event_timeline_for_event_list($event_list);
+		$timeline_data = drupal_json_encode(array('timeline'=>$a));
+		save_story_timeline($story_id, $event_type, $timeline_data);
+	}
 	
 	//timeline
-	$output = '<div id="timeline-embed"></div>
+	$output .= '<div id="timeline-embed"></div>
     <script type="text/javascript">
         var timeline_config = {
             width:              "100%",
             height:             "600",';
 	
 // 		$output .= 'source:             "'.'http://localhost/my-data2.json'.'"';
-	if(isset($event_type)) {
-		$output .= 'source:             "'.$base_url.'/tagstimelinedata/'.$story_id.'?event_type='.$event_type.'&path='.request_path().'"';
+	if($event_type) {
+		$output .= 'source:             "'.$base_url.'/tagstimelinedata/'.$story_id.'?event_type='.$event_type.'&path='.timeline_path_key().'"';
 	}
 	else {
-		$output .= 'source:             "'.$base_url.'/tagstimelinedata/'.$story_id.'?path='.request_path().'"';
+		$output .= 'source:             "'.$base_url.'/tagstimelinedata/'.$story_id.'?path='.timeline_path_key().'"';
 	}
 	
 	$output .= '    }
@@ -1103,7 +1228,7 @@ function dec_timeline_for_tags($story_id) {
 
 	$output .= '<div style="clear:both; margin-top:1em">If the timeline sticks at LOADING TIMELINE... then use your browser reload button.</div>';
 	$output .= '<div style="clear:both; margin-bottom:1em">If the information displayed seems incomplete (e.g. events of a story tag with time information are not included) then use the Recalcuate button.</div>';
-	if(isset($event_type)) {
+	if($event_type) {
 		$output .= l("Recalcuate", request_path(), array('query'=>array('timeline_for_tags'=>$story_id, 'event_type'=>$event_type, 'reload'=>'1')));
 	}
 	else {
@@ -1141,19 +1266,59 @@ function dec_timeline($topic) {
 		if($reload) {
 			//clear cache
 			if($attribute) {
-				$query = "delete from tag_timeline_data where tag = '".$topic."' AND attribute = '".$attribute."';";
+				$query = "delete from tag_timeline_data where tag = '".$topic."' AND attribute = '".$attribute."' AND request_path = '".timeline_path_key()."';";
 				db_query($query);
 			}
 			else {
-				$query = "delete from tag_timeline_data where tag = '".$topic."'AND attribute = 'no_attribute';";
+				$query = "delete from tag_timeline_data where tag = '".$topic."'AND attribute = 'no_attribute' AND request_path = '".timeline_path_key()."';";
 				db_query($query);
 			}
 		}
 	}
 	
-// 	dec_tag_timeline($topic, $attribute, request_path());
+	//check for timeline data
+	$cached_data = check_for_cached_topic_timeline($topic, $attribute, timeline_path_key());
+	
+	if(!$cached_data) {
+		//generate new timeline data
+		
+		$a = event_timeline_header_for_topic($topic);
+		$all_events = get_all_events_for_tag($topic);
+		$event_list = flat_list_of_single_tag_events($all_events);
+
+		if($attribute) {
+			$event_list = temporal_event_list_for_event_array_and_activity($attribute, $event_list);
+		}
+		else {
+			$event_list = temporal_event_list_for_event_array($event_list);
+		}
+
+		$a['date'] = event_timeline_for_event_list($event_list);
+
+		$timeline_data = drupal_json_encode(array('timeline'=>$a));
+		
+		
+// 		$timeline_data = drupal_json_encode(array('timeline'=>dec_tag_timeline($topic, $attribute, request_path())));
+		//save new timeline data
+		save_topic_timelime($topic, $attribute, $timeline_data);
+	}
 	
 	$output = "";
+	//title
+	//tag type
+	$notable_tag_types = get_notable_tag_type_names($topic);
+	if(!empty($notable_tag_types)) {
+		$topic_types = ' (' . implode(', ', $notable_tag_types) . ')';
+	}
+	else {
+		$topic_types = '';
+	}
+	//tag name
+	$name = get_topic_name($topic);
+	if($name) {
+		$output .= '<div class="topic-block"><h2><i class="fa fa-info fa-lg">&nbsp;</i><span class="topic-title">' . t('About : '). $name . $topic_types . '&nbsp;&nbsp;</span>' . '</h2>';
+	}
+	
 // 	if($attribute) {
 // 		if($attribute_title = get_attribute_reverse_title($attribute)) {
 // 			$name = get_topic_name($topic);
@@ -1190,7 +1355,7 @@ function dec_timeline($topic) {
 // 		}
 // 	}
 	
-	$output = '<div id="timeline-embed"></div>
+	$output .= '<div id="timeline-embed"></div>
     <script type="text/javascript">
         var timeline_config = {
             width:              "100%",
@@ -1203,11 +1368,11 @@ function dec_timeline($topic) {
     	$topic_path = '/'.$topic;
     }
 
-	if(isset($attribute)) {
-		$output .= 'source:             "'.$base_url.'/tagtimelinedata'.$topic_path.'?attribute='.$attribute.'&path='.request_path().'"';
+	if($attribute) {
+		$output .= 'source:             "'.$base_url.'/tagtimelinedata'.$topic_path.'?attribute='.$attribute.'&path='.timeline_path_key().'"';
 	}
     else {
-    	$output .= 'source:             "'.$base_url.'/tagtimelinedata'.$topic_path.'?path='.request_path().'"';
+    	$output .= 'source:             "'.$base_url.'/tagtimelinedata'.$topic_path.'?path='.timeline_path_key().'"';
     }
 
     $output .= '    }
@@ -1217,10 +1382,10 @@ function dec_timeline($topic) {
     $output .= '<div style="clear:both; margin-top:1em">If the timeline sticks at LOADING TIMELINE... then use your browser reload button.</div>';
     $output .= '<div style="clear:both; margin-bottom:1em">If the information displayed seems incomplete (e.g. events of a story tag with time information are not included) then use the Recalcuate button.</div>';
     if($attribute) {
-    	$output .= l("Recalculate", request_path(), array('query'=>array('timeline'=>$topic, 'attribute'=>$attribute, 'reload'=>'1')));
+    	$output .= story_search_link_check("Recalculate", request_path(), array('query'=>array('timeline'=>$topic, 'attribute'=>$attribute, 'reload'=>'1')));
     }
     else {
-    	$output .= l("Recalculate", request_path(), array('query'=>array('timeline'=>$topic, 'reload'=>'1')));
+    	$output .= story_search_link_check("Recalculate", request_path(), array('query'=>array('timeline'=>$topic, 'reload'=>'1')));
     }
 	return $output;
 }
@@ -1300,6 +1465,7 @@ function dec_tag_timeline($topic = '/m/01qwfk', $attribute = FALSE, $path) {
 // 		$events = temporal_events_for_tag($topic);
 		$events = temporal_event_list_for_event_array($event_list);
 	}
+
 	foreach($events as $event) {
 		$output[] = load_art_event_dec_tag($event, $types, TRUE);
 	}
@@ -1315,6 +1481,9 @@ function dec_tag_timeline($topic = '/m/01qwfk', $attribute = FALSE, $path) {
  */
 function translate_time_for_timeline($time) {
 	return str_replace('-',',',$time['0']);
+}
+function translate_time_for_timeline2($time) {
+	return str_replace('-',',',$time);
 }
 
 /**
@@ -1415,12 +1584,12 @@ function get_image_from_tag_list($tag_array) {
 function create_timeline_header($topic, $path) {
 	$header = array();
 	if(!get_topic_name($topic)) {
-		$header['headline'] = l($topic, $path, array('query'=>array('tag'=>$topic)));
+		$header['headline'] = story_search_link_check($topic, $path, array('query'=>array('tag'=>$topic)));
 		$header['type'] = 'default';
 		$header['text'] = 'Events connected to '.$topic;
 		return $header;
 	}
-	$header['headline'] = l(get_topic_name($topic), $path, array('query'=>array('tag'=>$topic)));
+	$header['headline'] = story_search_link_check(get_topic_name($topic), $path, array('query'=>array('tag'=>$topic)));
 	$description = get_topic_description($topic, 150);
 	if($description) {
 		$header['text'] = $description;
@@ -1446,7 +1615,7 @@ function create_timeline_header($topic, $path) {
 				$name = $value;
 			}
 			if($tag_attribute->link) {
-				$output_values[] = l($name, $path, array('query'=>array('tag'=>$value)));
+				$output_values[] = story_search_link_check($name, $path, array('query'=>array('tag'=>$value)));
 			}
 			else {
 				$output_values[] = $name;
@@ -1531,7 +1700,7 @@ function translate_events_for_timeline($events, $header, $path) {
 		}
 		if(is_array($event['title'])) {
 			if(is_array($event['title']['0'])) {
-				$entry['headline'] = l($event['title']['0']['1'], $path, array('query'=>array('tag'=>$event['title']['0']['0'])));
+				$entry['headline'] = story_search_link_check($event['title']['0']['1'], $path, array('query'=>array('tag'=>$event['title']['0']['0'])));
 			}
 			else {
 				$entry['headline'] = $event['title']['0'];
@@ -1709,13 +1878,13 @@ function dec_save_image_curl($url, $filename) {
  */
 function save_fb_image($topic, $thumbnail_url = FALSE) {
 
-	$imageUrl = 'https://usercontent.googleapis.com/freebase/v1/image'.$topic.'?maxwidth=200&maxheight=200';
-	$imageUrlthumbnail = 'https://usercontent.googleapis.com/freebase/v1/image'.$topic;
+	$imageUrl = 'https://usercontent.googleapis.com/freebase/v1/image'.$topic.'?maxwidth=200&maxheight=200'.get_google_api_key_path();
+	$imageUrlthumbnail = 'https://usercontent.googleapis.com/freebase/v1/image'.$topic.get_google_api_key_path('?');;
 	
 	$id = substr($topic,3);
 	$filename = 'fbimages/'.$id.'.jpeg';
 	$filenamethunbnail = 'fbimages/'.$id.'_sm.jpeg';
-
+	
 	dec_save_image($imageUrl, $filename);
 	dec_save_image($imageUrlthumbnail, $filenamethunbnail);
 	
@@ -1727,14 +1896,67 @@ function save_fb_image($topic, $thumbnail_url = FALSE) {
  */
 function dec_reset() {
 	//if the line below is uncommented then this function can reset local cached databases of freebase data
-	reset_recommender_database();
+// 	reset_recommender_database();
 	return "database reset";
 }
 
+
 /**
- * Produces event table for a list of events
+ * Produces event timeline header for story
  */
-function event_table_for_event_list($event_list = array('/m/0b34d','/m/04y9zg6','/m/053_g0','/m/047lvl3','/m/013v45','/m/0hnb6fd','/m/022840','/m/0hccjyn','/m/0hccjz1')) {
+function event_timeline_header_for_story($story) {
+	$tag_array = get_tags_names_for_a_story($story);
+	$headline = array();
+	foreach($tag_array as $tag) {
+		if($tag['1']) {
+			$headline[] = $tag['1'];
+		}
+		else {
+			$headline[] = $tag['0'];
+		}
+	}
+	
+	$header = array();
+	$header['headline'] = l(implode(', ',$headline), request_path(), array('query'=>array('story'=>$story)));
+	$header['text'] = "&nbsp;";
+	$header['type'] = 'default';
+	
+	$image_result = get_image_from_tag_list($tag_array);
+	if($image_result) {
+		$header['asset']['media'] = $image_result['image'];
+		$header['asset']['caption'] = $image_result['tag']['1'];
+		$header['asset']['credit'] = "";
+	}
+	else {
+		$header['asset']['media'] = "";
+		$header['asset']['caption'] = "";
+		$header['asset']['credit'] = "";		
+	}
+	return $header;
+}
+
+/**
+ * Produces event timeline header for topic
+ */
+function event_timeline_header_for_topic($topic) {
+	$name = get_topic_name($topic);
+	if($name) {
+		$header['headline'] = story_search_link_check($name, request_path(), array('query'=>array('tag'=>$topic)));
+	}
+	else {
+		$header['headline'] = $topic;
+	}
+	$header['text'] = get_topic_description($topic, 150);
+	$header['type'] = 'default';
+	$image = check_freebase_saved_image($topic);
+	$header['asset'] = array('media'=>$image,'credit'=>"",'caption'=>$name);
+	return $header;
+}
+
+/**
+ * Produces event timeline for a list of events
+ */
+function event_timeline_for_event_list($event_list) {
 	$event_string = "('".implode("','", $event_list)."')";
 	$query = "SELECT event_value_table.event, event_value_table.position, event_value_table.value, tag_name.name  FROM
 (SELECT event_attribute_value.event, attribute_name.name, event_attribute_position.position, event_attribute_value.value FROM event_attribute_value, attribute_name, event_attribute_position
@@ -1749,7 +1971,134 @@ LEFT JOIN tag_name ON tag_name.tag = event_value_table.value;";
 			$output[$record->event] = array(array(),array(),array(),array(),array(),array(),array());
 		}
 		if($record->name) {
-			$output[$record->event][$record->position][] = storytaglink($record->name, $record->value);
+			$output[$record->event][$record->position][] = story_search_link_check($record->name, request_path(), array("query"=>array("tag"=>$record->value)));
+		}
+		elseif(!is_freebase_topic_id($record->value)) {
+			if($record->position == '1') {
+				$output[$record->event][$record->position][] = str_replace("_"," ",$record->value);
+			}
+			else {
+				$output[$record->event][$record->position][] = $record->value;
+			}
+		}
+	}
+
+	$output_with_titles = array();
+	foreach($output as $event_id=>$event_row) {
+		$row = array();
+		foreach($event_row as $event_cell) {
+			$row[] = implode(', ', $event_cell);
+		}
+		$output_with_titles[$event_id] = $row;
+
+		//add title to the event array
+		$event_type = get_type_of_stored_event($event_id);
+
+		if($event_name = get_topic_name($event_id)) {
+			$output_with_titles[$event_id][0] = story_search_link_check($event_name, request_path(), array("query"=>array("tag"=>$event_id)));
+				
+			// 			$output['title'][] = array($event_id,$event_name);
+			//cache topic info
+// 			$handle = background_process_start_locked('dontrunconcurrently','check_topic_name_image_description', $event_id);
+
+		}
+		elseif($event_type == 'exhibition_creation') {
+			$output_with_titles[$event_id][0] = get_event_label($event_id, '/exhibitions/exhibition').' at '
+					.get_event_label($event_id, '/exhibitions/exhibition_run/venue');
+		}
+		elseif($event_type == 'award_won') {
+			$output_with_titles[$event_id][0] = get_event_label_with_event_attribute_name($event_id, 'agent').' won '
+					.get_event_label($event_id, '/award/award_honor/award');
+		}
+		elseif($event_type == 'award_nomination') {
+			$output_with_titles[$event_id][0] = get_event_label_with_event_attribute_name($event_id, 'agent').' nominated for '
+					.get_event_label($event_id, '/award/award_nomination/award');
+		}
+		// 		elseif($event_type == 'education') {
+		// 			$output_with_titles[$event_id][0] = get_event_label_with_event_attribute_name($event_id, 'agent').' educated at '
+		// 					.get_event_label_with_event_attribute_name($event_id, 'location');
+		// 		}
+		elseif($event_type == 'education') {
+			$output_with_titles[$event_id][0] = get_event_label($event_id, '/education/education/student').' educated at '
+					.get_event_label($event_id, '/education/education/institution');
+		}
+		elseif($event_type == 'place_lived') {
+			$output_with_titles[$event_id][0] = get_event_label_with_event_attribute_name($event_id, 'agent').' lived in '
+					.get_event_label_with_event_attribute_name($event_id, 'location');
+		}
+		elseif($event_type == 'exhibition_run') {
+			$output_with_titles[$event_id][0] = get_event_label($event_id, '/exhibitions/exhibition_run/venue').' exhibited '
+					.$output['title'][] = get_event_label($event_id, '/exhibitions/exhibition_run/exhibition');
+		}
+		elseif($event_type == 'object_location') {
+			$output_with_titles[$event_id][0] = get_event_label($event_id, '/visual_art/artwork_location_relationship/artwork').' in '
+					.get_event_label($event_id, '/visual_art/artwork_location_relationship/location');
+		}
+		elseif($event_type == 'object_ownership') {
+			$output_with_titles[$event_id][0] = get_event_label($event_id, '/visual_art/artwork_owner_relationship/artwork').' owned by '
+					.get_event_label($event_id, '/visual_art/artwork_owner_relationship/owner');
+		}
+		elseif($event_type == 'organization_membership') {
+			$output_with_titles[$event_id][0] = get_event_label($event_id, '/organization/organization_membership/member').' member of '
+					.get_event_label($event_id, '/organization/organization_membership/organization');
+		}
+
+	}
+	
+	$timeline_output = array();
+
+	foreach($output_with_titles as $key=>$output_with_title) {
+		$row = array();
+		$row['headline'] = $output_with_title[0];
+		$row['tag'] = $output_with_title[1];
+		if($output_with_title[4] && !$output_with_title[3]) {
+			$row['startDate'] = translate_time_for_timeline2($output_with_title[4]);
+			$row['endDate'] = translate_time_for_timeline2($output_with_title[3]);			
+		}
+		else {
+			$row['startDate'] = translate_time_for_timeline2($output_with_title[3]);
+			$row['endDate'] = translate_time_for_timeline2($output_with_title[4]);
+		}
+		$row['text'] = 'Agent: '.$output_with_title[2].'<br/>'.'Location: '.$output_with_title[5].'<br/>'.'Tag: '.$output_with_title[6];
+		$image = check_freebase_saved_image($key);
+		if($image) {
+			$thumbnail = check_freebase_saved_image($key,TRUE);
+			$name = get_topic_name($key);
+			if($name) {
+				$row['asset'] = array('media'=>$image,'credit'=>"",'caption'=>$name, 'thumbnail'=>$thumbnail);
+			}
+			else {
+				$row['asset'] = array('media'=>$image,'credit'=>"",'caption'=>"", 'thumbnail'=>$thumbnail);
+			}		
+		}
+		else {
+			$row['asset'] = array('media'=>"",'credit'=>"",'caption'=>"");			
+		}
+		$timeline_output[] = $row;	
+	}
+	return $timeline_output;
+}
+
+
+/**
+ * Produces event table for a list of events
+ */
+function event_table_for_event_list($event_list) {
+	$event_string = "('".implode("','", $event_list)."')";
+	$query = "SELECT event_value_table.event, event_value_table.position, event_value_table.value, tag_name.name  FROM
+(SELECT event_attribute_value.event, attribute_name.name, event_attribute_position.position, event_attribute_value.value FROM event_attribute_value, attribute_name, event_attribute_position
+WHERE event_attribute_value.event IN ".$event_string." AND
+event_attribute_value.attribute = attribute_name.attribute AND
+attribute_name.name = event_attribute_position.event_attribute) as event_value_table
+LEFT JOIN tag_name ON tag_name.tag = event_value_table.value;";
+	$output = array();
+	$result = db_query($query);
+	foreach($result as $record) {
+		if(!isset($output[$record->event])) {
+			$output[$record->event] = array(array(),array(),array(),array(),array(),array(),array());
+		}
+		if($record->name) {
+			$output[$record->event][$record->position][] = story_search_link_check($record->name, request_path(), array("query"=>array("tag"=>$record->value)));
 		}
 		elseif(!is_freebase_topic_id($record->value)) {
 			if($record->position == '1') {
@@ -1773,11 +2122,11 @@ LEFT JOIN tag_name ON tag_name.tag = event_value_table.value;";
 		$event_type = get_type_of_stored_event($event_id);
 		
 		if($event_name = get_topic_name($event_id)) {
-			$output_with_titles[$event_id][0] = storytaglink($event_name, $event_id);
+			$output_with_titles[$event_id][0] = story_search_link_check($event_name, request_path(), array("query"=>array("tag"=>$event_id)));
 			
 // 			$output['title'][] = array($event_id,$event_name);
 			//cache topic info
-			$handle = background_process_start_locked('dontrunconcurrently','check_topic_name_image_description', $event_id);
+// 			$handle = background_process_start_locked('dontrunconcurrently','check_topic_name_image_description', $event_id);
 		
 		}
 		elseif($event_type == 'exhibition_creation') {
@@ -1822,6 +2171,7 @@ LEFT JOIN tag_name ON tag_name.tag = event_value_table.value;";
 		}
 
 	}
+	
 	$table = theme(
 				'table', 
 				array(	'rows' => $output_with_titles, 
@@ -1886,7 +2236,7 @@ LEFT JOIN tag_name ON tag_name.tag = event_value_table.value;";
 		if($event_name = get_topic_name($event_id)) {
 			$output_with_titles[$event_id][0] = storytaglink($event_name, $event_id);
 			//cache topic info
-			$handle = background_process_start_locked('dontrunconcurrently','check_topic_name_image_description', $event_id);
+// 			$handle = background_process_start_locked('dontrunconcurrently','check_topic_name_image_description', $event_id);
 	
 		}
 		elseif($event_type == 'award_won') {
@@ -2653,7 +3003,7 @@ function complete_time_stamp($date, $start_end = 'start') {
 // 	}
 	
 function dec_setting($location, $time,  $end) {
-	$output = "";
+	$output = '<div>';
 	if($end) {
 		$full_start_time = complete_time_stamp($time, 'start');
 		$full_end_time = complete_time_stamp($end, 'end');		
@@ -2679,26 +3029,38 @@ function dec_setting($location, $time,  $end) {
 	$themes = dec_get_themes_for_events_of_setting($location, $full_start_time, $full_end_time);
 
 	$name = get_topic_name($location);
+	$path_array = explode('/',request_path());
+	if(end($path_array) == 'stories' || end($path_array) == 'settingstories') {
+		array_pop($path_array);
+	}
+	$path_array[] = 'settingstories';
+	$next_path = implode('/',$path_array);
 	if($end) {
 		if($name) {
-			$output .= '<h2><i class="fa fa-info fa-lg">&nbsp;</i>' . t('About : ') .$name.", ".$time." to ".$end.'</h2>';
+			$output .= '<h2><i class="fa fa-info fa-lg">&nbsp;</i><span class="topic-title">' . t('About : ').$name.", ".$time." to ".$end.'&nbsp;&nbsp;</span>' . l('<span class="topic-search"><i class="fa fa-search">&nbsp;</i>' . '</span>', $next_path, array("query"=>array('storylocation'=>$location, 'storytime'=>$time, 'storyend'=>$end), "html"=>TRUE)) . '</h2>';
+				
+// 			$output .= '<h2><i class="fa fa-info fa-lg">&nbsp;</i>' . t('About : ') .$name.", ".$time." to ".$end.'</h2>';
 // 			$output .= '<h2>'.$name.", ".$time." to ".$end.'</h2>';
 // 			drupal_set_title($name.", ".$time." to ".$end);
 		}
 		else {
-			$output .= '<h2><i class="fa fa-info fa-lg">&nbsp;</i>' . t('About : ') .$name.", ".$time." to ".$end.'</h2>';
+			$output .= '<h2><i class="fa fa-info fa-lg">&nbsp;</i><span class="topic-title">' . t('About : ').$location.", ".$time." to ".$end.'&nbsp;&nbsp;</span>' . l('<span class="topic-search"><i class="fa fa-search">&nbsp;</i>' . '</span>', $next_path, array("query"=>array('storylocation'=>$location, 'storytime'=>$time, 'storyend'=>$end), "html"=>TRUE)) . '</h2>';
+				
+// 			$output .= '<h2><i class="fa fa-info fa-lg">&nbsp;</i>' . t('About : ') .$name.", ".$time." to ".$end.'</h2>';
 // 			$output .= '<h2>'.$location.", ".$time." to ".$end.'</h2>';
 // 			drupal_set_title($location.", ".$time." to ".$end);
 		}		
 	}
 	else {
 		if($name) {
-			$output .= '<h2><i class="fa fa-info fa-lg">&nbsp;</i>' . t('About : ') .$name.", ".$time.'</h2>';
+			$output .= '<h2><i class="fa fa-info fa-lg">&nbsp;</i><span class="topic-title">' . t('About : ').$name.", ".$time.'&nbsp;&nbsp;</span>' . l('<span class="topic-search"><i class="fa fa-search">&nbsp;</i>' . '</span>', $next_path, array("query"=>array('storylocation'=>$location, 'storytime'=>$time), "html"=>TRUE)) . '</h2>';
+
 // 			$output .= '<h2>'.$name.", ".$time.'</h2>';
 // 			drupal_set_title($name.", ".$time);
 		}
 		else {
-			$output .= '<h2><i class="fa fa-info fa-lg">&nbsp;</i>' . t('About : ') .$name.", ".$time.'</h2>';
+			$output .= '<h2><i class="fa fa-info fa-lg">&nbsp;</i><span class="topic-title">' . t('About : ').$location.", ".$time.'&nbsp;&nbsp;</span>' . l('<span class="topic-search"><i class="fa fa-search">&nbsp;</i>' . '</span>', $next_path, array("query"=>array('storylocation'=>$location, 'storytime'=>$time), "html"=>TRUE)) . '</h2>';
+
 // 			$output .= '<h2>'.$location.", ".$time.'</h2>';
 // 			drupal_set_title($location.", ".$time);
 		}
@@ -2706,7 +3068,7 @@ function dec_setting($location, $time,  $end) {
 	
 	//tag name and description
 	if($name) {
-		$output .= '<div style="clear:both">Location: '.storytaglink($name, $location).'</div>';
+		$output .= '<div style="clear:both">Location: '.story_search_link_check($name, request_path(), array("query"=>array("tag"=>$location))).'</div>';
 	}
 	else {
 		$output .= '<div style="clear:both">Location: '.$location.'</div>';
@@ -2724,11 +3086,11 @@ function dec_setting($location, $time,  $end) {
 // 			$output .= l('<div style="float: left; white-space: nowrap; background-color: #ebebeb; margin: 5px;">'.$theme->name."</div>", "tag".$theme->value, array("html"=>TRUE));
 
 			//$output .= storytaglink('<div style="float: left; white-space: nowrap; background-color: #ebebeb; margin: 5px;">'.$theme->name."</div>", $theme->value, array("html"=>TRUE));
-			$output .= storytaglink('<li class="tags">'.$theme->name."</li>", $theme->value, array("html"=>TRUE));
+			$output .= story_search_link_check('<li class="tags">'.$theme->name."</li>", request_path(), array("html"=>TRUE, "query"=>array("tag"=>$theme->value)));
 		
 		}
 
-		$output .=  '</ul">';
+		$output .=  '</ul><div style="clear:both;"></div>';
 	}
 	
 	if(!empty($event_array)) {
@@ -2760,7 +3122,7 @@ function dec_setting($location, $time,  $end) {
 // 			}
 // 		}
 // 	}
-	return $output;
+	return $output.'</div>';
 	
 }
 
@@ -3067,10 +3429,32 @@ function dec_tags($list) {
 }
 
 /**
+ * Update tag event mapping for single tag
+ * Checks that the concept space fro that tag has been generated
+ * Saves links between that tag and associated events
+ * Loads (if necessary) the top name, image and description for each event of the tag for use in timelines
+ */
+function update_tag_event_mapping($tag) {
+	new_event_space_of_a_topic($tag);
+	$event_array = flat_list_of_single_tag_events(get_all_events_for_tag($tag));
+	save_tag_event_results($tag, $event_array);
+	
+	//get the event ids of a topic
+	$event_list = flat_list_of_single_tag_events(get_all_events_for_tag($tag));
+
+	//check_topic_name_image_description($topic) for each event id for use on timelines
+	foreach($event_list as $event) {
+		check_topic_name_image_description($event);
+// 		$handle = background_process_start('check_topic_name_image_description',$event);
+	}	
+	
+}
+
+/**
  * Produce output for a list of tags
  */
 function dec_list_of_tags($tag_array, $max_value) {
-	$output = "";
+	$output = '<div>&nbsp';
 
 	//produce event spaces
 	foreach($tag_array as $tag) {
@@ -3088,7 +3472,8 @@ function dec_list_of_tags($tag_array, $max_value) {
 			$tag_name_array[] = $tag;
 		}		
 	}
-	//not for panel
+
+	$output .= '<h2><i class="fa fa-info fa-lg">&nbsp;</i>' . t('About : ') .implode(", ",$tag_name_array).'</h2>';
 // 	drupal_set_title(implode(", ",$tag_name_array));
 	
 	//do the calculations
@@ -3103,6 +3488,9 @@ function dec_list_of_tags($tag_array, $max_value) {
 	
 	//use this list for event table 
 	$event_list = event_list_for_story_id($max_value);
+	
+	//retrieve title, description and image for events******here
+	async_check_for_name_description_image($event_list);
 	
 	$themes = top_n_themes_of_story($max_value, 10);
 // 	$matching_themes = top_n_matching_themes_of_story2($event_list, $max_value, 10);	
@@ -3146,16 +3534,16 @@ function dec_list_of_tags($tag_array, $max_value) {
 		$output .=  '<ul class="field-name-field-fb-tags">';
 		foreach($overlapping_settings as $setting) {
 			if($setting->end && $setting->start && $setting->start !== $setting->end) {
-				$output .= storysettinglink('<li class="tags">'. $setting->name.", ".$setting->start." to ".$setting->end . '</li>','setting',array('html'=>'true', 'query' => array('location' => $setting->location, 'time' => $setting->start, 'end' => $setting->end)));				
+				$output .= l('<li class="tags">'. $setting->name.", ".$setting->start." to ".$setting->end . '</li>',request_path(),array('html'=>'true', 'query' => array('location' => $setting->location, 'time' => $setting->start, 'end' => $setting->end)));				
 			}
 			elseif($setting->start == $setting->end) {
-				$output .= storysettinglink('<li class="tags">'. $setting->name.", ".$setting->start . '</li>','setting', array('html'=>'true', 'query' => array('location' => $setting->location, 'time' => $setting->start)));
+				$output .= l('<li class="tags">'. $setting->name.", ".$setting->start . '</li>',request_path(), array('html'=>'true', 'query' => array('location' => $setting->location, 'time' => $setting->start)));
 			}
 			elseif($setting->start && !$setting->end) {
-				$output .= storysettinglink('<li class="tags">'. $setting->name.", ".$setting->start . '</li>','setting',array('html'=>'true', 'query' => array('location' => $setting->location, 'time' => $setting->start)));
+				$output .= l('<li class="tags">'. $setting->name.", ".$setting->start . '</li>',request_path(),array('html'=>'true', 'query' => array('location' => $setting->location, 'time' => $setting->start)));
 			}
 			elseif($setting->end && !$setting->start) {
-				$output .= storysettinglink('<li class="tags">'. $setting->name.", ".$setting->end . '</li>','setting',array('html'=>'true', 'query' => array('location' => $setting->location, 'time' => $setting->end)));
+				$output .= l('<li class="tags">'. $setting->name.", ".$setting->end . '</li>',request_path(),array('html'=>'true', 'query' => array('location' => $setting->location, 'time' => $setting->end)));
 			}
 		
 		}
@@ -3184,7 +3572,7 @@ function dec_list_of_tags($tag_array, $max_value) {
 
 	$output .= $event_table;
 	
-	return $output;
+	return $output.'</div>';
 }
 
 /**
@@ -3198,17 +3586,17 @@ function dec_setting_timeline_links($time, $end, $location, $event_array) {
 		$output .= '<ul class="field-name-field-fb-tags" style="clear:both">';
 		
 		if($end) {
-			$output .= l('<li class="tags">' . t('All') . '</li>', request_path(), array('html'=>'true', 'query'=>array('timeline_for_setting'=>$location, 'time'=>$time, 'end'=>$end)));
+			$output .= story_search_link_check('<li class="tags">' . t('All') . '</li>', request_path(), array('html'=>'true', 'query'=>array('timeline_for_setting'=>$location, 'time'=>$time, 'end'=>$end)));
 		}
 		else {
-			$output .= l('<li class="tags">' . t('All') . '</li>', request_path(), array('html'=>'true', 'query'=>array('timeline_for_setting'=>$location, 'time'=>$time)));
+			$output .= story_search_link_check('<li class="tags">' . t('All') . '</li>', request_path(), array('html'=>'true', 'query'=>array('timeline_for_setting'=>$location, 'time'=>$time)));
 		}
 		foreach($attribute_list as $attribute) {
 			if($end) {
-				$output .= l('<li class="tags">' . str_replace('_', ' ', ucfirst($attribute)) . '</li>', request_path(), array('html'=>'true', 'query'=>array('timeline_for_setting'=>$location, 'time'=>$time, 'event_type'=>$attribute, 'end'=>$end)));
+				$output .= story_search_link_check('<li class="tags">' . str_replace('_', ' ', ucfirst($attribute)) . '</li>', request_path(), array('html'=>'true', 'query'=>array('timeline_for_setting'=>$location, 'time'=>$time, 'event_type'=>$attribute, 'end'=>$end)));
 			}
 			else {
-				$output .= l('<li class="tags">' . str_replace('_', ' ', ucfirst($attribute)) . '</li>', request_path(), array('html'=>'true', 'query'=>array('timeline_for_setting'=>$location, 'time'=>$time, 'event_type'=>$attribute)));
+				$output .= story_search_link_check('<li class="tags">' . str_replace('_', ' ', ucfirst($attribute)) . '</li>', request_path(), array('html'=>'true', 'query'=>array('timeline_for_setting'=>$location, 'time'=>$time, 'event_type'=>$attribute)));
 			}
 		}
 		$output .= '</ul>';	
@@ -3228,9 +3616,9 @@ function dec_tag_timeline_links($topic, $event_array) {
 	if(!empty($attribute_list)) {
 		$output_list = array();
 		$output = '<div class="event-space-headings"><h2><i class="fa fa-clock-o fa-lg">&nbsp;</i>Timelimes</h2></div><ul class="field-name-field-fb-tags">';
-		$output .= l('<li class="tags">' . t('All') . '</li>', request_path(), array('html'=>'true', 'query'=>array('timeline'=>$topic)));
+		$output .= story_search_link_check('<li class="tags">' . t('All') . '</li>', request_path(), array('html'=>'true', 'query'=>array('timeline'=>$topic)));
 		foreach($attribute_list as $attribute) {
-			$output .= l('<li class="tags">' . str_replace('_', ' ', ucfirst($attribute)) . '</li>', request_path(), array('html'=>'true', 'query'=>array('timeline'=>$topic, 'attribute'=>$attribute)));
+			$output .= story_search_link_check('<li class="tags">' . str_replace('_', ' ', ucfirst($attribute)) . '</li>', request_path(), array('html'=>'true', 'query'=>array('timeline'=>$topic, 'attribute'=>$attribute)));
 		}
 		$output .= '</ul>';
 	}
@@ -3282,7 +3670,7 @@ function temporal_event_list_for_event_array_and_activity($activity = 'military_
 }
 
 /**
- * Events in the array that have the specified activity type and temporal information
+ * Events in the array that have temporal information
  */
 function temporal_event_list_for_event_array($event_list = array('/m/0b34d','/m/04y9zg6','/m/053_g0','/m/047lvl3','/m/013v45','/m/0hnb6fd','/m/022840','/m/0hccjyn','/m/0hccjz1')) {
 	$event_string = "('".implode("','", $event_list)."')";
@@ -3350,6 +3738,7 @@ function event_list_for_story_id($story_id) {
 	FROM query_tag, tag_event_id
 	WHERE query_tag.id = '".$story_id."' AND
 	query_tag.tag = tag_event_id.tag;";
+
 	$result = db_query($query);
 	$event_list = array();
 	foreach($result as $event) {
@@ -3357,6 +3746,7 @@ function event_list_for_story_id($story_id) {
 	}
 	return $event_list;
 }
+
 /**
  * Flatten list of events of a story
 */
@@ -3451,7 +3841,7 @@ tag = :tag;";
  */
 function dec_tag($topic) {
 	$current_path = drupal_get_path_alias(current_path());
-	$output = "";
+	$output = '<div>';
 
 	if(isset($_GET['reload'])) {
 		$reload = $_GET['reload'];
@@ -3497,25 +3887,24 @@ function dec_tag($topic) {
 		$name = get_topic_name($topic);
 		if($name) {
 			$path_array = explode('/',request_path());
+			$next_path = implode('/',$path_array);
 			if(isset($path_array[2]) && isset($path_array[3])) {
 				if($path_array[2] == 'story' && !tag_of_story($topic,$path_array[3]) && !isset($_GET['storytag'])) {
 					$output .= '<div class="button addtag-button">' . l( t('Add to Story') , $current_path . '/addtag' , array("html"=>TRUE, 'query'=>array('topic_name' => $name, 'mid' => $topic, 'destination' => (drupal_get_path_alias(current_path()) . '?tag=' . $topic)))) . '</div>';
 				}
 			}
-			if(isset($_GET['storytag'])) {
-				$output .= '<div class="topic-block"><h2><i class="fa fa-tag fa-lg">&nbsp;</i><span class="topic-title">' . $name . $topic_types . '&nbsp;&nbsp;</span>' . '</h2>';
+			$path_array = explode('/',request_path());
+			if(end($path_array) == 'stories' || end($path_array) == 'settingstories') {
+				array_pop($path_array);
 			}
-			else {
-				$output .= '<div class="topic-block"><h2><i class="fa fa-tag fa-lg">&nbsp;</i><span class="topic-title">' . $name . $topic_types . '&nbsp;&nbsp;</span>' . l('<span class="topic-search"><i class="fa fa-search">&nbsp;</i>' . '</span>', $current_path . '/stories', array("query"=>array('storytag'=>$topic), "html"=>TRUE)) . '</h2>';
-			}
-			
-			// 			drupal_set_title($name);
+			$path_array[] = 'stories';
+			$next_path = implode('/',$path_array);
+			$output .= '<div class="topic-block"><h2><i class="fa fa-info fa-lg">&nbsp;</i><span class="topic-title">' . t('About : '). $name . $topic_types . '&nbsp;&nbsp;</span>' . l('<span class="topic-search"><i class="fa fa-search">&nbsp;</i>' . '</span>', $next_path, array("query"=>array('storytag'=>$topic), "html"=>TRUE)) . '</h2>';
 		}
 
 
 		
 		$output .= '<div class="description-attribute-block">';
-// 		$output .= image_html_for_a_freebase_topic($topic);
 		if($image = check_freebase_saved_image($topic, FALSE, $reload)) {
 			$output .= '<div class="topic-image"><img src="'.$image.'"></div>';
 		}
@@ -3524,41 +3913,40 @@ function dec_tag($topic) {
 		$description = get_topic_description($topic);
 		if($description) {
 			$output .= '<div class="topic-description">';
+			$output .= '<p>' . $description . '</p>';
+			$output .= '</div>';
 		}
-
-		$output .= '<p>' . $description . '</p>';
+		
 		//tag triples
 		$tag_attributes = get_triple_ids_of_a_tag2($topic);
-
-		$output .= '<div class="event-space-tag-attibutes-wrapper">';
 		
-		foreach($tag_attributes as $attribute_values) {
-			$output .=  '<div class="event-space-tag-attibutes"><ul class="field-name-field-fb-tags">';
-			$output .= ' <li class="plain">'.$attribute_values->fact_attribute."</li>";
+		if(!empty($tag_attributes)) {
+			$output .= '<div class="event-space-tag-attibutes-wrapper">';
 			
-				foreach($attribute_values->value_list as $value) {
-					$name = get_topic_name($value);
-					if(!$name) {
-						$name = $value;
+			foreach($tag_attributes as $attribute_values) {
+				$output .=  '<div class="event-space-tag-attibutes"><ul class="field-name-field-fb-tags">';
+				$output .= ' <li class="plain">'.$attribute_values->fact_attribute."</li>";
+				
+					foreach($attribute_values->value_list as $value) {
+						$name = get_topic_name($value);
+						if(!$name) {
+							$name = $value;
+						}
+						if($attribute_values->link) {
+							$output .= story_search_link_check('<li class="tags">'.$name."</li>", request_path(), array("html"=>TRUE, "query"=>array('tag'=>$value)));
+						}
+						else {
+							$output .= $name;//'<li>'.$name."</li>";
+						}
+						
 					}
-					if($attribute_values->link) {
-						$output .= storytaglink('<li class="tags">'.$name."</li>", $value, array("html"=>TRUE));
-					}
-					else {
-						$output .= '<li>'.$name."</li>";
-					}
-					
-				}
-
-			$output .=  '</ul></div>';
+				$output .=  '</ul><div style="clear:both;"></div></div>';
+			}
+			$output .= '</div>';
 		}
-		$output .= '</div>';
-		
-		$output .= '</div>';	
+	
 
-		$output .= '</div>';
-		
-		$output .= '</div>';
+
 		// end of topic-block
 
 	}
@@ -3574,9 +3962,9 @@ function dec_tag($topic) {
 		$output .= '<div style="clear:both"><h2><i class="fa fa-link fa-lg">&nbsp;</i>Themes</h2></div>';
 		$output .=  '<ul class="field-name-field-fb-tags">';
 		foreach($themes as $theme) {
-			$output .= storytaglink('<li class="tags">'.$theme->name."</li>", $theme->value, array("html"=>TRUE));
+			$output .= story_search_link_check('<li class="tags">'.$theme->name."</li>", request_path(), array("html"=>TRUE, "query"=>array('tag'=>$theme->value)));
 					}
-		$output .=  '</ul>';
+		$output .=  '</ul><div style="clear:both;"></div>';
 		
 	}
 	
@@ -3589,16 +3977,16 @@ function dec_tag($topic) {
 		
 		foreach($settings as $setting) {
 			if(isset($setting->end_time) && isset($setting->start_time) && $setting->start_time !== $setting->end_time) {
-				$output .= storysettinglink('<li class="tags">' .$setting->name.", ".$setting->start_time." to ".$setting->end_time . '</li>','setting',array('html'=>'true', 'query' => array('location' => $setting->location, 'time' => $setting->start_time, 'end' => $setting->end_time)));
+				$output .= story_search_link_check('<li class="tags">' .$setting->name.", ".$setting->start_time." to ".$setting->end_time . '</li>',request_path(),array('html'=>'true', 'query' => array('location' => $setting->location, 'time' => $setting->start_time, 'end' => $setting->end_time)));
 			}
 			elseif(isset($setting->start_time)) {
-				$output .= storysettinglink('<li class="tags">' .$setting->name.", ".$setting->start_time . '</li>','setting',array('html'=>'true', 'query' => array('location' => $setting->location, 'time' => $setting->start_time)));
+				$output .= story_search_link_check('<li class="tags">' .$setting->name.", ".$setting->start_time . '</li>',request_path(),array('html'=>'true', 'query' => array('location' => $setting->location, 'time' => $setting->start_time)));
 			}
 			elseif(isset($setting->end_time)) {
-				$output .= storysettinglink('<li class="tags">' .$setting->name.", ".$setting->end_time  . '</li>','setting',array('html'=>'true', 'query' => array('location' => $setting->location, 'time' => $setting->end_time)));
+				$output .= story_search_link_check('<li class="tags">' .$setting->name.", ".$setting->end_time  . '</li>',request_path(),array('html'=>'true', 'query' => array('location' => $setting->location, 'time' => $setting->end_time)));
 			}
 		}
-		$output .=  '</ul>';
+		$output .=  '</ul><div style="clear:both;"></div>';
 	}
 	
 // 	if(!empty($settings)) {
@@ -3644,6 +4032,9 @@ function dec_tag($topic) {
 // 	}
 	
 	$event_list = flat_list_of_single_tag_events($all_events);
+	
+	//retrieve title, description and images for events*******here
+	async_check_for_name_description_image($event_list);
 	if(!empty($event_list)) {
 		$output .= dec_tag_timeline_links($topic, $event_list);
 		$output .= '<div style="clear:both"><h2><i class="fa fa-cloud fa-lg">&nbsp;</i>Event Space : <span class="event-space-filter"><input id="event-space-filter" type="text"></span></h2></div>';
@@ -3678,8 +4069,8 @@ function dec_tag($topic) {
 	//l($setting->name." ".$setting->time,'setting',array('query' => array('location' => $setting->location, 'time' => $setting->time))).
 	
 	$output .= '<div style="clear:both; margin-bottom:1em">If the information displayed seems incomplete (e.g. no title displayed for the story tag or broken image link) then use the recalcuate button.</div>';
-	$output .= '<div class="button">'.l('Recalculate',request_path(), array('query' => array('tag'=>$topic, 'reload' => '1'))).'</div>';
-	return $output;
+	$output .= '<div class="button">'.story_search_link_check('Recalculate',request_path(), array('query' => array('tag'=>$topic, 'reload' => '1'))).'</div>';
+	return $output.'</div>';
 }
 
 /**
@@ -3696,7 +4087,7 @@ function produce_event_table_for_timeline($event, $path) {
 				$output .= '<div style="clear:both"><b>'.ucfirst($key).":</b> ";
 				foreach($elements as $element) {
 					if(is_array($element)) {
-						$value_array[] = l($element[1], $path, array('query' => array('tag'=>$element[0])));
+						$value_array[] = story_search_link_check($element[1], $path, array('query' => array('tag'=>$element[0])));
 					}
 					//comment this out to remove date links TODO
 					// 			elseif($key == 'start_time' || $key == 'end_time') {
@@ -3828,7 +4219,7 @@ event_attribute_value.attribute = attribute_name.attribute AND
 	$object = $result->fetchObject();
 	if(isset($object->value) && isset($object->name)) {
 		//pre-cache topic for timelines
-		$handle = background_process_start_locked('dontrunconcurrently','check_topic_name_image_description', $object->value);
+// 		$handle = background_process_start_locked('dontrunconcurrently','check_topic_name_image_description', $object->value);
 		return array($object->value, $object->name);
 	}
 	else {
@@ -3872,7 +4263,7 @@ function get_event_value($event_id, $attribute) {
 	$object = $result->fetchObject();
 	if(isset($object->value) && isset($object->name)) {
 		//pre-cache topic for timelines
-		$handle = background_process_start_locked('dontrunconcurrently','check_topic_name_image_description', $object->value);
+// 		$handle = background_process_start_locked('dontrunconcurrently','check_topic_name_image_description', $object->value);
 		return array($object->value, $object->name);
 	}
 	else {
@@ -3901,6 +4292,7 @@ LEFT JOIN tag_name ON tag_name.tag = events.value;";
 	$records = array();
 
 	foreach ($result as $record) {
+
 // 		if(in_array($record->attribute, array('activity','location','agent','start_time','end_time'))) {
 			$attribute = $record->attribute;
 // 		}
@@ -3940,10 +4332,9 @@ LEFT JOIN tag_name ON tag_name.tag = events.value;";
 	if($event_name = get_topic_name($event_id)) {
 		$output['title'][] = array($event_id,$event_name);
 		//cache topic info
-		$handle = background_process_start_locked('dontrunconcurrently','check_topic_name_image_description', $event_id);
+// 		$handle = background_process_start_locked('dontrunconcurrently','check_topic_name_image_description', $event_id);
 		
 	}
-	//*
 	elseif($event_type == 'exhibition_creation') {
 		$output['title'][] = get_event_label($event_id, '/exhibitions/exhibition').' at '
 				.get_event_label($event_id, '/exhibitions/exhibition_run/venue');
@@ -4045,7 +4436,7 @@ LEFT JOIN tag_name ON tag_name.tag = events.value;";
 		if($event_name = get_topic_name($event_id)) {
 			$output['title'][] = array($event_id,$event_name);
 		//cache topic info
-		$handle = background_process_start_locked('dontrunconcurrently','check_topic_name_image_description', $event_id);
+// 		$handle = background_process_start_locked('dontrunconcurrently','check_topic_name_image_description', $event_id);
 		
 		}
 	elseif($event_type == 'exhibition_creation') {
@@ -5736,7 +6127,7 @@ function fb_topic_exhibition_producer($topic, $previous_output = array("events"=
 }
 
 /**
- * Retrieve exhibition data of an exhibition curator//****here no date info
+ * Retrieve exhibition data of an exhibition curator//no date info
  */
 function fb_topic_exhibition_curator($topic, $previous_output = array("events"=>array(),"names"=>array(), "links"=>array())) {
 	$query = array(array(
@@ -5811,7 +6202,7 @@ function fb_topic_exhibition_curator($topic, $previous_output = array("events"=>
 }
 
 /**
- * Retrieve exhibition data of an exhibition subject//****here no date info
+ * Retrieve exhibition data of an exhibition subject// no date info
  */
 function fb_topic_exhibition_subject($topic, $previous_output = array("events"=>array(),"names"=>array(), "links"=>array())) {
 	$query = array(array(
@@ -6728,7 +7119,7 @@ function fb_object_award_winning_work($topic, $previous_output = array("events"=
 }
 
 /**
- * Retrieve exhibition history of an object//****here no date info
+ * Retrieve exhibition history of an object// no date info
  */
 function fb_object_exhibited($topic, $previous_output = array("events"=>array(),"names"=>array(), "links"=>array())) {
 	$query = array(array(
@@ -6802,7 +7193,7 @@ function fb_object_exhibited($topic, $previous_output = array("events"=>array(),
 }
 
 /**
- * Retrieve exhibition data for topic that is an exhibition//****here no date info
+ * Retrieve exhibition data for topic that is an exhibition// no date info
 */
 //fb_exhibition_production_of_the_exhibition("/m/052tvg1")
 //fb_exhibition_production_of_the_exhibition
