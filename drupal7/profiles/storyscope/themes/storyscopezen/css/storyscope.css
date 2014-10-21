@@ -4825,3 +4825,26 @@ ul.field-name-field-fb-tags .plain {
 .block-dec-rec .event-space-table table td a {
   color: #0088cc;
 }
+
+/* line 3450, ../sass/storyscope.scss */
+.pane-suggested-story-tags-suggested-story-tags-block .item-list {
+  margin: inherit;
+}
+/* line 3453, ../sass/storyscope.scss */
+.pane-suggested-story-tags-suggested-story-tags-block .suggested_tags {
+  list-style-type: none;
+  padding-left: 0px;
+  float: left;
+}
+/* line 3457, ../sass/storyscope.scss */
+.pane-suggested-story-tags-suggested-story-tags-block .suggested_tags li {
+  margin: 0 10px 10px 0;
+  padding: 3px 10px 3px 10px;
+  list-style: none;
+  float: left;
+  display: block;
+}
+/* line 3463, ../sass/storyscope.scss */
+.pane-suggested-story-tags-suggested-story-tags-block .suggested_tags li a {
+  color: #79b2ac;
+}

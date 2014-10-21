@@ -3444,3 +3444,26 @@ ul.field-name-field-fb-tags {
     }
   }
 }
+
+//***** STORYSCOPE LITE ***********//
+.pane-suggested-story-tags-suggested-story-tags-block {
+  .item-list {
+    margin: inherit;
+  }
+  .suggested_tags  {
+    list-style-type: none;
+    padding-left: 0px;
+    float: left;
+    li {
+      margin: 0 10px 10px 0;
+      padding: 3px 10px 3px 10px;
+      list-style: none;
+      float: left;
+      display: block;
+      a {
+        color: $gray-green;
+      }
+    }
+  }
+}
+
