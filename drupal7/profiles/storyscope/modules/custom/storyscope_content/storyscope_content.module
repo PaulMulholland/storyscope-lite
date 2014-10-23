@@ -305,3 +305,28 @@ function storyscope_content_add_tag($story_nid) {
 		}
 
 	}
+
+
+/**
+ * Implements hook_entity_info_alter().
+ * Adds a thumbnail view mode.
+ */
+function storyscope_content_entity_info_alter(&$entity_info) {
+  $entity_info['node']['view modes']['thumbnail'] = array(
+    'label' => t('Thumbnail'),
+    'custom settings' => TRUE,
+  );
+}
+
+/**
+ * Implements hook_entity_view().
+ * 
+ * We only want one thumbnail on the thumbnail teaser.
+ */
+function storyscope_content_entity_view($entity, $type, $view_mode, $langcode) {
+	//dpm($entity);
+  if ($view_mode == 'thumbnail' && isset($entity->content['field_media']['#items'])) {
+  	//dpm($entity);
+    $entity->content['field_media']['#items'] = array_slice($entity->content['field_media']['#items'], 0, 1);
+  }
+}

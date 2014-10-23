@@ -496,12 +496,43 @@ article{
     }
   }
 }
+
 .view-dossier-stories {
   .more-link {
     a {
       color: $story-color !important;
     }
+
   }
+  article {
+    max-height:150px;
+    overflow: hidden;
+    margin-bottom: 10px;
+    .article-inner {
+      .resource-container > .container-inner {
+        clear: inherit;
+        float:right;
+        width: 140px;
+        margin:0;
+      }
+
+      header {
+        max-height:110px;
+        overflow: hidden;
+        float:left;
+        
+        
+        h2 {
+        margin-top: 10px;
+        float:left;
+        max-width: 300px;
+      }
+      
+    }
+  }
+    
+  }
+
 }
 p.suggest {
   /*tool tip span*/
