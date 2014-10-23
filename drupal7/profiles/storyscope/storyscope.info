@@ -91,7 +91,7 @@ dependencies[] = storyscope_front_page
 ;Storyscope Custom Configuration
 dependencies[] = storyscope_settings
 dependencies[] = storyscope_user
-dependencies[] = storyscope_file_entities
+;dependencies[] = storyscope_file_entities
 
 ;Freebase Suggest
 dependencies[] = jquery_freebase
