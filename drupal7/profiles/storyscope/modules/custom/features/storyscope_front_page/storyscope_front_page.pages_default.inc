@@ -217,7 +217,7 @@ function storyscope_front_page_default_page_manager_pages() {
     $pane->configuration = array(
       'admin_title' => 'Add Dossier Button',
       'title' => '',
-      'body' => '<div class="button"><a href="node/add/dossier">Add a Dossier</a></div>',
+      'body' => '<div class="button float_right"><a href="node/add/dossier">Add a Dossier</a></div>',
       'format' => 'full_html',
       'substitute' => TRUE,
     );
@@ -227,7 +227,7 @@ function storyscope_front_page_default_page_manager_pages() {
     );
     $pane->css = array();
     $pane->extras = array();
-    $pane->position = 1;
+    $pane->position = 2;
     $pane->locks = array();
     $pane->uuid = 'd835ec32-4543-46d5-a997-f844aeb4492f';
     $display->content['new-d835ec32-4543-46d5-a997-f844aeb4492f'] = $pane;
@@ -249,7 +249,7 @@ function storyscope_front_page_default_page_manager_pages() {
     );
     $pane->css = array();
     $pane->extras = array();
-    $pane->position = 2;
+    $pane->position = 3;
     $pane->locks = array();
     $pane->uuid = 'e9a8224c-fdb2-42bf-98eb-17dfa626fe63';
     $display->content['new-e9a8224c-fdb2-42bf-98eb-17dfa626fe63'] = $pane;

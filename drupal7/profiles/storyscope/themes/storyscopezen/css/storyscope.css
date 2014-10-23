@@ -4879,3 +4879,13 @@ ul.field-name-field-fb-tags .plain {
 .pane-suggested-story-tags-suggested-story-tags-block .suggested_tags li a {
   color: #79b2ac;
 }
+
+/* line 3508, ../sass/storyscope.scss */
+.float_right {
+  float: right;
+}
+
+/* line 3512, ../sass/storyscope.scss */
+.float_left {
+  float: left;
+}
