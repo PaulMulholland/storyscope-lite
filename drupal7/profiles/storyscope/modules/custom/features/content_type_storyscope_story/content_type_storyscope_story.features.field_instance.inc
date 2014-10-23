@@ -197,12 +197,19 @@ function content_type_storyscope_story_field_default_field_instances() {
         'weight' => 1,
       ),
       'teaser' => array(
-        'label' => 'inline',
-        'module' => 'file_entity',
+        'label' => 'hidden',
+        'module' => 'media_colorbox',
         'settings' => array(
-          'file_view_mode' => 'teaser',
+          'audio_playlist' => 0,
+          'colorbox_caption' => 'title',
+          'colorbox_gallery' => 'post',
+          'colorbox_gallery_custom' => '',
+          'colorbox_view_mode' => 'default',
+          'file_view_mode' => 'default',
+          'fixed_height' => '',
+          'fixed_width' => '',
         ),
-        'type' => 'file_rendered',
+        'type' => 'media_colorbox',
         'weight' => 0,
       ),
       'thumbnail' => array(
