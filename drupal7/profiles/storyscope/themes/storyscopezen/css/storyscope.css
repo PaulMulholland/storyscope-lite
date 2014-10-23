@@ -1133,7 +1133,7 @@ article.node-reference > .article-inner p.type-identifier {
 .resource-container .view-mode-thumbnail .article-inner,
 li.article .view-mode-thumbnail .article-inner,
 article .view-mode-thumbnail .article-inner {
-  min-height: 175px;
+  min-height: 123px;
 }
 /* line 442, ../sass/storyscope.scss */
 .resource-container p.type-identifier,
