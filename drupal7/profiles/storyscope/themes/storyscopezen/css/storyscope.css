@@ -4695,7 +4695,7 @@ div.tabs .button a:hover {
 /* line 3326, ../sass/storyscope.scss */
 .field-name-field-media .field-item {
   float: left;
-  padding: 10px;
+  padding: 10px 6px 10px 6px;
 }
 
 /* line 3332, ../sass/storyscope.scss */
