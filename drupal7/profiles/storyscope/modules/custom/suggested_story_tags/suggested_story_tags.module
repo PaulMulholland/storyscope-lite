@@ -875,15 +875,17 @@ function suggested_story_tags() {
 			$buttons = '';
 			//display suggested tags for the story
 			foreach($result as $record) {
-				$buttons .= '&nbsp;<div style="float:left" class="button addtag-button">' . l( t($record->name) , drupal_get_path_alias(current_path()) . '/addtag' , array("html"=>TRUE, 'query'=>array('topic_name' => $record->name, 'mid' => $record->mid, 'destination' => (drupal_get_path_alias(current_path()))))) . '</div>';
+				//$buttons .= '<li class="tags">' . l( t($record->name) , drupal_get_path_alias(current_path()) . '/addtag' , array("html"=>TRUE, 'query'=>array('topic_name' => $record->name, 'mid' => $record->mid, 'destination' => (drupal_get_path_alias(current_path()))))) . '</li>';
+				$buttons .= '<li class="tags">' . l( t($record->name) , drupal_get_path_alias(current_path()) , array("html"=>TRUE, 'query'=>array('tag' => $record->mid))) . '</li>';
 				
 			}
 			if(!empty($buttons)) {
-				$output .= '<div style="margin-bottom:1em;"><div style="clear:both;">';
+
+				$output .= '<ul class="field-name-field-fb-tags">';
 				
 
 				$output .= $buttons;
-				$output .= '</div></div>';
+				$output .= '</ul>';
 			}
 			return $output;
 		}
