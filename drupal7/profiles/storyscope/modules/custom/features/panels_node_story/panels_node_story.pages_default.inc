@@ -200,7 +200,7 @@ function panels_node_story_default_page_manager_handlers() {
     );
     $pane->css = array(
       'css_id' => '',
-      'css_class' => 'resource-container container-full wide-items',
+      'css_class' => 'resource-container container-full wide-items story-tags',
     );
     $pane->extras = array();
     $pane->position = 0;
@@ -214,16 +214,34 @@ function panels_node_story_default_page_manager_handlers() {
     $pane->type = 'block';
     $pane->subtype = 'suggested_story_tags-suggested_story_tags_block';
     $pane->shown = TRUE;
-    $pane->access = array();
+    $pane->access = array(
+      'plugins' => array(
+        0 => array(
+          'name' => 'role',
+          'settings' => array(
+            'rids' => array(
+              0 => 2,
+              1 => 3,
+              2 => 4,
+            ),
+          ),
+          'context' => 'logged-in-user',
+          'not' => FALSE,
+        ),
+      ),
+    );
     $pane->configuration = array(
       'override_title' => 1,
-      'override_title_text' => '<i class="fa fa-thumbs-o-up"></i>&nbsp;</i>Suggested Tags',
+      'override_title_text' => '<i class="fa fa-thumbs-o-up fa-lg"></i>&nbsp;</i>Suggested Tags',
     );
     $pane->cache = array();
     $pane->style = array(
       'settings' => NULL,
     );
-    $pane->css = array();
+    $pane->css = array(
+      'css_id' => '',
+      'css_class' => 'pane-node-field-fb-tags',
+    );
     $pane->extras = array();
     $pane->position = 0;
     $pane->locks = array();
