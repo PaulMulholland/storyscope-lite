@@ -1,0 +1,7 @@
+<?php
+/**
+ * @file
+ * Code for the Storyscope File Entities feature.
+ */
+
+include_once 'storyscope_file_entities.features.inc';
