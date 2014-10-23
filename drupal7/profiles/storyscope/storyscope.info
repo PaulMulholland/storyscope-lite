@@ -108,3 +108,7 @@ dependencies[] = stories_of_theme
 dependencies[] = story_search_theme
 dependencies[] = suggested_story_tags
 
+UI Widgets;
+dependencies[] = footable
+dependencies[] = jquery_update
+
