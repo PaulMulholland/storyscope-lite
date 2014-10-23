@@ -486,6 +486,21 @@ function storyscope_update_7018() {
 	return t('Update unique key for setting_timeline_data table');
 }
 
+function storyscope_update_7019() {
+  // An array of new or changed features; the array keys are feature names,
+  // values are an array of exportable types as seen in a feature's .info file:
+  //   features[field][] = node-page-body
+  $features = array(
+    'panels_node_story', 'panels_node_dossier' , 'storyscope_settings', 'views_dossier_stories', 'content_type_storyscope_dossier', 'content_type_storyscope_story', 'storyscope_front_page', );
+ 
+  // Enable the modules by name.
+  module_enable($features);
+  
+    // Revert the features (if the feature has been changed)
+  storyscope_features_revert($features);
+ 
+  return t('Update storyscope settings - story panel - panels_node_dossier - views_dossier_stories - content_type_storyscope_dossier - content_type_storyscope_story - storyscope_front_page');
+}
 /**
 * Revert specified features.
 *

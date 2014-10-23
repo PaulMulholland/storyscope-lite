@@ -101,3 +101,9 @@ dependencies[] = progress
 dependencies[] = background_process
 dependencies[] = dec_rec
 dependencies[] = dec_dossier
+dependencies[] = dossier_theme
+dependencies[] = installation_theme
+dependencies[] = stories_of_theme
+dependencies[] = story_search_theme
+dependencies[] = suggested_story_tags
+
