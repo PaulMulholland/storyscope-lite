@@ -4698,30 +4698,35 @@ div.tabs .button a:hover {
   padding: 10px 6px 10px 6px;
 }
 
-/* line 3332, ../sass/storyscope.scss */
+/* line 3333, ../sass/storyscope.scss */
+.story-tags ul.field-name-field-fb-tags > a > li {
+  background-color: #edd;
+}
+
+/* line 3338, ../sass/storyscope.scss */
 .pane-node-field-fb-tags {
   padding-top: 25px;
   border-top: solid 1px #CDCCCB;
 }
-/* line 3337, ../sass/storyscope.scss */
+/* line 3343, ../sass/storyscope.scss */
 .pane-node-field-fb-tags .pane-content .field-collection-container {
   border-bottom: none;
   margin-bottom: 0px;
 }
 
-/* line 3347, ../sass/storyscope.scss */
+/* line 3353, ../sass/storyscope.scss */
 ul.field-name-field-fb-tags {
   list-style-type: none;
   padding-left: 0px;
   float: left;
 }
-/* line 3352, ../sass/storyscope.scss */
+/* line 3358, ../sass/storyscope.scss */
 ul.field-name-field-fb-tags li {
   margin: 0 10px 10px 0;
   padding: 3px 10px 3px 10px;
   list-style: none;
   text-decoration: none;
-  background-color: #eee;
+  background-color: #dde;
   -moz-border-radius: 3px;
   border-radius: 3px;
   box-shadow: 1px 1px 1px #999999;
@@ -4729,16 +4734,16 @@ ul.field-name-field-fb-tags li {
   display: block;
   color: #666;
 }
-/* line 3364, ../sass/storyscope.scss */
+/* line 3370, ../sass/storyscope.scss */
 ul.field-name-field-fb-tags li a {
   color: #666;
 }
-/* line 3367, ../sass/storyscope.scss */
+/* line 3373, ../sass/storyscope.scss */
 ul.field-name-field-fb-tags li a:hover {
   text-decoration: none;
   border-bottom: none;
 }
-/* line 3372, ../sass/storyscope.scss */
+/* line 3378, ../sass/storyscope.scss */
 ul.field-name-field-fb-tags .plain {
   background-color: #fff;
   -moz-border-radius: none;
@@ -4747,89 +4752,90 @@ ul.field-name-field-fb-tags .plain {
   font-weight: bold;
 }
 
-/* line 3382, ../sass/storyscope.scss */
+/* line 3388, ../sass/storyscope.scss */
 .block-dec-rec {
   border-top: 1px solid #D3D7D9;
   padding-top: 1em;
 }
-/* line 3385, ../sass/storyscope.scss */
+/* line 3391, ../sass/storyscope.scss */
 .block-dec-rec h2, .block-dec-rec .node-story-visualisation .exhibit-collectionView-body ol li > div > div:first-child, .node-story-visualisation .exhibit-collectionView-body ol .block-dec-rec li > div > div:first-child {
   font-size: 1.2em;
 }
-/* line 3388, ../sass/storyscope.scss */
+/* line 3394, ../sass/storyscope.scss */
 .block-dec-rec .addtag-button {
   float: right;
   padding-right: 20px;
 }
-/* line 3392, ../sass/storyscope.scss */
+/* line 3398, ../sass/storyscope.scss */
 .block-dec-rec .find-tagged-stories {
   float: right;
 }
-/* line 3395, ../sass/storyscope.scss */
+/* line 3401, ../sass/storyscope.scss */
 .block-dec-rec .find-tagged-stories a {
   color: #4E4E4E;
 }
-/* line 3399, ../sass/storyscope.scss */
+/* line 3405, ../sass/storyscope.scss */
 .block-dec-rec .event-space-headings {
   clear: both;
 }
-/* line 3402, ../sass/storyscope.scss */
+/* line 3408, ../sass/storyscope.scss */
 .block-dec-rec .event-space-filter {
   font-size: 13px;
   color: #4E4E4E;
 }
-/* line 3407, ../sass/storyscope.scss */
+/* line 3413, ../sass/storyscope.scss */
 .block-dec-rec .event-space-tag-attibutes-wrapper {
+  clear: both;
   padding-top: 15px;
   padding-bottom: 25px;
 }
-/* line 3410, ../sass/storyscope.scss */
+/* line 3417, ../sass/storyscope.scss */
 .block-dec-rec .event-space-tag-attibutes-wrapper .event-space-tag-attibutes {
   clear: both;
 }
-/* line 3413, ../sass/storyscope.scss */
+/* line 3420, ../sass/storyscope.scss */
 .block-dec-rec .event-space-tag-attibutes-wrapper .event-space-tag-attibutes .field-name-field-fb-tags {
   margin: 0;
 }
-/* line 3420, ../sass/storyscope.scss */
+/* line 3427, ../sass/storyscope.scss */
 .block-dec-rec .topic-block {
   display: block;
   padding-bottom: 10px;
   border-bottom: solid 1px #CDCCCB;
 }
-/* line 3424, ../sass/storyscope.scss */
+/* line 3431, ../sass/storyscope.scss */
 .block-dec-rec .topic-block .description-attribute-block {
   display: inline-block;
 }
-/* line 3426, ../sass/storyscope.scss */
+/* line 3433, ../sass/storyscope.scss */
 .block-dec-rec .topic-block .description-attribute-block .topic-description {
   width: 75%;
   float: left;
 }
-/* line 3429, ../sass/storyscope.scss */
+/* line 3436, ../sass/storyscope.scss */
 .block-dec-rec .topic-block .description-attribute-block .topic-description p {
   width: 95%;
 }
-/* line 3433, ../sass/storyscope.scss */
+/* line 3440, ../sass/storyscope.scss */
 .block-dec-rec .topic-block .description-attribute-block .topic-image {
   width: 25%;
   float: right;
   max-height: 212px;
   overflow: hidden;
 }
-/* line 3438, ../sass/storyscope.scss */
+/* line 3445, ../sass/storyscope.scss */
 .block-dec-rec .topic-block .description-attribute-block .topic-image img {
   width: 90%;
 }
-/* line 3446, ../sass/storyscope.scss */
+/* line 3453, ../sass/storyscope.scss */
 .block-dec-rec .event-space-table {
   clear: both;
 }
-/* line 3448, ../sass/storyscope.scss */
+/* line 3455, ../sass/storyscope.scss */
 .block-dec-rec .event-space-table table {
   width: 100%;
 }
-/* line 3451, ../sass/storyscope.scss */
+/* line 3458, ../sass/storyscope.scss */
 .block-dec-rec .event-space-table table th {
   padding: 2px 3px 2px 3px;
   border-bottom: 1px solid grey;
@@ -4837,31 +4843,31 @@ ul.field-name-field-fb-tags .plain {
   width: 50px;
   text-transform: capitalize;
 }
-/* line 3458, ../sass/storyscope.scss */
+/* line 3465, ../sass/storyscope.scss */
 .block-dec-rec .event-space-table table tr {
   border-bottom: 1px solid lightgrey;
   background: none;
 }
-/* line 3468, ../sass/storyscope.scss */
+/* line 3475, ../sass/storyscope.scss */
 .block-dec-rec .event-space-table table td {
   padding: 3px 3px 3px 3px;
 }
-/* line 3470, ../sass/storyscope.scss */
+/* line 3477, ../sass/storyscope.scss */
 .block-dec-rec .event-space-table table td a {
   color: #0088cc;
 }
 
-/* line 3481, ../sass/storyscope.scss */
+/* line 3488, ../sass/storyscope.scss */
 .pane-suggested-story-tags-suggested-story-tags-block .item-list {
   margin: inherit;
 }
-/* line 3484, ../sass/storyscope.scss */
+/* line 3491, ../sass/storyscope.scss */
 .pane-suggested-story-tags-suggested-story-tags-block .suggested_tags {
   list-style-type: none;
   padding-left: 0px;
   float: left;
 }
-/* line 3488, ../sass/storyscope.scss */
+/* line 3495, ../sass/storyscope.scss */
 .pane-suggested-story-tags-suggested-story-tags-block .suggested_tags li {
   margin: 0 10px 10px 0;
   padding: 3px 10px 3px 10px;
@@ -4869,7 +4875,7 @@ ul.field-name-field-fb-tags .plain {
   float: left;
   display: block;
 }
-/* line 3494, ../sass/storyscope.scss */
+/* line 3501, ../sass/storyscope.scss */
 .pane-suggested-story-tags-suggested-story-tags-block .suggested_tags li a {
   color: #79b2ac;
 }
