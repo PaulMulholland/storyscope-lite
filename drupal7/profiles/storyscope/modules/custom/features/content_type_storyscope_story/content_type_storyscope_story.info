@@ -4,6 +4,7 @@ package = Storyscope Content Types
 dependencies[] = features
 dependencies[] = field_collection
 dependencies[] = file
+dependencies[] = file_entity
 dependencies[] = jquery_freebase
 dependencies[] = media
 dependencies[] = media_colorbox
