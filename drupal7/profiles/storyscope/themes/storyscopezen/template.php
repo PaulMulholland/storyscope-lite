@@ -96,9 +96,8 @@ function storyscopezen_field__field_fb_tags($variables) {
 			$id = explode('/',$mid);
 			$lenth = count($id) - 1;
 			$relative_mid = $id[$lenth];
-			$output .= '<li class="tags">';
-			$tags_link = l($topic,  $path , array('attributes' => array('target'=>'_self'), 'query' => array('tag'=> '/m/' . $relative_mid )));
-			$output .= $tags_link . '</li>'; 
+			$tags_link = l('<li class="tags">'. $topic . '</li>',  $path , array('html' => TRUE, 'attributes' => array('target'=>'_self'), 'query' => array('tag'=> '/m/' . $relative_mid )));
+			$output .= $tags_link ; 
 		}
 		elseif (empty($mid) && !empty($topic)) {
       $output .= '<li class="tags freebase-link">' . $topic . '</li>';
