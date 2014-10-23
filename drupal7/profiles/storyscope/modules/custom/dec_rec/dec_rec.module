@@ -1013,7 +1013,7 @@ function dec_timeline_for_setting($location, $time, $end) {
 	$output = "";
 	$name = get_topic_name($location);
 	if($name) {
-		$output .= '<h2><i class="fa fa-info fa-lg">&nbsp;</i><span class="topic-title">' . t('About : ').$name.", ".$time." to ".$end.'&nbsp;&nbsp;</span>';
+		$output .= '<h2><i class="fa fa-info-circle fa-lg">&nbsp;</i><span class="topic-title">' . t('About : ').$name.", ".$time." to ".$end.'&nbsp;&nbsp;</span>';
 	}
 	
 	if(!$location && !$time) {
@@ -1162,7 +1162,7 @@ WHERE query_tag.id = '".$story_id."';";
 		}
 	}
 	
-	$output .= '<h2><i class="fa fa-info fa-lg">&nbsp;</i>' . t('About : ') .implode(", ",$tag_name_array).'</h2>';
+	$output .= '<h2><i class="fa fa-info-circle fa-lg">&nbsp;</i>' . t('About : ') .implode(", ",$tag_name_array).'</h2>';
 	
 
 	if(isset($_GET['event_type'])) {
@@ -1316,7 +1316,7 @@ function dec_timeline($topic) {
 	//tag name
 	$name = get_topic_name($topic);
 	if($name) {
-		$output .= '<div class="topic-block"><h2><i class="fa fa-info fa-lg">&nbsp;</i><span class="topic-title">' . t('About : '). $name . $topic_types . '&nbsp;&nbsp;</span>' . '</h2>';
+		$output .= '<div class="topic-block"><h2><i class="fa fa-info-circle fa-lg">&nbsp;</i><span class="topic-title">' . t('About : '). $name . $topic_types . '&nbsp;&nbsp;</span>' . '</h2>';
 	}
 	
 // 	if($attribute) {
@@ -3037,29 +3037,29 @@ function dec_setting($location, $time,  $end) {
 	$next_path = implode('/',$path_array);
 	if($end) {
 		if($name) {
-			$output .= '<h2><i class="fa fa-info fa-lg">&nbsp;</i><span class="topic-title">' . t('About : ').$name.", ".$time." to ".$end.'&nbsp;&nbsp;</span>' . l('<span class="topic-search"><i class="fa fa-search">&nbsp;</i>' . '</span>', $next_path, array("query"=>array('storylocation'=>$location, 'storytime'=>$time, 'storyend'=>$end), "html"=>TRUE)) . '</h2>';
+			$output .= '<h2><i class="fa fa-info-circle fa-lg">&nbsp;</i><span class="topic-title">' . t('About : ').$name.", ".$time." to ".$end.'&nbsp;&nbsp;</span>' . l('<span class="topic-search"><i class="fa fa-search">&nbsp;</i>' . '</span>', $next_path, array("query"=>array('storylocation'=>$location, 'storytime'=>$time, 'storyend'=>$end), "html"=>TRUE)) . '</h2>';
 				
-// 			$output .= '<h2><i class="fa fa-info fa-lg">&nbsp;</i>' . t('About : ') .$name.", ".$time." to ".$end.'</h2>';
+// 			$output .= '<h2><i class="fa fa-info-circle fa-lg">&nbsp;</i>' . t('About : ') .$name.", ".$time." to ".$end.'</h2>';
 // 			$output .= '<h2>'.$name.", ".$time." to ".$end.'</h2>';
 // 			drupal_set_title($name.", ".$time." to ".$end);
 		}
 		else {
-			$output .= '<h2><i class="fa fa-info fa-lg">&nbsp;</i><span class="topic-title">' . t('About : ').$location.", ".$time." to ".$end.'&nbsp;&nbsp;</span>' . l('<span class="topic-search"><i class="fa fa-search">&nbsp;</i>' . '</span>', $next_path, array("query"=>array('storylocation'=>$location, 'storytime'=>$time, 'storyend'=>$end), "html"=>TRUE)) . '</h2>';
+			$output .= '<h2><i class="fa fa-info-circle fa-lg">&nbsp;</i><span class="topic-title">' . t('About : ').$location.", ".$time." to ".$end.'&nbsp;&nbsp;</span>' . l('<span class="topic-search"><i class="fa fa-search">&nbsp;</i>' . '</span>', $next_path, array("query"=>array('storylocation'=>$location, 'storytime'=>$time, 'storyend'=>$end), "html"=>TRUE)) . '</h2>';
 				
-// 			$output .= '<h2><i class="fa fa-info fa-lg">&nbsp;</i>' . t('About : ') .$name.", ".$time." to ".$end.'</h2>';
+// 			$output .= '<h2><i class="fa fa-info-circle fa-lg">&nbsp;</i>' . t('About : ') .$name.", ".$time." to ".$end.'</h2>';
 // 			$output .= '<h2>'.$location.", ".$time." to ".$end.'</h2>';
 // 			drupal_set_title($location.", ".$time." to ".$end);
 		}		
 	}
 	else {
 		if($name) {
-			$output .= '<h2><i class="fa fa-info fa-lg">&nbsp;</i><span class="topic-title">' . t('About : ').$name.", ".$time.'&nbsp;&nbsp;</span>' . l('<span class="topic-search"><i class="fa fa-search">&nbsp;</i>' . '</span>', $next_path, array("query"=>array('storylocation'=>$location, 'storytime'=>$time), "html"=>TRUE)) . '</h2>';
+			$output .= '<h2><i class="fa fa-info-circle fa-lg">&nbsp;</i><span class="topic-title">' . t('About : ').$name.", ".$time.'&nbsp;&nbsp;</span>' . l('<span class="topic-search"><i class="fa fa-search">&nbsp;</i>' . '</span>', $next_path, array("query"=>array('storylocation'=>$location, 'storytime'=>$time), "html"=>TRUE)) . '</h2>';
 
 // 			$output .= '<h2>'.$name.", ".$time.'</h2>';
 // 			drupal_set_title($name.", ".$time);
 		}
 		else {
-			$output .= '<h2><i class="fa fa-info fa-lg">&nbsp;</i><span class="topic-title">' . t('About : ').$location.", ".$time.'&nbsp;&nbsp;</span>' . l('<span class="topic-search"><i class="fa fa-search">&nbsp;</i>' . '</span>', $next_path, array("query"=>array('storylocation'=>$location, 'storytime'=>$time), "html"=>TRUE)) . '</h2>';
+			$output .= '<h2><i class="fa fa-info-circle fa-lg">&nbsp;</i><span class="topic-title">' . t('About : ').$location.", ".$time.'&nbsp;&nbsp;</span>' . l('<span class="topic-search"><i class="fa fa-search">&nbsp;</i>' . '</span>', $next_path, array("query"=>array('storylocation'=>$location, 'storytime'=>$time), "html"=>TRUE)) . '</h2>';
 
 // 			$output .= '<h2>'.$location.", ".$time.'</h2>';
 // 			drupal_set_title($location.", ".$time);
@@ -3473,7 +3473,7 @@ function dec_list_of_tags($tag_array, $max_value) {
 		}		
 	}
 
-	$output .= '<h2><i class="fa fa-info fa-lg">&nbsp;</i>' . t('About : ') .implode(", ",$tag_name_array).'</h2>';
+	$output .= '<h2><i class="fa fa-info-circle fa-lg">&nbsp;</i>' . t('About : ') .implode(", ",$tag_name_array).'</h2>';
 // 	drupal_set_title(implode(", ",$tag_name_array));
 	
 	//do the calculations
@@ -3889,7 +3889,7 @@ function dec_tag($topic) {
 			$path_array = explode('/',request_path());
 			$next_path = implode('/',$path_array);
 			if(isset($path_array[2]) && isset($path_array[3])) {
-				if($path_array[2] == 'story' && !tag_of_story($topic,$path_array[3]) && !isset($_GET['storytag'])) {
+				if($path_array[2] == 'story' && !tag_of_story($topic,$path_array[3]) && !isset($_GET['storytag']) && user_is_logged_in()) {
 					$output .= '<div class="button addtag-button">' . l( t('Add to Story') , $current_path . '/addtag' , array("html"=>TRUE, 'query'=>array('topic_name' => $name, 'mid' => $topic, 'destination' => (drupal_get_path_alias(current_path()) . '?tag=' . $topic)))) . '</div>';
 				}
 			}
@@ -3899,7 +3899,7 @@ function dec_tag($topic) {
 			}
 			$path_array[] = 'stories';
 			$next_path = implode('/',$path_array);
-			$output .= '<div class="topic-block"><h2><i class="fa fa-info fa-lg">&nbsp;</i><span class="topic-title">' . t('About : '). $name . $topic_types . '&nbsp;&nbsp;</span>' . l('<span class="topic-search"><i class="fa fa-search">&nbsp;</i>' . '</span>', $next_path, array("query"=>array('storytag'=>$topic), "html"=>TRUE)) . '</h2>';
+			$output .= '<div class="topic-block"><h2><i class="fa fa-info-circle fa-lg">&nbsp;</i><span class="topic-title">' . t('About : '). $name . $topic_types . '&nbsp;&nbsp;</span>' . l('<span class="topic-search"><i class="fa fa-search">&nbsp;</i>' . '</span>', $next_path, array("query"=>array('storytag'=>$topic), "html"=>TRUE)) . '</h2>';
 		}
 
 
