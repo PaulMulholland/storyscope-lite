@@ -91,7 +91,7 @@ dependencies[] = storyscope_front_page
 ;Storyscope Custom Configuration
 dependencies[] = storyscope_settings
 dependencies[] = storyscope_user
-dependencies[] = storyscope_file_entities
+;dependencies[] = storyscope_file_entities
 
 ;Freebase Suggest
 dependencies[] = jquery_freebase
@@ -107,4 +107,9 @@ dependencies[] = installation_theme
 dependencies[] = stories_of_theme
 dependencies[] = story_search_theme
 dependencies[] = suggested_story_tags
+
+UI Widgets;
+dependencies[] = footable
+dependencies[] = jquery_update
+dependencies[] = fontawesome
 
