@@ -111,4 +111,5 @@ dependencies[] = suggested_story_tags
 UI Widgets;
 dependencies[] = footable
 dependencies[] = jquery_update
+dependencies[] = fontawesome
 
