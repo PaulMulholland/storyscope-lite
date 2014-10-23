@@ -198,18 +198,11 @@ function content_type_storyscope_story_field_default_field_instances() {
       ),
       'teaser' => array(
         'label' => 'inline',
-        'module' => 'media_colorbox',
+        'module' => 'file_entity',
         'settings' => array(
-          'audio_playlist' => 0,
-          'colorbox_caption' => 'title',
-          'colorbox_gallery' => 'post',
-          'colorbox_gallery_custom' => '',
-          'colorbox_view_mode' => 'default',
-          'file_view_mode' => 'default',
-          'fixed_height' => '',
-          'fixed_width' => '',
+          'file_view_mode' => 'teaser',
         ),
-        'type' => 'media_colorbox',
+        'type' => 'file_rendered',
         'weight' => 0,
       ),
       'thumbnail' => array(
