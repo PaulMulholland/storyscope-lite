@@ -5306,7 +5306,7 @@ FROM event_attribute_value
 WHERE event_attribute_value.value = :tag) as event_table, event_attribute_value, attribute_name
 WHERE event_table.event = event_attribute_value.event AND
 event_attribute_value.attribute = attribute_name.attribute AND
-attribute_name.attribute <> 'location') as data
+attribute_name.name <> 'location') as data
 WHERE result.tag = data.tag
 GROUP BY result.tag
 ORDER BY frequency DESC) as frequency
@@ -5381,7 +5381,7 @@ query_tag.id = :storyid AND
 query_tag.tag = event_attribute_value.value) as event_table, event_attribute_value, attribute_name
 WHERE event_table.event = event_attribute_value.event AND
 event_attribute_value.attribute = attribute_name.attribute AND
-attribute_name.attribute <> 'location') as data
+attribute_name.name <> 'location') as data
 WHERE result.tag = data.tag 
 GROUP BY result.tag
 ORDER BY annotations DESC,frequency DESC LIMIT ".$n.") as result_table
