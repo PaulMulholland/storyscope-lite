@@ -880,7 +880,6 @@ function suggested_story_tags() {
 			}
 			if(!empty($buttons)) {
 				$output .= '<div style="margin-bottom:1em;"><div style="clear:both;">';
-				$output .= '<div class="topic-block"><h2 class="pane-title"><i class="fa fa-tag fa-lg">&nbsp;</i><span class="topic-title">Suggested story tags&nbsp;&nbsp;</span>' . '</h2></div><div style="clear:both;">';
 				
 
 				$output .= $buttons;
