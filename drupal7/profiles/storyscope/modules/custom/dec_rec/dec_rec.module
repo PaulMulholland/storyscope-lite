@@ -1896,7 +1896,7 @@ function save_fb_image($topic, $thumbnail_url = FALSE) {
  */
 function dec_reset() {
 	//if the line below is uncommented then this function can reset local cached databases of freebase data
-	reset_recommender_database();
+// 	reset_recommender_database();
 	return "database reset";
 }
 
