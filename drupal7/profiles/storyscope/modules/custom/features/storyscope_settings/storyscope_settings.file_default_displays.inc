@@ -16,13 +16,13 @@ function storyscope_settings_file_default_displays() {
   $file_display->weight = -46;
   $file_display->status = TRUE;
   $file_display->settings = array(
-    'colorbox_node_style' => 'larger_thumbnail',
-    'colorbox_node_style_first' => 'larger_thumbnail',
+    'colorbox_node_style' => 'media_thumbnail',
+    'colorbox_node_style_first' => 'media_thumbnail',
     'colorbox_image_style' => '',
     'colorbox_gallery' => 'post',
     'colorbox_gallery_custom' => '',
-    'colorbox_caption' => 'node_title',
-    'colorbox_caption_custom' => '',
+    'colorbox_caption' => 'custom',
+    'colorbox_caption_custom' => '[current-page:title]',
   );
   $export['image__default__file_field_colorbox'] = $file_display;
 
@@ -121,8 +121,8 @@ function storyscope_settings_file_default_displays() {
   $file_display->weight = 50;
   $file_display->status = TRUE;
   $file_display->settings = array(
-    'image_style' => 'medium',
-    'image_link' => 'content',
+    'image_style' => 'media_thumbnail',
+    'image_link' => '',
   );
   $export['image__teaser__file_field_image'] = $file_display;
 
