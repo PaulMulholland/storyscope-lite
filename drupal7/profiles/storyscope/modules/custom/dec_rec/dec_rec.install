@@ -493,6 +493,21 @@ function dec_rec_schema() {
 					),
 			),
 	);
+	$schema['tag_themes'] = array(
+			'description' => t('Stored themes of a topic'),
+			'fields' => array(
+					'tag' => array(
+							'description' => t('Freebase tag'),
+							'type' => 'varchar',
+							'length' => 45,
+					),
+					'mid' => array(
+							'description' => t('Theme mid'),
+							'type' => 'varchar',
+							'length' => 45,
+					),
+			),
+	);
 	return $schema;
 }
 

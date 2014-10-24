@@ -370,6 +370,26 @@ function storyscope_update_7029() {
 	return t('Added table for storing site theme calculations');
 }
 
+function storyscope_update_7030() {
+	$schema['tag_themes'] = array(
+			'description' => t('Stored themes of a topic'),
+			'fields' => array(
+					'tag' => array(
+							'description' => t('Freebase tag'),
+							'type' => 'varchar',
+							'length' => 45,
+					),
+					'mid' => array(
+							'description' => t('Theme mid'),
+							'type' => 'varchar',
+							'length' => 45,
+					),
+			),
+	);
+	db_create_table('tag_themes', $schema['tag_themes']);
+	return t('Added table for storing tag theme calculations');
+}
+
 /**
 * Revert specified features.
 *

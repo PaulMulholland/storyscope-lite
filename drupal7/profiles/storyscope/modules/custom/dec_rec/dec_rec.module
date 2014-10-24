@@ -5320,6 +5320,9 @@ ORDER BY frequency DESC) as frequency
 	foreach ($result as $record) {
 		$output[] = $record;
 	}
+	
+	//cache themes of a tag
+	dec_save_themes('tag_themes', 'tag', $output, 'value', $tag);
 	return $output;	
 }
 
