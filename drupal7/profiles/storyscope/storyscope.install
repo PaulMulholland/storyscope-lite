@@ -355,6 +355,21 @@ function storyscope_update_7028() {
 	return t('Added table for storing story theme calculations');
 }
 
+function storyscope_update_7029() {
+	$schema['site_themes'] = array(
+			'description' => t('Stored themes of a site'),
+			'fields' => array(
+					'mid' => array(
+							'description' => t('Theme mid'),
+							'type' => 'varchar',
+							'length' => 45,
+					),
+			),
+	);
+	db_create_table('site_themes', $schema['site_themes']);
+	return t('Added table for storing site theme calculations');
+}
+
 /**
 * Revert specified features.
 *

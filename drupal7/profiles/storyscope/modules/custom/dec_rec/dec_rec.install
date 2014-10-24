@@ -483,6 +483,16 @@ function dec_rec_schema() {
 					),
 			),
 	);
+	$schema['site_themes'] = array(
+			'description' => t('Stored themes of a site'),
+			'fields' => array(
+					'mid' => array(
+							'description' => t('Theme mid'),
+							'type' => 'varchar',
+							'length' => 45,
+					),
+			),
+	);
 	return $schema;
 }
 
