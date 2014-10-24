@@ -5397,6 +5397,8 @@ foreach ($result as $record) {
 	$output[] = $record;
 }
 
+dec_save_themes('story_themes', 'story', $output, 'value', $story_id);
+
 return $output;
 }
 

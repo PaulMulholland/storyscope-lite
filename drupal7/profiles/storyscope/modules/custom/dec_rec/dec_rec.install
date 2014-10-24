@@ -468,6 +468,21 @@ function dec_rec_schema() {
 					),
 			),
 	);
+	$schema['story_themes'] = array(
+			'description' => t('Stored themes of a story'),
+			'fields' => array(
+					'story' => array(
+							'description' => t('Story nid'),
+							'type' => 'int',
+							'length' => 11,
+					),
+					'mid' => array(
+							'description' => t('Theme mid'),
+							'type' => 'varchar',
+							'length' => 45,
+					),
+			),
+	);
 	return $schema;
 }
 

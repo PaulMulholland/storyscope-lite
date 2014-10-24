@@ -334,6 +334,27 @@ function storyscope_update_7027() {
 	db_create_table('dossier_themes', $schema['dossier_themes']);
 	return t('Added table for storing dossier theme calculations');
 }
+
+function storyscope_update_7028() {
+	$schema['story_themes'] = array(
+			'description' => t('Stored themes of a story'),
+			'fields' => array(
+					'story' => array(
+							'description' => t('Story nid'),
+							'type' => 'int',
+							'length' => 11,
+					),
+					'mid' => array(
+							'description' => t('Theme mid'),
+							'type' => 'varchar',
+							'length' => 45,
+					),
+			),
+	);
+	db_create_table('story_themes', $schema['story_themes']);
+	return t('Added table for storing story theme calculations');
+}
+
 /**
 * Revert specified features.
 *
