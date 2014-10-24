@@ -1900,7 +1900,7 @@ function save_fb_image($topic, $thumbnail_url = FALSE) {
  */
 function dec_reset() {
 	//if the line below is uncommented then this function can reset local cached databases of freebase data
-// 	reset_recommender_database();
+//  	reset_recommender_database();
 	return "database reset";
 }
 
@@ -3577,7 +3577,7 @@ function dec_list_of_tags($tag_array, $max_value) {
 // 		}
 	
 // 	}
-	
+
 	//themes (i.e. themes may or may not be story tags)
 	if(!empty($themes)) {
 		$output .= '<div style="clear:both"><h2><i class="fa fa-link fa-lg">&nbsp;</i>Themes</h2></div>';

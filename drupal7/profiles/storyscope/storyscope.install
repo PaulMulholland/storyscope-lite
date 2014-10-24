@@ -314,6 +314,26 @@ function storyscope_update_7026() {
  
   return t('Update content_type_storyscope_dossier - panels_node_dossier');
 }
+
+function storyscope_update_7027() {
+	$schema['dossier_themes'] = array(
+			'description' => t('Stored themes of a dossier'),
+			'fields' => array(
+					'dossier' => array(
+							'description' => t('Dossier nid'),
+							'type' => 'int',
+							'length' => 11,
+					),
+					'mid' => array(
+							'description' => t('Theme mid'),
+							'type' => 'varchar',
+							'length' => 45,
+					),
+			),
+	);
+	db_create_table('dossier_themes', $schema['dossier_themes']);
+	return t('Added table for storing dossier theme calculations');
+}
 /**
 * Revert specified features.
 *

@@ -48,7 +48,7 @@ function dossier_theme_block_content() {
 function dec_dossier_themes($dossier_nid) {
 	$dossier_node = node_load($dossier_nid);
 	$story_array = read_stories_from_dossier_node($dossier_node);
-	$themes = themes_for_a_dossier($story_array, 10);
+	$themes = themes_for_a_dossier($story_array, 10, $dossier_nid);
 	$output = '';
 	$output = '<div>&nbsp';
 	if(!empty($themes)) {
@@ -150,7 +150,7 @@ JOIN tag_name ON tag_name.tag = frequency_table.location ORDER BY stories DESC, 
  * Find how many times a concept appears in the concept spaces of the annotations of the stoires in the dossier
  * Group by number of stories they connect to, number of annotations they connect to, and finally frequency
  */
-function themes_for_a_dossier($story_array, $limit = 10) {//****here
+function themes_for_a_dossier($story_array, $limit = 10, $dossier_nid) {//****here
 	$output = array();
 	if(!empty($story_array)) {
 		$story_string = "('".implode("','", $story_array)."')";
@@ -196,7 +196,23 @@ WHERE result.frequency >= 2 LIMIT ".$limit.";";
 			$output[] = $record;
 		}
 	}
+	dec_save_themes('dossier_themes', 'dossier', $output, 'value', $dossier_nid);
 	return $output;
+}
+
+function dec_save_themes($table = 'dossier_themes', $table_field = 'dossier', $theme_array, $theme_field = 'value', $nid) {
+	//delete previous entry in query_tag table
+
+	db_delete($table)
+	->condition($table_field, $nid)
+	->execute();
+	
+	//update theme table
+	$query = db_insert($table)->fields(array($table_field, 'mid'));
+	foreach($theme_array as $entry) {
+		$query->values(array($table_field=>$nid, "mid"=>$entry->$theme_field));
+	}
+	$query->execute();
 }
 
 function read_stories_from_dossier_node($dossier_node) {
