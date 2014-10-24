@@ -3094,7 +3094,7 @@ function dec_setting($location, $time,  $end) {
 	$timeline_links = dec_setting_timeline_links($time, $end, $location, $event_array);
 	//get themes for the events of a setting
 	$themes = dec_get_themes_for_events_of_setting($location, $full_start_time, $full_end_time);
-
+	
 	$name = get_topic_name($location);
 	$path_array = explode('/',request_path());
 	if(end($path_array) == 'stories' || end($path_array) == 'settingstories') {
@@ -3147,6 +3147,17 @@ function dec_setting($location, $time,  $end) {
 	}
 
 	if(!empty($themes)) {
+		//save to cache
+		$setting_id = check_setting_id($time, $end, $location);
+		db_delete('setting_themes')
+		->condition('setting_id', $setting_id)
+		->execute();
+		$query = db_insert('setting_themes')->fields(array('setting_id', 'mid'));
+		foreach($themes as $tag) {
+			$query->values(array("setting_id"=>$setting_id, "mid"=>$tag->value));
+		}
+		$query->execute();
+
 		$output .= '<div style="clear:both"><h2><i class="fa fa-link fa-lg">&nbsp;</i>Themes</h2></div>';
 		$output .=  '<ul class="field-name-field-fb-tags">';
 		foreach($themes as $theme) {
@@ -3191,6 +3202,30 @@ function dec_setting($location, $time,  $end) {
 // 	}
 	return $output.'</div>';
 	
+}
+
+function check_setting_id($location, $time,  $end) {
+	//check whether setting exists
+	$record = db_select('setting_id','si')
+	->fields('si',array('id'))
+	->condition('location', $location,'=')
+	->condition('start', $time,'=')
+	->condition('end', $end,'=')
+	->execute()
+	->fetchAssoc();
+
+	//return id
+	if(isset($record['id'])) {
+		return $record['id'];
+	}
+	else {
+		//save to database
+		$query = db_insert('setting_id')
+		->fields(array("location"=>$location, "start"=>$time, "end"=>$end))
+		->execute();
+		//return id
+		return $query;
+	}
 }
 
 /**

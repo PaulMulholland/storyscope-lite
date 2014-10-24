@@ -508,6 +508,48 @@ function dec_rec_schema() {
 					),
 			),
 	);
+	$schema['setting_id'] = array(
+			'description' => t('Id for a setting'),
+			'fields' => array(
+					'id' => array(
+							'description' => t('Setting id'),
+							'type' => 'serial',
+							'not null' => TRUE,
+					),
+					'location' => array(
+							'description' => t('Location topic'),
+							'type' => 'varchar',
+							'length' => 45,
+					),
+					'start' => array(
+							'description' => t('Start time datestamp'),
+							'type' => 'varchar',
+							'length' => 45,
+					),
+					'end' => array(
+							'description' => t('End time datestamp'),
+							'type' => 'varchar',
+							'length' => 45,
+							'default' => '0',
+					),
+			),
+			'primary key' => array('id'),
+	);
+	$schema['setting_themes'] = array(
+			'description' => t('Stored themes of a setting'),
+			'fields' => array(
+					'setting_id' => array(
+							'description' => t('Setting id'),
+							'type' => 'int',
+							'length' => 11,
+					),
+					'mid' => array(
+							'description' => t('Theme mid'),
+							'type' => 'varchar',
+							'length' => 45,
+					),
+			),
+	);
 	return $schema;
 }
 
