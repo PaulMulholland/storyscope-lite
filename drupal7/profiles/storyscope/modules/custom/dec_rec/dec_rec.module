@@ -1013,7 +1013,12 @@ function dec_timeline_for_setting($location, $time, $end) {
 	$output = "";
 	$name = get_topic_name($location);
 	if($name) {
-		$output .= '<h2><i class="fa fa-info-circle fa-lg">&nbsp;</i><span class="topic-title">' . t('About : ').$name.", ".$time." to ".$end.'&nbsp;&nbsp;</span>';
+		if($end) {
+			$output .= '<h2><i class="fa fa-info-circle fa-lg">&nbsp;</i><span class="topic-title">' . t('About : ').$name.", ".$time." to ".$end.'&nbsp;&nbsp;</span>';
+		}
+		else {
+			$output .= '<h2><i class="fa fa-info-circle fa-lg">&nbsp;</i><span class="topic-title">' . t('About : ').$name.", ".$time.'&nbsp;&nbsp;</span>';
+		}
 	}
 	
 	if(!$location && !$time) {
