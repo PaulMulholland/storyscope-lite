@@ -476,6 +476,27 @@ function storyscope_update_7034() {
 	db_create_table('dossier_settings', $schema['dossier_settings']);
 	return t('Added table for storing settings of a dossier');
 }
+
+function storyscope_update_7035() {
+	$schema['story_settings'] = array(
+			'description' => t('Stored settings of a story'),
+			'fields' => array(
+					'story' => array(
+							'description' => t('Story nid'),
+							'type' => 'int',
+							'length' => 11,
+					),
+					'id' => array(
+							'description' => t('Setting id'),
+							'type' => 'int',
+							'length' => 11,
+					),
+			),
+	);
+	db_create_table('story_settings', $schema['story_settings']);
+	return t('Added table for storing settings of a story');
+}
+
 /**
 * Revert specified features.
 *

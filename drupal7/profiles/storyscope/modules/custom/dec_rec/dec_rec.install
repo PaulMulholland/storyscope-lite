@@ -575,6 +575,21 @@ function dec_rec_schema() {
 					),
 			),
 	);
+	$schema['story_settings'] = array(
+			'description' => t('Stored settings of a story'),
+			'fields' => array(
+					'story' => array(
+							'description' => t('Story nid'),
+							'type' => 'int',
+							'length' => 11,
+					),
+					'id' => array(
+							'description' => t('Setting id'),
+							'type' => 'int',
+							'length' => 11,
+					),
+			),
+	);
 	return $schema;
 }
 

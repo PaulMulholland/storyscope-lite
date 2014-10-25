@@ -138,12 +138,14 @@ JOIN tag_name ON tag_name.tag = frequency_table.location ORDER BY stories DESC, 
 		$output = array();
 		$result = db_query($query);
 		$output = array();
+		$setting_ids = array();
 		foreach ($result as $record) {
+			$setting_ids[] = check_setting_id($record->start, $record->end, $record->location);
 			$output[] = $record;
 		}
 	}
 	if($dossier_nid) {
-		dec_save_themes('dossier_themes', 'dossier', $output, 'value', $dossier_nid);
+		dec_save_settings('dossier_settings', 'dossier', $setting_ids, $dossier_nid);
 	}
 	return $output;
 }
@@ -220,19 +222,20 @@ function dec_save_themes($table = 'dossier_themes', $table_field = 'dossier', $t
 	$query->execute();
 }
 
-function dec_save_settings($table = 'dossier_settings', $table_field = 'dossier', $theme_array, $theme_field = 'value', $nid) {
-	//delete previous entry in setting table
+function dec_save_settings($table = 'story_settings', $table_field = 'story', $setting_ids, $nid) {
+	//delete previous entry in query_tag table
 
 	db_delete($table)
 	->condition($table_field, $nid)
 	->execute();
 
-	//update setting table
-	$query = db_insert($table)->fields(array($table_field, 'id'));
-	foreach($theme_array as $entry) {
-		$query->values(array($table_field=>$nid, "id"=>$entry->$theme_field));
+	if(!empty($setting_ids)) {
+		$query = db_insert($table)->fields(array($table_field, 'id'));
+		foreach($setting_ids as $setting_id) {
+			$query->values(array($table_field=>$nid, "id"=>$setting_id));
+		}
+		$query->execute();
 	}
-	$query->execute();
 }
 
 function read_stories_from_dossier_node($dossier_node) {
