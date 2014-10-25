@@ -150,7 +150,7 @@ JOIN tag_name ON tag_name.tag = frequency_table.location ORDER BY stories DESC, 
  * Find how many times a concept appears in the concept spaces of the annotations of the stoires in the dossier
  * Group by number of stories they connect to, number of annotations they connect to, and finally frequency
  */
-function themes_for_a_dossier($story_array, $limit = 10, $dossier_nid) {//****here
+function themes_for_a_dossier($story_array, $limit = 10, $dossier_nid = 0) {//****here
 	$output = array();
 	if(!empty($story_array)) {
 		$story_string = "('".implode("','", $story_array)."')";
@@ -196,7 +196,9 @@ WHERE result.frequency >= 2 LIMIT ".$limit.";";
 			$output[] = $record;
 		}
 	}
-	dec_save_themes('dossier_themes', 'dossier', $output, 'value', $dossier_nid);
+	if($dossier_nid) {
+		dec_save_themes('dossier_themes', 'dossier', $output, 'value', $dossier_nid);
+	}
 	return $output;
 }
 
