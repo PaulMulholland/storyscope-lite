@@ -416,6 +416,7 @@ function storyscope_update_7031() {
 							'default' => '0',
 					),
 			),
+			'primary key' => array('id'),
 	);
 	db_create_table('setting_id', $schema['setting_id']);
 	return t('Added table for storing setting id');
@@ -440,8 +441,22 @@ function storyscope_update_7032() {
 	db_create_table('setting_themes', $schema['setting_themes']);
 	return t('Added table for storing setting theme calculations');
 }
-
-
+function storyscope_update_7033() {
+	$schema['site_settings'] = array(
+			'description' => t('Id for a setting'),
+			'fields' => array(
+					'id' => array(
+							'description' => t('Setting id'),
+							'type' => 'serial',
+							'not null' => TRUE,
+					),
+			),
+			'primary key' => array('id'),
+	);
+	db_create_table('site_settings', $schema['site_settings']);
+	return t('Added table for storing settings of the installation');
+}
+	
 /**
 * Revert specified features.
 *

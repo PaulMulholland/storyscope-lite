@@ -193,8 +193,20 @@ JOIN tag_name ON tag_name.tag = frequency_table.location ORDER BY stories DESC, 
 	$output = array();
 	$result = db_query($query);
 	$output = array();
+	$setting_ids = array();
 	foreach ($result as $record) {
 		$output[] = $record;
+		$setting_ids[] = check_setting_id($record->start, $record->end, $record->location);
 	}
+	
+	//add to the installation setting cache
+	if(!empty($setting_ids)) {
+		$query = db_insert('site_settings')->fields(array('id'));
+		foreach($setting_ids as $setting_id) {
+			$query->values(array("id"=>$setting_id));
+		}
+		$query->execute();
+	}
+	
 	return $output;
 }

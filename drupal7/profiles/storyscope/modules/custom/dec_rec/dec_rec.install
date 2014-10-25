@@ -550,6 +550,16 @@ function dec_rec_schema() {
 					),
 			),
 	);
+	$schema['site_settings'] = array(
+			'description' => t('Id for a setting'),
+			'fields' => array(
+					'id' => array(
+							'description' => t('Setting id'),
+							'type' => 'serial',
+							'not null' => TRUE,
+					),
+			),
+	);
 	return $schema;
 }
 
