@@ -560,6 +560,21 @@ function dec_rec_schema() {
 					),
 			),
 	);
+	$schema['dossier_settings'] = array(
+			'description' => t('Stored settings of a dossier'),
+			'fields' => array(
+					'dossier' => array(
+							'description' => t('Dossier nid'),
+							'type' => 'int',
+							'length' => 11,
+					),
+					'id' => array(
+							'description' => t('Setting id'),
+							'type' => 'int',
+							'length' => 11,
+					),
+			),
+	);
 	return $schema;
 }
 

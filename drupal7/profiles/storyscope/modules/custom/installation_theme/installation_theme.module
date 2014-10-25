@@ -137,11 +137,28 @@ function dec_save_installation_themes($table = 'site_themes', $theme_array, $the
 	->execute();
 
 	//update theme table
-	$query = db_insert($table)->fields(array('mid'));
-	foreach($theme_array as $entry) {
-		$query->values(array("mid"=>$entry->$theme_field));
+	if(!empty($theme_array)) {
+		$query = db_insert($table)->fields(array('mid'));
+		foreach($theme_array as $entry) {
+			$query->values(array("mid"=>$entry->$theme_field));
+		}
+		$query->execute();
 	}
-	$query->execute();
+}
+
+function dec_save_installation_settings($table = 'site_settings', $setting_ids) {
+	//delete previous entry in query_tag table
+
+	db_delete($table)
+	->execute();
+
+	if(!empty($setting_ids)) {
+		$query = db_insert('site_settings')->fields(array('id'));
+		foreach($setting_ids as $setting_id) {
+			$query->values(array("id"=>$setting_id));
+		}
+		$query->execute();
+	}
 }
 
 function settings_for_an_installation($n = 10) {
@@ -200,13 +217,7 @@ JOIN tag_name ON tag_name.tag = frequency_table.location ORDER BY stories DESC, 
 	}
 	
 	//add to the installation setting cache
-	if(!empty($setting_ids)) {
-		$query = db_insert('site_settings')->fields(array('id'));
-		foreach($setting_ids as $setting_id) {
-			$query->values(array("id"=>$setting_id));
-		}
-		$query->execute();
-	}
+	dec_save_installation_settings('site_settings', $setting_ids);
 	
 	return $output;
 }
