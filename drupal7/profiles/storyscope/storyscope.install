@@ -497,6 +497,25 @@ function storyscope_update_7035() {
 	return t('Added table for storing settings of a story');
 }
 
+function storyscope_update_7036() {
+	$schema['tag_settings'] = array(
+			'description' => t('Stored settings of a topic'),
+			'fields' => array(
+					'tag' => array(
+							'description' => t('Freebase tag'),
+							'type' => 'varchar',
+							'length' => 45,
+					),
+					'id' => array(
+							'description' => t('Setting id'),
+							'type' => 'int',
+							'length' => 11,
+					),
+			),
+	);
+	db_create_table('tag_settings', $schema['tag_settings']);
+	return t('Added table for storing settings of a theme');
+}
 /**
 * Revert specified features.
 *

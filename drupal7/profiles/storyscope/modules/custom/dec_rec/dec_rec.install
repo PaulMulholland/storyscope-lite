@@ -590,6 +590,21 @@ function dec_rec_schema() {
 					),
 			),
 	);
+	$schema['tag_settings'] = array(
+			'description' => t('Stored settings of a topic'),
+			'fields' => array(
+					'tag' => array(
+							'description' => t('Freebase tag'),
+							'type' => 'varchar',
+							'length' => 45,
+					),
+					'id' => array(
+							'description' => t('Setting id'),
+							'type' => 'int',
+							'length' => 11,
+					),
+			),
+	);
 	return $schema;
 }
 

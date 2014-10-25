@@ -5169,7 +5169,6 @@ JOIN tag_name ON tag_name.tag = frequency_table.location ORDER BY tags DESC, fre
 	$result = db_query($query);
 	$output = array();
 	$setting_ids = array();
-	$setting_ids = array();
 	foreach ($result as $record) {
 		$output[] = $record;
 		$setting_ids[] = check_setting_id($record->start, $record->end, $record->location);
@@ -5229,9 +5228,12 @@ ORDER BY frequency DESC LIMIT ".$n.";";
 
 	$result = db_query($query);
 	$output = array();
+	$setting_ids = array();
 	foreach ($result as $record) {
 		$output[] = $record;
+		$setting_ids[] = check_setting_id($record->start_time, $record->end_time, $record->location);
 	}
+	dec_save_settings('tag_settings', 'tag', $setting_ids, $topic);
 
 	return $output;
 }
