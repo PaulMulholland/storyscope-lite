@@ -1955,7 +1955,12 @@ function event_timeline_header_for_topic($topic) {
 	else {
 		$header['headline'] = $topic;
 	}
-	$header['text'] = get_topic_description($topic, 150);
+	if($text = get_topic_description($topic, 150)) {
+		$header['text'] = $text;
+	}
+	else {
+		$header['text'] = '&nbsp;';
+	}
 	$header['type'] = 'default';
 	$image = check_freebase_saved_image($topic);
 	$header['asset'] = array('media'=>$image,'credit'=>"",'caption'=>$name);
