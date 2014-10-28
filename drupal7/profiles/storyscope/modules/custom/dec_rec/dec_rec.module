@@ -843,7 +843,7 @@ function check_for_cached_setting_timeline($location, $start, $end, $event_type 
 	if($event_type) {
 		$query = "SELECT setting_timeline_data.timeline_data
 		FROM setting_timeline_data
-		WHERE setting_timeline_data.location = '".$location."' AND setting_timeline_data.start = '".$start."' AND setting_timeline_data.end = '".$end."' AND setting_timeline_data.event_type = '".$event_type." AND request_path = '".$path."';";
+		WHERE setting_timeline_data.location = '".$location."' AND setting_timeline_data.start = '".$start."' AND setting_timeline_data.end = '".$end."' AND setting_timeline_data.event_type = '".$event_type."' AND request_path = '".$path."';";
 		$result = db_query($query);		
 	}
 	else {
@@ -5178,7 +5178,6 @@ JOIN tag_name ON tag_name.tag = frequency_table.location ORDER BY tags DESC, fre
 		$output[] = $record;
 		$setting_ids[] = check_setting_id($record->start, $record->end, $record->location);
 	}
-	
 	//cache settings of the story
 	dec_save_settings('story_settings', 'story', $setting_ids, $story);
 
