@@ -314,6 +314,22 @@ function storyscope_update_7026() {
  
   return t('Update content_type_storyscope_dossier - panels_node_dossier');
 }
+
+function storyscope_update_7027() {
+  // An array of new or changed features; the array keys are feature names,
+  // values are an array of exportable types as seen in a feature's .info file:
+  //   features[field][] = node-page-body
+  $features = array(
+    'storyscope_front_page');
+ 
+  // Enable the modules by name.
+  module_enable($features);
+  
+    // Revert the features (if the feature has been changed)
+  storyscope_features_revert($features);
+ 
+  return t('Update - storyscope_front_page');
+}
 /**
 * Revert specified features.
 *

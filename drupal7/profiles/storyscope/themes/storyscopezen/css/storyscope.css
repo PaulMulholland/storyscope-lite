@@ -4919,3 +4919,9 @@ ul.field-name-field-fb-tags .plain {
 #content {
   padding-left: 10px;
 }
+
+/* line 3565, ../sass/storyscope.scss */
+.custom_front_text {
+  font-size: 1.2em;
+  margin-top: 20px;
+}
