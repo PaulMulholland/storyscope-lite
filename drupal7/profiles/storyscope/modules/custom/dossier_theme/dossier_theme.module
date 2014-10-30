@@ -48,7 +48,7 @@ function dossier_theme_block_content() {
 function dec_dossier_themes($dossier_nid) {
 	$dossier_node = node_load($dossier_nid);
 	$story_array = read_stories_from_dossier_node($dossier_node);
-	$themes = themes_for_a_dossier($story_array, 10);
+	$themes = themes_for_a_dossier($story_array, 10, $dossier_nid);
 	$output = '';
 	$output = '<div>&nbsp';
 	if(!empty($themes)) {
@@ -59,7 +59,7 @@ function dec_dossier_themes($dossier_nid) {
 		}
 		$output .=  '</ul><div style="clear:both;"></div>';
 	}
-	$settings = settings_for_a_dossier($story_array, 10);
+	$settings = settings_for_a_dossier($story_array, 10, $dossier_nid);
 	if(!empty($settings)) {
 		$output .= '<div class="topic-block"><h2 class="pane-title"><i class="fa fa-compass fa-lg">&nbsp;</i><span class="topic-title">Dossier settings&nbsp;&nbsp;</span>' . '</h2></div>';
 		$output .=  '<ul class="field-name-field-fb-tags">';
@@ -87,7 +87,7 @@ function dec_dossier_themes($dossier_nid) {
 /**
  * Get settings for a story
  */
-function settings_for_a_dossier($story_array, $n = 10) {
+function settings_for_a_dossier($story_array, $n = 10, $dossier_nid = 0) {
 	$output = array();
 	if(!empty($story_array)) {
 		$story_string = "('".implode("','", $story_array)."')";	
@@ -138,9 +138,14 @@ JOIN tag_name ON tag_name.tag = frequency_table.location ORDER BY stories DESC, 
 		$output = array();
 		$result = db_query($query);
 		$output = array();
+		$setting_ids = array();
 		foreach ($result as $record) {
+			$setting_ids[] = check_setting_id($record->start, $record->end, $record->location);
 			$output[] = $record;
 		}
+	}
+	if($dossier_nid) {
+		dec_save_settings('dossier_settings', 'dossier', $setting_ids, $dossier_nid);
 	}
 	return $output;
 }
@@ -150,7 +155,7 @@ JOIN tag_name ON tag_name.tag = frequency_table.location ORDER BY stories DESC, 
  * Find how many times a concept appears in the concept spaces of the annotations of the stoires in the dossier
  * Group by number of stories they connect to, number of annotations they connect to, and finally frequency
  */
-function themes_for_a_dossier($story_array, $limit = 10) {//****here
+function themes_for_a_dossier($story_array, $limit = 10, $dossier_nid = 0) {//****here
 	$output = array();
 	if(!empty($story_array)) {
 		$story_string = "('".implode("','", $story_array)."')";
@@ -196,7 +201,41 @@ WHERE result.frequency >= 2 LIMIT ".$limit.";";
 			$output[] = $record;
 		}
 	}
+	if($dossier_nid) {
+		dec_save_themes('dossier_themes', 'dossier', $output, 'value', $dossier_nid);
+	}
 	return $output;
+}
+
+function dec_save_themes($table = 'dossier_themes', $table_field = 'dossier', $theme_array, $theme_field = 'value', $nid) {
+	//delete previous entry in query_tag table
+
+	db_delete($table)
+	->condition($table_field, $nid)
+	->execute();
+	
+	//update theme table
+	$query = db_insert($table)->fields(array($table_field, 'mid'));
+	foreach($theme_array as $entry) {
+		$query->values(array($table_field=>$nid, "mid"=>$entry->$theme_field));
+	}
+	$query->execute();
+}
+
+function dec_save_settings($table = 'story_settings', $table_field = 'story', $setting_ids, $nid) {
+	//delete previous entry in query_tag table
+
+	db_delete($table)
+	->condition($table_field, $nid)
+	->execute();
+
+	if(!empty($setting_ids)) {
+		$query = db_insert($table)->fields(array($table_field, 'id'));
+		foreach($setting_ids as $setting_id) {
+			$query->values(array($table_field=>$nid, "id"=>$setting_id));
+		}
+		$query->execute();
+	}
 }
 
 function read_stories_from_dossier_node($dossier_node) {

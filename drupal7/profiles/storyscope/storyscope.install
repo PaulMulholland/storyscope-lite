@@ -316,6 +316,208 @@ function storyscope_update_7026() {
 }
 
 function storyscope_update_7027() {
+	$schema['dossier_themes'] = array(
+			'description' => t('Stored themes of a dossier'),
+			'fields' => array(
+					'dossier' => array(
+							'description' => t('Dossier nid'),
+							'type' => 'int',
+							'length' => 11,
+					),
+					'mid' => array(
+							'description' => t('Theme mid'),
+							'type' => 'varchar',
+							'length' => 45,
+					),
+			),
+	);
+	db_create_table('dossier_themes', $schema['dossier_themes']);
+	return t('Added table for storing dossier theme calculations');
+}
+
+function storyscope_update_7028() {
+	$schema['story_themes'] = array(
+			'description' => t('Stored themes of a story'),
+			'fields' => array(
+					'story' => array(
+							'description' => t('Story nid'),
+							'type' => 'int',
+							'length' => 11,
+					),
+					'mid' => array(
+							'description' => t('Theme mid'),
+							'type' => 'varchar',
+							'length' => 45,
+					),
+			),
+	);
+	db_create_table('story_themes', $schema['story_themes']);
+	return t('Added table for storing story theme calculations');
+}
+
+function storyscope_update_7029() {
+	$schema['site_themes'] = array(
+			'description' => t('Stored themes of a site'),
+			'fields' => array(
+					'mid' => array(
+							'description' => t('Theme mid'),
+							'type' => 'varchar',
+							'length' => 45,
+					),
+			),
+	);
+	db_create_table('site_themes', $schema['site_themes']);
+	return t('Added table for storing site theme calculations');
+}
+
+function storyscope_update_7030() {
+	$schema['tag_themes'] = array(
+			'description' => t('Stored themes of a topic'),
+			'fields' => array(
+					'tag' => array(
+							'description' => t('Freebase tag'),
+							'type' => 'varchar',
+							'length' => 45,
+					),
+					'mid' => array(
+							'description' => t('Theme mid'),
+							'type' => 'varchar',
+							'length' => 45,
+					),
+			),
+	);
+	db_create_table('tag_themes', $schema['tag_themes']);
+	return t('Added table for storing tag theme calculations');
+}
+
+function storyscope_update_7031() {
+	$schema['setting_id'] = array(
+			'description' => t('Id for a setting'),
+			'fields' => array(
+					'id' => array(
+							'description' => t('Setting id'),
+							'type' => 'serial',
+							'not null' => TRUE,
+					),
+					'location' => array(
+							'description' => t('Location topic'),
+							'type' => 'varchar',
+							'length' => 45,
+					),
+					'start' => array(
+							'description' => t('Start time datestamp'),
+							'type' => 'varchar',
+							'length' => 45,
+					),
+					'end' => array(
+							'description' => t('End time datestamp'),
+							'type' => 'varchar',
+							'length' => 45,
+							'default' => '0',
+					),
+			),
+			'primary key' => array('id'),
+	);
+	db_create_table('setting_id', $schema['setting_id']);
+	return t('Added table for storing setting id');
+}
+
+function storyscope_update_7032() {
+	$schema['setting_themes'] = array(
+			'description' => t('Stored themes of a setting'),
+			'fields' => array(
+					'setting_id' => array(
+							'description' => t('Setting id'),
+							'type' => 'int',
+							'length' => 11,
+					),
+					'mid' => array(
+							'description' => t('Theme mid'),
+							'type' => 'varchar',
+							'length' => 45,
+					),
+			),
+	);
+	db_create_table('setting_themes', $schema['setting_themes']);
+	return t('Added table for storing setting theme calculations');
+}
+function storyscope_update_7033() {
+	$schema['site_settings'] = array(
+			'description' => t('Id for a setting'),
+			'fields' => array(
+					'id' => array(
+							'description' => t('Setting id'),
+							'type' => 'serial',
+							'not null' => TRUE,
+					),
+			),
+			'primary key' => array('id'),
+	);
+	db_create_table('site_settings', $schema['site_settings']);
+	return t('Added table for storing settings of the installation');
+}
+
+function storyscope_update_7034() {
+	$schema['dossier_settings'] = array(
+			'description' => t('Stored settings of a dossier'),
+			'fields' => array(
+					'dossier' => array(
+							'description' => t('Dossier nid'),
+							'type' => 'int',
+							'length' => 11,
+					),
+					'id' => array(
+							'description' => t('Setting id'),
+							'type' => 'int',
+							'length' => 11,
+					),
+			),
+	);
+	db_create_table('dossier_settings', $schema['dossier_settings']);
+	return t('Added table for storing settings of a dossier');
+}
+
+function storyscope_update_7035() {
+	$schema['story_settings'] = array(
+			'description' => t('Stored settings of a story'),
+			'fields' => array(
+					'story' => array(
+							'description' => t('Story nid'),
+							'type' => 'int',
+							'length' => 11,
+					),
+					'id' => array(
+							'description' => t('Setting id'),
+							'type' => 'int',
+							'length' => 11,
+					),
+			),
+	);
+	db_create_table('story_settings', $schema['story_settings']);
+	return t('Added table for storing settings of a story');
+}
+
+function storyscope_update_7036() {
+	$schema['tag_settings'] = array(
+			'description' => t('Stored settings of a topic'),
+			'fields' => array(
+					'tag' => array(
+							'description' => t('Freebase tag'),
+							'type' => 'varchar',
+							'length' => 45,
+					),
+					'id' => array(
+							'description' => t('Setting id'),
+							'type' => 'int',
+							'length' => 11,
+					),
+			),
+	);
+	db_create_table('tag_settings', $schema['tag_settings']);
+	return t('Added table for storing settings of a theme');
+}
+
+function storyscope_update_7037() {
   // An array of new or changed features; the array keys are feature names,
   // values are an array of exportable types as seen in a feature's .info file:
   //   features[field][] = node-page-body
@@ -328,8 +530,9 @@ function storyscope_update_7027() {
     // Revert the features (if the feature has been changed)
   storyscope_features_revert($features);
  
-  return t('Update - storyscope_front_page');
+  return t('Update storyscope_front_page');
 }
+
 /**
 * Revert specified features.
 *

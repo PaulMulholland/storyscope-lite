@@ -843,7 +843,7 @@ function check_for_cached_setting_timeline($location, $start, $end, $event_type 
 	if($event_type) {
 		$query = "SELECT setting_timeline_data.timeline_data
 		FROM setting_timeline_data
-		WHERE setting_timeline_data.location = '".$location."' AND setting_timeline_data.start = '".$start."' AND setting_timeline_data.end = '".$end."' AND setting_timeline_data.event_type = '".$event_type." AND request_path = '".$path."';";
+		WHERE setting_timeline_data.location = '".$location."' AND setting_timeline_data.start = '".$start."' AND setting_timeline_data.end = '".$end."' AND setting_timeline_data.event_type = '".$event_type."' AND request_path = '".$path."';";
 		$result = db_query($query);		
 	}
 	else {
@@ -1013,7 +1013,12 @@ function dec_timeline_for_setting($location, $time, $end) {
 	$output = "";
 	$name = get_topic_name($location);
 	if($name) {
-		$output .= '<h2><i class="fa fa-info-circle fa-lg">&nbsp;</i><span class="topic-title">' . t('About : ').$name.", ".$time." to ".$end.'&nbsp;&nbsp;</span>';
+		if($end) {
+			$output .= '<h2><i class="fa fa-info-circle fa-lg">&nbsp;</i><span class="topic-title">' . t('About : ').$name.", ".$time." to ".$end.'&nbsp;&nbsp;</span>';
+		}
+		else {
+			$output .= '<h2><i class="fa fa-info-circle fa-lg">&nbsp;</i><span class="topic-title">' . t('About : ').$name.", ".$time.'&nbsp;&nbsp;</span>';
+		}
 	}
 	
 	if(!$location && !$time) {
@@ -1881,6 +1886,10 @@ function save_fb_image($topic, $thumbnail_url = FALSE) {
 	$imageUrl = 'https://usercontent.googleapis.com/freebase/v1/image'.$topic.'?maxwidth=200&maxheight=200'.get_google_api_key_path();
 	$imageUrlthumbnail = 'https://usercontent.googleapis.com/freebase/v1/image'.$topic.get_google_api_key_path('?');;
 	
+	//check for fbimages directory - createif does not exist
+	$dir = 'public://fbimages/';
+	file_prepare_directory($dir, FILE_CREATE_DIRECTORY);
+	
 	$id = substr($topic,3);
 	$filename = 'fbimages/'.$id.'.jpeg';
 	$filenamethunbnail = 'fbimages/'.$id.'_sm.jpeg';
@@ -1896,7 +1905,7 @@ function save_fb_image($topic, $thumbnail_url = FALSE) {
  */
 function dec_reset() {
 	//if the line below is uncommented then this function can reset local cached databases of freebase data
-// 	reset_recommender_database();
+//  	reset_recommender_database();
 	return "database reset";
 }
 
@@ -1946,7 +1955,12 @@ function event_timeline_header_for_topic($topic) {
 	else {
 		$header['headline'] = $topic;
 	}
-	$header['text'] = get_topic_description($topic, 150);
+	if($text = get_topic_description($topic, 150)) {
+		$header['text'] = $text;
+	}
+	else {
+		$header['text'] = '&nbsp;';
+	}
 	$header['type'] = 'default';
 	$image = check_freebase_saved_image($topic);
 	$header['asset'] = array('media'=>$image,'credit'=>"",'caption'=>$name);
@@ -3085,7 +3099,7 @@ function dec_setting($location, $time,  $end) {
 	$timeline_links = dec_setting_timeline_links($time, $end, $location, $event_array);
 	//get themes for the events of a setting
 	$themes = dec_get_themes_for_events_of_setting($location, $full_start_time, $full_end_time);
-
+	
 	$name = get_topic_name($location);
 	$path_array = explode('/',request_path());
 	if(end($path_array) == 'stories' || end($path_array) == 'settingstories') {
@@ -3138,6 +3152,17 @@ function dec_setting($location, $time,  $end) {
 	}
 
 	if(!empty($themes)) {
+		//save to cache
+		$setting_id = check_setting_id($time, $end, $location);
+		db_delete('setting_themes')
+		->condition('setting_id', $setting_id)
+		->execute();
+		$query = db_insert('setting_themes')->fields(array('setting_id', 'mid'));
+		foreach($themes as $tag) {
+			$query->values(array("setting_id"=>$setting_id, "mid"=>$tag->value));
+		}
+		$query->execute();
+
 		$output .= '<div style="clear:both"><h2><i class="fa fa-link fa-lg">&nbsp;</i>Themes</h2></div>';
 		$output .=  '<ul class="field-name-field-fb-tags">';
 		foreach($themes as $theme) {
@@ -3182,6 +3207,30 @@ function dec_setting($location, $time,  $end) {
 // 	}
 	return $output.'</div>';
 	
+}
+
+function check_setting_id($location, $time,  $end) {
+	//check whether setting exists
+	$record = db_select('setting_id','si')
+	->fields('si',array('id'))
+	->condition('location', $location,'=')
+	->condition('start', $time,'=')
+	->condition('end', $end,'=')
+	->execute()
+	->fetchAssoc();
+
+	//return id
+	if(isset($record['id'])) {
+		return $record['id'];
+	}
+	else {
+		//save to database
+		$query = db_insert('setting_id')
+		->fields(array("location"=>$location, "start"=>$time, "end"=>$end))
+		->execute();
+		//return id
+		return $query;
+	}
 }
 
 /**
@@ -3573,7 +3622,7 @@ function dec_list_of_tags($tag_array, $max_value) {
 // 		}
 	
 // 	}
-	
+
 	//themes (i.e. themes may or may not be story tags)
 	if(!empty($themes)) {
 		$output .= '<div style="clear:both"><h2><i class="fa fa-link fa-lg">&nbsp;</i>Themes</h2></div>';
@@ -5124,9 +5173,13 @@ JOIN tag_name ON tag_name.tag = frequency_table.location ORDER BY tags DESC, fre
 	$output = array();
 	$result = db_query($query);
 	$output = array();
+	$setting_ids = array();
 	foreach ($result as $record) {
 		$output[] = $record;
+		$setting_ids[] = check_setting_id($record->start, $record->end, $record->location);
 	}
+	//cache settings of the story
+	dec_save_settings('story_settings', 'story', $setting_ids, $story);
 
 	return $output;
 }
@@ -5179,9 +5232,12 @@ ORDER BY frequency DESC LIMIT ".$n.";";
 
 	$result = db_query($query);
 	$output = array();
+	$setting_ids = array();
 	foreach ($result as $record) {
 		$output[] = $record;
+		$setting_ids[] = check_setting_id($record->start_time, $record->end_time, $record->location);
 	}
+	dec_save_settings('tag_settings', 'tag', $setting_ids, $topic);
 
 	return $output;
 }
@@ -5316,6 +5372,9 @@ ORDER BY frequency DESC) as frequency
 	foreach ($result as $record) {
 		$output[] = $record;
 	}
+	
+	//cache themes of a tag
+	dec_save_themes('tag_themes', 'tag', $output, 'value', $tag);
 	return $output;	
 }
 
@@ -5392,6 +5451,8 @@ $output = array();
 foreach ($result as $record) {
 	$output[] = $record;
 }
+
+dec_save_themes('story_themes', 'story', $output, 'value', $story_id);
 
 return $output;
 }

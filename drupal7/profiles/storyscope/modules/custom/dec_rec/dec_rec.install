@@ -453,6 +453,158 @@ function dec_rec_schema() {
 					),
 			),
 	);
+	$schema['dossier_themes'] = array(
+			'description' => t('Stored themes of a dossier'),
+			'fields' => array(
+					'dossier' => array(
+							'description' => t('Dossier nid'),
+							'type' => 'int',
+							'length' => 11,
+					),
+					'mid' => array(
+							'description' => t('Theme mid'),
+							'type' => 'varchar',
+							'length' => 45,
+					),
+			),
+	);
+	$schema['story_themes'] = array(
+			'description' => t('Stored themes of a story'),
+			'fields' => array(
+					'story' => array(
+							'description' => t('Story nid'),
+							'type' => 'int',
+							'length' => 11,
+					),
+					'mid' => array(
+							'description' => t('Theme mid'),
+							'type' => 'varchar',
+							'length' => 45,
+					),
+			),
+	);
+	$schema['site_themes'] = array(
+			'description' => t('Stored themes of a site'),
+			'fields' => array(
+					'mid' => array(
+							'description' => t('Theme mid'),
+							'type' => 'varchar',
+							'length' => 45,
+					),
+			),
+	);
+	$schema['tag_themes'] = array(
+			'description' => t('Stored themes of a topic'),
+			'fields' => array(
+					'tag' => array(
+							'description' => t('Freebase tag'),
+							'type' => 'varchar',
+							'length' => 45,
+					),
+					'mid' => array(
+							'description' => t('Theme mid'),
+							'type' => 'varchar',
+							'length' => 45,
+					),
+			),
+	);
+	$schema['setting_id'] = array(
+			'description' => t('Id for a setting'),
+			'fields' => array(
+					'id' => array(
+							'description' => t('Setting id'),
+							'type' => 'serial',
+							'not null' => TRUE,
+					),
+					'location' => array(
+							'description' => t('Location topic'),
+							'type' => 'varchar',
+							'length' => 45,
+					),
+					'start' => array(
+							'description' => t('Start time datestamp'),
+							'type' => 'varchar',
+							'length' => 45,
+					),
+					'end' => array(
+							'description' => t('End time datestamp'),
+							'type' => 'varchar',
+							'length' => 45,
+							'default' => '0',
+					),
+			),
+			'primary key' => array('id'),
+	);
+	$schema['setting_themes'] = array(
+			'description' => t('Stored themes of a setting'),
+			'fields' => array(
+					'setting_id' => array(
+							'description' => t('Setting id'),
+							'type' => 'int',
+							'length' => 11,
+					),
+					'mid' => array(
+							'description' => t('Theme mid'),
+							'type' => 'varchar',
+							'length' => 45,
+					),
+			),
+	);
+	$schema['site_settings'] = array(
+			'description' => t('Id for a setting'),
+			'fields' => array(
+					'id' => array(
+							'description' => t('Setting id'),
+							'type' => 'serial',
+							'not null' => TRUE,
+					),
+			),
+	);
+	$schema['dossier_settings'] = array(
+			'description' => t('Stored settings of a dossier'),
+			'fields' => array(
+					'dossier' => array(
+							'description' => t('Dossier nid'),
+							'type' => 'int',
+							'length' => 11,
+					),
+					'id' => array(
+							'description' => t('Setting id'),
+							'type' => 'int',
+							'length' => 11,
+					),
+			),
+	);
+	$schema['story_settings'] = array(
+			'description' => t('Stored settings of a story'),
+			'fields' => array(
+					'story' => array(
+							'description' => t('Story nid'),
+							'type' => 'int',
+							'length' => 11,
+					),
+					'id' => array(
+							'description' => t('Setting id'),
+							'type' => 'int',
+							'length' => 11,
+					),
+			),
+	);
+	$schema['tag_settings'] = array(
+			'description' => t('Stored settings of a topic'),
+			'fields' => array(
+					'tag' => array(
+							'description' => t('Freebase tag'),
+							'type' => 'varchar',
+							'length' => 45,
+					),
+					'id' => array(
+							'description' => t('Setting id'),
+							'type' => 'int',
+							'length' => 11,
+					),
+			),
+	);
 	return $schema;
 }
 
