@@ -30,9 +30,12 @@ function storyscopezen_preprocess_maintenance_page(&$variables, $hook) {
 function storyscopezen_preprocess_page(&$variables, $hook) {
   global $user;
   if ($user->uid > 0){
-    $logout_string = t('You are signed in as ') . l(check_plain($user->name), 'user/' . $user->uid) . ' - ';
-    $logout_string .= l(t('Sign out'), 'user/logout');
+    $logout_string = '<div class="float_right" id="logout">' . t('You are signed in as ') . l(check_plain($user->name), 'user/' . $user->uid) . ' - ';
+    $logout_string .= l(t('Sign out'), 'user/logout') . '</div>';
     $variables['logout_string'] = $logout_string;
+  } else {
+    $logout_string = '<div class="button float_right" id="logout">'. l( t('Sign in') , 'user/') . '</div>';
+	$variables['logout_string'] = $logout_string;
   }
   // Add inline 'create new' buttons with title on certain pages.
   if (!empty($variables['page']['#views_contextual_links_info']['views_ui']['view']->name)) {
