@@ -76,16 +76,51 @@ function storyscope_front_page_default_page_manager_pages() {
   $display->content = array();
   $display->panels = array();
     $pane = new stdClass();
-    $pane->pid = 'new-24210847-5004-46f8-9aa9-6fd83a935d32';
-    $pane->panel = 'middle_2_1';
-    $pane->type = 'custom';
-    $pane->subtype = 'custom';
+    $pane->pid = 'new-e9a8224c-fdb2-42bf-98eb-17dfa626fe63';
+    $pane->panel = 'bottom';
+    $pane->type = 'block';
+    $pane->subtype = 'installation_theme-installation_theme_block';
     $pane->shown = TRUE;
     $pane->access = array();
     $pane->configuration = array(
+      'override_title' => 0,
+      'override_title_text' => '',
+    );
+    $pane->cache = array();
+    $pane->style = array(
+      'settings' => NULL,
+    );
+    $pane->css = array();
+    $pane->extras = array();
+    $pane->position = 0;
+    $pane->locks = array();
+    $pane->uuid = 'e9a8224c-fdb2-42bf-98eb-17dfa626fe63';
+    $display->content['new-e9a8224c-fdb2-42bf-98eb-17dfa626fe63'] = $pane;
+    $display->panels['bottom'][0] = 'new-e9a8224c-fdb2-42bf-98eb-17dfa626fe63';
+    $pane = new stdClass();
+    $pane->pid = 'new-24210847-5004-46f8-9aa9-6fd83a935d32';
+    $pane->panel = 'middle_1';
+    $pane->type = 'custom';
+    $pane->subtype = 'custom';
+    $pane->shown = TRUE;
+    $pane->access = array(
+      'plugins' => array(
+        0 => array(
+          'name' => 'role',
+          'settings' => array(
+            'rids' => array(
+              0 => 2,
+            ),
+          ),
+          'context' => 'logged-in-user',
+          'not' => TRUE,
+        ),
+      ),
+    );
+    $pane->configuration = array(
       'admin_title' => 'Custom Home Page Text',
       'title' => '',
-      'body' => '<p style="margin-bottom: 1.5em; color: #4e4e4e; font-family: Arial, Helvetica, \'Nimbus Sans L\', sans-serif; line-height: 1.42em; font-size: 120%;">Storyscope is a software tool for exploring and creating stories.</p>
+      'body' => '<p class="custom_front_text" >Storyscope is a software tool for exploring and creating stories.</p>
 ',
       'format' => 'full_html',
       'substitute' => TRUE,
@@ -100,68 +135,7 @@ function storyscope_front_page_default_page_manager_pages() {
     $pane->locks = array();
     $pane->uuid = '24210847-5004-46f8-9aa9-6fd83a935d32';
     $display->content['new-24210847-5004-46f8-9aa9-6fd83a935d32'] = $pane;
-    $display->panels['middle_2_1'][0] = 'new-24210847-5004-46f8-9aa9-6fd83a935d32';
-    $pane = new stdClass();
-    $pane->pid = 'new-b4651534-df60-42df-bad0-ca44d1f4f755';
-    $pane->panel = 'middle_2_1';
-    $pane->type = 'custom';
-    $pane->subtype = 'custom';
-    $pane->shown = TRUE;
-    $pane->access = array();
-    $pane->configuration = array(
-      'admin_title' => '',
-      'title' => '',
-      'body' => '<p><img src="profiles/storyscope/themes/storyscopezen/images/all_hawaii_entrees_press_release_imma_2006.png" alt="" /></p>',
-      'format' => 'full_html',
-      'substitute' => TRUE,
-    );
-    $pane->cache = array();
-    $pane->style = array(
-      'settings' => NULL,
-    );
-    $pane->css = array();
-    $pane->extras = array();
-    $pane->position = 1;
-    $pane->locks = array();
-    $pane->uuid = 'b4651534-df60-42df-bad0-ca44d1f4f755';
-    $display->content['new-b4651534-df60-42df-bad0-ca44d1f4f755'] = $pane;
-    $display->panels['middle_2_1'][1] = 'new-b4651534-df60-42df-bad0-ca44d1f4f755';
-    $pane = new stdClass();
-    $pane->pid = 'new-84e35a3a-0f9a-44e7-893f-c802b8e8320f';
-    $pane->panel = 'middle_2_2';
-    $pane->type = 'block';
-    $pane->subtype = 'user-login';
-    $pane->shown = TRUE;
-    $pane->access = array(
-      'plugins' => array(
-        0 => array(
-          'name' => 'entity_bundle:user',
-          'settings' => array(
-            'type' => array(),
-          ),
-          'context' => 'logged-in-user',
-          'not' => TRUE,
-        ),
-      ),
-    );
-    $pane->configuration = array(
-      'override_title' => 1,
-      'override_title_text' => '<none>',
-    );
-    $pane->cache = array();
-    $pane->style = array(
-      'settings' => NULL,
-    );
-    $pane->css = array(
-      'css_id' => '',
-      'css_class' => 'float_left',
-    );
-    $pane->extras = array();
-    $pane->position = 0;
-    $pane->locks = array();
-    $pane->uuid = '84e35a3a-0f9a-44e7-893f-c802b8e8320f';
-    $display->content['new-84e35a3a-0f9a-44e7-893f-c802b8e8320f'] = $pane;
-    $display->panels['middle_2_2'][0] = 'new-84e35a3a-0f9a-44e7-893f-c802b8e8320f';
+    $display->panels['middle_1'][0] = 'new-24210847-5004-46f8-9aa9-6fd83a935d32';
     $pane = new stdClass();
     $pane->pid = 'new-ec9bd614-e188-4554-8d8d-9cf0ec3c52fb';
     $pane->panel = 'middle_3';
@@ -227,33 +201,11 @@ function storyscope_front_page_default_page_manager_pages() {
     );
     $pane->css = array();
     $pane->extras = array();
-    $pane->position = 2;
+    $pane->position = 1;
     $pane->locks = array();
     $pane->uuid = 'd835ec32-4543-46d5-a997-f844aeb4492f';
     $display->content['new-d835ec32-4543-46d5-a997-f844aeb4492f'] = $pane;
     $display->panels['middle_3'][1] = 'new-d835ec32-4543-46d5-a997-f844aeb4492f';
-    $pane = new stdClass();
-    $pane->pid = 'new-e9a8224c-fdb2-42bf-98eb-17dfa626fe63';
-    $pane->panel = 'middle_3';
-    $pane->type = 'block';
-    $pane->subtype = 'installation_theme-installation_theme_block';
-    $pane->shown = TRUE;
-    $pane->access = array();
-    $pane->configuration = array(
-      'override_title' => 0,
-      'override_title_text' => '',
-    );
-    $pane->cache = array();
-    $pane->style = array(
-      'settings' => NULL,
-    );
-    $pane->css = array();
-    $pane->extras = array();
-    $pane->position = 3;
-    $pane->locks = array();
-    $pane->uuid = 'e9a8224c-fdb2-42bf-98eb-17dfa626fe63';
-    $display->content['new-e9a8224c-fdb2-42bf-98eb-17dfa626fe63'] = $pane;
-    $display->panels['middle_3'][2] = 'new-e9a8224c-fdb2-42bf-98eb-17dfa626fe63';
   $display->hide_title = PANELS_TITLE_FIXED;
   $display->title_pane = 'new-24210847-5004-46f8-9aa9-6fd83a935d32';
   $handler->conf['display'] = $display;

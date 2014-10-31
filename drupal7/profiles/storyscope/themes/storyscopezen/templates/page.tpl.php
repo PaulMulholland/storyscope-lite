@@ -73,7 +73,7 @@
 <div id="page">
   <div id="page-leader" class="clearfix">
   <?php if (isset($logout_string)): ?>
-    <p id="logout"><?php print $logout_string; ?></p>
+    <?php print $logout_string; ?>
   <?php endif; ?>
   <header id="header" role="banner">
 

@@ -78,6 +78,7 @@ p {
   }
 
 #navigation {
+  padding-left: inherit;
   a {
     @include link-colors($dark-gray, $med-gray);
     border-bottom: none;
@@ -105,14 +106,14 @@ p {
 /* Home page */
 .front{
   #page-leader {
-    background-color: #b5d5e9;
+    //background-color: #b5d5e9;
     margin-top: 0 !important;
   }
   #highlighted {
     display: none;
   }
   #content {
-    padding: 0;
+    //padding: 0;
     border: none;
   }
   #main-menu {
@@ -122,15 +123,15 @@ p {
     display: none;
   }
   #navigation {
-    margin-left: 3%;
-    padding-bottom: 40px;
+    //margin-left: 3%;
+    //padding-bottom: 40px;
   }
   .tabs {
     display: none;
   }
   .panel-top,
   .container-full {
-    background-color: #dddbc0;
+    //background-color: #dddbc0;
     padding: 25px;
     height: 100%;
     .pane-1 {
@@ -172,10 +173,10 @@ p {
   }
 
   .middle-4-wrapper {
-    background-color: #b5d5e9;
-    height: 10px;
-    margin: 15px 0;
-    padding: 0;
+    //background-color: #b5d5e9;
+    //height: 10px;
+    //margin: 15px 0;
+    //padding: 0;
   }
   .middle-2-2 {
     .pane-user-login {
@@ -3321,7 +3322,16 @@ float: left;
 }
 
 //******* Storyscope Lite ********//
-
+.front{
+  .container-full {
+    //background-color: #dddbc0;
+    padding: inherit;
+    height: inherit;
+  }
+  .panel-top {
+    padding: inherit;
+  }
+}
 .field-name-field-media {
   .field-item {
     float: left;
@@ -3387,6 +3397,7 @@ ul.field-name-field-fb-tags {
 //Event Space Styling
 .block-dec-rec {
   border-top: 1px solid #D3D7D9;
+  padding-left: 10px;
   padding-top: 1em;
   h2 {
     font-size: 1.2em;
@@ -3513,3 +3524,51 @@ ul.field-name-field-fb-tags {
   float: left;
 }
 
+.view-dossiers {
+  //background-color: grey;
+  .view-content {
+    
+      article {
+        .container-full {
+          padding: inherit;
+        }
+        header{
+         float: left;
+        } 
+        //background-color: grey;
+        .container-inner {
+          width: inherit;
+          float:right;
+          clear: none;
+        }
+      }
+    
+  }
+
+}
+
+#logout {
+  position: relative;
+  padding-top: 60px;
+}
+
+#navigation {
+
+   padding-left: 200px;
+
+ 
+}
+
+#content {
+  padding-left: 10px;
+}
+
+.custom_front_text {
+  font-size: 1.2em;
+  margin-top: 20px;
+}
+
+.block-dec-rec-story-event-space-block {
+  padding-left: 10px;
+  
+}

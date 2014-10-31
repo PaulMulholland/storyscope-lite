@@ -76,6 +76,28 @@ function panels_node_dossier_default_page_manager_handlers() {
   $display->content = array();
   $display->panels = array();
     $pane = new stdClass();
+    $pane->pid = 'new-a1be89b3-1b24-4272-bd3c-eb269cc6a2b8';
+    $pane->panel = 'bottom';
+    $pane->type = 'block';
+    $pane->subtype = 'dossier_theme-dossier_theme_block';
+    $pane->shown = TRUE;
+    $pane->access = array();
+    $pane->configuration = array(
+      'override_title' => 0,
+      'override_title_text' => '',
+    );
+    $pane->cache = array();
+    $pane->style = array(
+      'settings' => NULL,
+    );
+    $pane->css = array();
+    $pane->extras = array();
+    $pane->position = 0;
+    $pane->locks = array();
+    $pane->uuid = 'a1be89b3-1b24-4272-bd3c-eb269cc6a2b8';
+    $display->content['new-a1be89b3-1b24-4272-bd3c-eb269cc6a2b8'] = $pane;
+    $display->panels['bottom'][0] = 'new-a1be89b3-1b24-4272-bd3c-eb269cc6a2b8';
+    $pane = new stdClass();
     $pane->pid = 'new-db01f179-5a13-41d4-b6a8-89eddf9c3e2d';
     $pane->panel = 'middle_2_1';
     $pane->type = 'entity_field';
@@ -120,7 +142,14 @@ function panels_node_dossier_default_page_manager_handlers() {
       'delta_offset' => '0',
       'delta_reversed' => FALSE,
       'formatter_settings' => array(
-        'file_view_mode' => 'teaser',
+        'file_view_mode' => 'preview',
+        'colorbox_view_mode' => 'default',
+        'fixed_width' => '',
+        'fixed_height' => '',
+        'colorbox_gallery' => 'post',
+        'colorbox_gallery_custom' => '',
+        'colorbox_caption' => 'mediafield',
+        'audio_playlist' => 0,
       ),
       'context' => 'argument_entity_id:node_1',
       'override_title' => 1,
@@ -210,28 +239,6 @@ function panels_node_dossier_default_page_manager_handlers() {
     $pane->uuid = '0e937958-f084-4d48-9a31-77caa59d2566';
     $display->content['new-0e937958-f084-4d48-9a31-77caa59d2566'] = $pane;
     $display->panels['middle_3'][1] = 'new-0e937958-f084-4d48-9a31-77caa59d2566';
-    $pane = new stdClass();
-    $pane->pid = 'new-a1be89b3-1b24-4272-bd3c-eb269cc6a2b8';
-    $pane->panel = 'middle_3';
-    $pane->type = 'block';
-    $pane->subtype = 'dossier_theme-dossier_theme_block';
-    $pane->shown = TRUE;
-    $pane->access = array();
-    $pane->configuration = array(
-      'override_title' => 0,
-      'override_title_text' => '',
-    );
-    $pane->cache = array();
-    $pane->style = array(
-      'settings' => NULL,
-    );
-    $pane->css = array();
-    $pane->extras = array();
-    $pane->position = 2;
-    $pane->locks = array();
-    $pane->uuid = 'a1be89b3-1b24-4272-bd3c-eb269cc6a2b8';
-    $display->content['new-a1be89b3-1b24-4272-bd3c-eb269cc6a2b8'] = $pane;
-    $display->panels['middle_3'][2] = 'new-a1be89b3-1b24-4272-bd3c-eb269cc6a2b8';
   $display->hide_title = PANELS_TITLE_FIXED;
   $display->title_pane = '0';
   $handler->conf['display'] = $display;
