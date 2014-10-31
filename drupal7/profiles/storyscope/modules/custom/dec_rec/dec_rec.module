@@ -635,9 +635,9 @@ function dec_rec_entity_update($entity, $type) {
 /**
  * 
  */
-function async_check_for_name_description_image($event_list) {
+function check_for_name_description_image($event_list) {
 	foreach($event_list as $event_id) {
-		$handle = background_process_start('check_topic_name_image_description', $event_id);
+		check_topic_name_image_description($event_id);
 	}
 }
 
@@ -2979,14 +2979,14 @@ function fb_exhibition_curator_exhibition($topic = '/m/0hd_0bn', $result = array
 /**
  * Retrieve event space for a setting
  */
-function event_space_of_a_setting($location, $year, $end = 0) {
-	if($end) {
-		$year_field = $year.":".$end;
-	}
-	else {
-		$year_field = $year;
-	}	
-	if(check_for_calculated_setting($location, $year_field)) {
+function event_space_of_a_setting($location, $year, $end = 0, $real_start, $real_end = 0) {
+// 	if($end) {
+		$timespan = $real_start.":".$real_end;
+// 	}
+// 	else {
+// 		$year_field = $year;
+// 	}	
+	if(check_for_calculated_setting($location, $timespan)) {
 		return;
 	}
 	$result = array("events"=>array(),"names"=>array(),"links"=>array());
@@ -2996,7 +2996,7 @@ function event_space_of_a_setting($location, $year, $end = 0) {
 
 	save_events_to_db($result["events"]);
 	save_tag_names_to_db($result["names"]);
-	save_calculated_setting($location, $year);
+	save_calculated_setting($location, $timespan);
 
 }
 
@@ -3088,18 +3088,20 @@ function dec_setting($location, $time,  $end) {
 	new_event_space_of_a_topic($location);
 		
 	//event space for setting
-	event_space_of_a_setting($location, $full_start_time, $full_end_time);
-	
+	event_space_of_a_setting($location, $full_start_time, $full_end_time, $time, $end);
+		
 	//get events for a setting
 	$all_events = get_all_events_for_setting($location, $full_start_time, $full_end_time);
 	$event_array = flat_list_of_events($all_events);
-	
+
+	$handle = background_process_start('check_for_name_description_image', $event_array);
+
 	//event table and timeline links
 	$setting_event_table = event_table_for_event_list($event_array);
 	$timeline_links = dec_setting_timeline_links($time, $end, $location, $event_array);
 	//get themes for the events of a setting
 	$themes = dec_get_themes_for_events_of_setting($location, $full_start_time, $full_end_time);
-	
+		
 	$name = get_topic_name($location);
 	$path_array = explode('/',request_path());
 	if(end($path_array) == 'stories' || end($path_array) == 'settingstories') {
@@ -3209,7 +3211,7 @@ function dec_setting($location, $time,  $end) {
 	
 }
 
-function check_setting_id($location, $time,  $end) {
+function check_setting_id($time,  $end, $location) {
 	//check whether setting exists
 	$record = db_select('setting_id','si')
 	->fields('si',array('id'))
@@ -3597,7 +3599,7 @@ function dec_list_of_tags($tag_array, $max_value) {
 	$event_list = event_list_for_story_id($max_value);
 	
 	//retrieve title, description and image for events******here
-	async_check_for_name_description_image($event_list);
+	$handle = background_process_start('check_for_name_description_image', $event_list);
 	
 	$themes = top_n_themes_of_story($max_value, 10);
 // 	$matching_themes = top_n_matching_themes_of_story2($event_list, $max_value, 10);	
@@ -4141,7 +4143,7 @@ function dec_tag($topic) {
 	$event_list = flat_list_of_single_tag_events($all_events);
 	
 	//retrieve title, description and images for events*******here
-	async_check_for_name_description_image($event_list);
+	$handle = background_process_start('check_for_name_description_image', $event_list);
 	if(!empty($event_list)) {
 		$output .= dec_tag_timeline_links($topic, $event_list);
 		$output .= '<div style="clear:both"><h2><i class="fa fa-cloud fa-lg">&nbsp;</i>Event Space : <span class="event-space-filter"><input id="event-space-filter" type="text"></span></h2></div>';
