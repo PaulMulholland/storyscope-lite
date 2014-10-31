@@ -4754,87 +4754,88 @@ ul.field-name-field-fb-tags .plain {
 /* line 3398, ../sass/storyscope.scss */
 .block-dec-rec {
   border-top: 1px solid #D3D7D9;
+  padding-left: 10px;
   padding-top: 1em;
 }
-/* line 3401, ../sass/storyscope.scss */
+/* line 3402, ../sass/storyscope.scss */
 .block-dec-rec h2, .block-dec-rec .node-story-visualisation .exhibit-collectionView-body ol li > div > div:first-child, .node-story-visualisation .exhibit-collectionView-body ol .block-dec-rec li > div > div:first-child {
   font-size: 1.2em;
 }
-/* line 3404, ../sass/storyscope.scss */
+/* line 3405, ../sass/storyscope.scss */
 .block-dec-rec .addtag-button {
   float: right;
   padding-right: 20px;
 }
-/* line 3408, ../sass/storyscope.scss */
+/* line 3409, ../sass/storyscope.scss */
 .block-dec-rec .find-tagged-stories {
   float: right;
 }
-/* line 3411, ../sass/storyscope.scss */
+/* line 3412, ../sass/storyscope.scss */
 .block-dec-rec .find-tagged-stories a {
   color: #4E4E4E;
 }
-/* line 3415, ../sass/storyscope.scss */
+/* line 3416, ../sass/storyscope.scss */
 .block-dec-rec .event-space-headings {
   clear: both;
 }
-/* line 3418, ../sass/storyscope.scss */
+/* line 3419, ../sass/storyscope.scss */
 .block-dec-rec .event-space-filter {
   font-size: 13px;
   color: #4E4E4E;
 }
-/* line 3423, ../sass/storyscope.scss */
+/* line 3424, ../sass/storyscope.scss */
 .block-dec-rec .event-space-tag-attibutes-wrapper {
   clear: both;
   padding-top: 15px;
   padding-bottom: 25px;
 }
-/* line 3427, ../sass/storyscope.scss */
+/* line 3428, ../sass/storyscope.scss */
 .block-dec-rec .event-space-tag-attibutes-wrapper .event-space-tag-attibutes {
   clear: both;
 }
-/* line 3430, ../sass/storyscope.scss */
+/* line 3431, ../sass/storyscope.scss */
 .block-dec-rec .event-space-tag-attibutes-wrapper .event-space-tag-attibutes .field-name-field-fb-tags {
   margin: 0;
 }
-/* line 3437, ../sass/storyscope.scss */
+/* line 3438, ../sass/storyscope.scss */
 .block-dec-rec .topic-block {
   display: block;
   padding-bottom: 10px;
   border-bottom: solid 1px #CDCCCB;
 }
-/* line 3441, ../sass/storyscope.scss */
+/* line 3442, ../sass/storyscope.scss */
 .block-dec-rec .topic-block .description-attribute-block {
   display: inline-block;
 }
-/* line 3443, ../sass/storyscope.scss */
+/* line 3444, ../sass/storyscope.scss */
 .block-dec-rec .topic-block .description-attribute-block .topic-description {
   width: 75%;
   float: left;
 }
-/* line 3446, ../sass/storyscope.scss */
+/* line 3447, ../sass/storyscope.scss */
 .block-dec-rec .topic-block .description-attribute-block .topic-description p {
   width: 95%;
 }
-/* line 3450, ../sass/storyscope.scss */
+/* line 3451, ../sass/storyscope.scss */
 .block-dec-rec .topic-block .description-attribute-block .topic-image {
   width: 25%;
   float: right;
   max-height: 212px;
   overflow: hidden;
 }
-/* line 3455, ../sass/storyscope.scss */
+/* line 3456, ../sass/storyscope.scss */
 .block-dec-rec .topic-block .description-attribute-block .topic-image img {
   width: 90%;
 }
-/* line 3463, ../sass/storyscope.scss */
+/* line 3464, ../sass/storyscope.scss */
 .block-dec-rec .event-space-table {
   clear: both;
 }
-/* line 3465, ../sass/storyscope.scss */
+/* line 3466, ../sass/storyscope.scss */
 .block-dec-rec .event-space-table table {
   width: 100%;
 }
-/* line 3468, ../sass/storyscope.scss */
+/* line 3469, ../sass/storyscope.scss */
 .block-dec-rec .event-space-table table th {
   padding: 2px 3px 2px 3px;
   border-bottom: 1px solid grey;
@@ -4842,31 +4843,31 @@ ul.field-name-field-fb-tags .plain {
   width: 50px;
   text-transform: capitalize;
 }
-/* line 3475, ../sass/storyscope.scss */
+/* line 3476, ../sass/storyscope.scss */
 .block-dec-rec .event-space-table table tr {
   border-bottom: 1px solid lightgrey;
   background: none;
 }
-/* line 3485, ../sass/storyscope.scss */
+/* line 3486, ../sass/storyscope.scss */
 .block-dec-rec .event-space-table table td {
   padding: 3px 3px 3px 3px;
 }
-/* line 3487, ../sass/storyscope.scss */
+/* line 3488, ../sass/storyscope.scss */
 .block-dec-rec .event-space-table table td a {
   color: #0088cc;
 }
 
-/* line 3498, ../sass/storyscope.scss */
+/* line 3499, ../sass/storyscope.scss */
 .pane-suggested-story-tags-suggested-story-tags-block .item-list {
   margin: inherit;
 }
-/* line 3501, ../sass/storyscope.scss */
+/* line 3502, ../sass/storyscope.scss */
 .pane-suggested-story-tags-suggested-story-tags-block .suggested_tags {
   list-style-type: none;
   padding-left: 0px;
   float: left;
 }
-/* line 3505, ../sass/storyscope.scss */
+/* line 3506, ../sass/storyscope.scss */
 .pane-suggested-story-tags-suggested-story-tags-block .suggested_tags li {
   margin: 0 10px 10px 0;
   padding: 3px 10px 3px 10px;
@@ -4874,54 +4875,59 @@ ul.field-name-field-fb-tags .plain {
   float: left;
   display: block;
 }
-/* line 3511, ../sass/storyscope.scss */
+/* line 3512, ../sass/storyscope.scss */
 .pane-suggested-story-tags-suggested-story-tags-block .suggested_tags li a {
   color: #79b2ac;
 }
 
-/* line 3518, ../sass/storyscope.scss */
+/* line 3519, ../sass/storyscope.scss */
 .float_right {
   float: right;
 }
 
-/* line 3522, ../sass/storyscope.scss */
+/* line 3523, ../sass/storyscope.scss */
 .float_left {
   float: left;
 }
 
-/* line 3531, ../sass/storyscope.scss */
+/* line 3532, ../sass/storyscope.scss */
 .view-dossiers .view-content article .container-full {
   padding: inherit;
 }
-/* line 3534, ../sass/storyscope.scss */
+/* line 3535, ../sass/storyscope.scss */
 .view-dossiers .view-content article header {
   float: left;
 }
-/* line 3538, ../sass/storyscope.scss */
+/* line 3539, ../sass/storyscope.scss */
 .view-dossiers .view-content article .container-inner {
   width: inherit;
   float: right;
   clear: none;
 }
 
-/* line 3549, ../sass/storyscope.scss */
+/* line 3550, ../sass/storyscope.scss */
 #logout {
   position: relative;
   padding-top: 60px;
 }
 
-/* line 3554, ../sass/storyscope.scss */
+/* line 3555, ../sass/storyscope.scss */
 #navigation {
   padding-left: 200px;
 }
 
-/* line 3561, ../sass/storyscope.scss */
+/* line 3562, ../sass/storyscope.scss */
 #content {
   padding-left: 10px;
 }
 
-/* line 3565, ../sass/storyscope.scss */
+/* line 3566, ../sass/storyscope.scss */
 .custom_front_text {
   font-size: 1.2em;
   margin-top: 20px;
+}
+
+/* line 3571, ../sass/storyscope.scss */
+.block-dec-rec-story-event-space-block {
+  padding-left: 10px;
 }
