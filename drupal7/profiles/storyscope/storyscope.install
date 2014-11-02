@@ -533,6 +533,13 @@ function storyscope_update_7037() {
   return t('Update storyscope_front_page');
 }
 
+function storyscope_update_7038() {
+	$modules = array('dec_rdf_export');
+	$enable_dependencies = TRUE;
+	module_enable($modules, $enable_dependencies);
+	return t('RDF export module');
+}
+
 /**
 * Revert specified features.
 *
