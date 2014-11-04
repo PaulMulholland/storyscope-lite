@@ -38,7 +38,7 @@ function installation_theme_block_view($delta = '') {
 
 function installation_theme_block_content() {
 	$path = request_path();
-	if($path == '') {
+	if($path == '' || $path == 'front') {
 		return dec_installation_themes();
 	}
   return FALSE;
