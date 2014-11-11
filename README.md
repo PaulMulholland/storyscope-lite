@@ -2,6 +2,12 @@
 
 Storyscope-Lite is software to help you create and share stories. It is based on the Drupal 7 framework and requires a working Apache / PHP / MySQL stack (see below).
 
+###User Guide
+The user guide is here.
+[https://github.com/PaulMulholland/storyscope-lite/wiki/Guide-to-Storyscope-Lite]
+
+The User Guide is here.
+
 ###Quick Install (OS X)
 
 - Install a MAMP stack - see [http://www.mamp.info/en/]  
