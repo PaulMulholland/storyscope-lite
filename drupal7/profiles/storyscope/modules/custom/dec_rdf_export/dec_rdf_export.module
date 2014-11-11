@@ -23,7 +23,7 @@ function dec_rdf_export_menu(){
 }
 
 function dec_rdf_export() {
-	$allow_export = FALSE;
+	$allow_export = TRUE;
 	//the call below exports the site in RDF
 	if($allow_export) {
 		$handle = background_process_start('dec_save_as_rdf');
@@ -129,17 +129,21 @@ function dec_save_as_rdf() {
 	$triples = settings_of_tag_triples($triples);
 	
 	//all events of a site
+	/**not really needed in the export
 	$events = events_of_site();
 	foreach($events as $event) {
 		//details of event
 		$triples = rdf_event_details($event, $triples);
 	}
-	
+	*/
+	//all facts of a site
+	//not really needed in the export
+
 	//serialize
 	$ns = array(
 		'rdf' => 'http://www.w3.org/1999/02/22-rdf-syntax-ns#',
 		'dc' => 'http://purl.org/dc/elements/1.1#',
-		'storyscope' => 'http://decipher.open.ac.uk/ontology/storyscope/',
+		'storyscope' => 'http://decipher.open.ac.uk/storyscope/ontology/',
 		'owltime' => 'http://www.w3.org/2006/time#'
 	);
 	$conf = array('ns' => $ns);
@@ -161,16 +165,16 @@ function rdf_event_details($event, $previous_triples) {
 	$triples = array();
 
 	$triples[] = array("s"=>$base_url.'/?tag='.$event, "s_type"=>'uri',
-			"p"=>'http://decipher.open.ac.uk/ontology/storyscope/interpretationOf', "p_type"=>'uri',
+			"p"=>'storyscope:interpretationOf', "p_type"=>'uri',
 			"o"=>'http://rdf.freebase.com/ns/m.'.substr($event, 3), "o_type"=>'uri',
 			"o_datatype"=>"", "o_lang"=>"");
 	$triples[] = array("s"=>$base_url.'/?tag='.$event, "s_type"=>'uri',
 			"p"=>'http://www.w3.org/1999/02/22-rdf-syntax-ns#type', "p_type"=>'uri',
-			"o"=>'http://decipher.open.ac.uk/ontology/storyscope/Event', "o_type"=>'uri',
+			"o"=>'storyscope:Event', "o_type"=>'uri',
 			"o_datatype"=>"", "o_lang"=>"");
 		
 	$attribute_triples = attributes_of_event($event);
-	
+
 	return array_merge($previous_triples, $triples, $attribute_triples);
 }
 
@@ -185,7 +189,7 @@ event_attribute_value.attribute = attribute_name.attribute;";
 	foreach($result as $attribute) {
 		if($attribute->name == 'start_time') {
 			$triples[] = array("s"=>$base_url.'/?tag='.$event, "s_type"=>'uri',
-					"p"=>'http://decipher.open.ac.uk/ontology/storyscope/hasTime', "p_type"=>'uri',
+					"p"=>'storyscope:hasTime', "p_type"=>'uri',
 					"o"=>$base_url.'/?tag='.$event.'#time', "o_type"=>'uri',
 					"o_datatype"=>"", "o_lang"=>"");	
 			$triples[] = array("s"=>$base_url.'/?tag='.$event.'#time', "s_type"=>'uri',
@@ -199,7 +203,7 @@ event_attribute_value.attribute = attribute_name.attribute;";
 		}
 		elseif($attribute->name == 'end_time') {
 			$triples[] = array("s"=>$base_url.'/?tag='.$event, "s_type"=>'uri',
-					"p"=>'http://decipher.open.ac.uk/ontology/storyscope/hasTime', "p_type"=>'uri',
+					"p"=>'storyscope:hasTime', "p_type"=>'uri',
 					"o"=>$base_url.'/?tag='.$event.'#time', "o_type"=>'uri',
 					"o_datatype"=>"", "o_lang"=>"");
 			$triples[] = array("s"=>$base_url.'/?tag='.$event.'#time', "s_type"=>'uri',
@@ -213,19 +217,19 @@ event_attribute_value.attribute = attribute_name.attribute;";
 		}
 		elseif($attribute->name == 'location') {
 			$triples[] = array("s"=>$base_url.'/?tag='.$event, "s_type"=>'uri',
-					"p"=>'http://decipher.open.ac.uk/ontology/storyscope/atPlace', "p_type"=>'uri',
+					"p"=>'storyscope:atPlace', "p_type"=>'uri',
 					"o"=>'http://rdf.freebase.com/ns/m.'.substr($attribute->value, 3), "o_type"=>'uri',
 					"o_datatype"=>"", "o_lang"=>"");		
 		}
 		elseif($attribute->name == 'tag') {
 			$triples[] = array("s"=>$base_url.'/?tag='.$event, "s_type"=>'uri',
-					"p"=>'http://decipher.open.ac.uk/ontology/storyscope/involved', "p_type"=>'uri',
+					"p"=>'storyscope:involved', "p_type"=>'uri',
 					"o"=>'http://rdf.freebase.com/ns/m.'.substr($attribute->value, 3), "o_type"=>'uri',
 					"o_datatype"=>"", "o_lang"=>"");		
 		}
 		elseif($attribute->name == 'agent') {
 			$triples[] = array("s"=>$base_url.'/?tag='.$event, "s_type"=>'uri',
-					"p"=>'http://decipher.open.ac.uk/ontology/storyscope/involvedAgent', "p_type"=>'uri',
+					"p"=>'storyscope:involvedAgent', "p_type"=>'uri',
 					"o"=>'http://rdf.freebase.com/ns/m.'.substr($attribute->value, 3), "o_type"=>'uri',
 					"o_datatype"=>"", "o_lang"=>"");		
 		}		
@@ -248,7 +252,7 @@ function rdf_dossier_of_site($nid, $previous_triples) {
 	global $base_url;
 	$triples = array();
 	$triples[] = array("s"=>$base_url.'/dossier/'.$nid, "s_type"=>'uri',
-			"p"=>'http://decipher.open.ac.uk/ontology/storyscope/hasSite', "p_type"=>'uri',
+			"p"=>'storyscope:hasSite', "p_type"=>'uri',
 			"o"=>$base_url, "o_type"=>'uri',
 			"o_datatype"=>"", "o_lang"=>"");
 	return array_merge($previous_triples, $triples);
@@ -259,7 +263,7 @@ function rdf_stories_of_dossier($dossier, $stories, $previous_triples) {
 	$triples = array();
 	foreach($stories as $story) {
 		$triples[] = array("s"=>$base_url.'/dossier/'.$dossier.'/story/'.$story, "s_type"=>'uri',
-				"p"=>'http://decipher.open.ac.uk/ontology/storyscope/hasDossier', "p_type"=>'uri',
+				"p"=>'storyscope:hasDossier', "p_type"=>'uri',
 				"o"=>$base_url.'/dossier/'.$dossier, "o_type"=>'uri',
 				"o_datatype"=>"", "o_lang"=>"");
 	}
@@ -287,7 +291,7 @@ WHERE tag_settings.id = setting_id.id;";
 			$setting_uri = $base_url.'/?location='.$setting->location.'&time='.$setting->start;
 		}
 		$triples[] = array("s"=>$base_url.'/?tag='.$record->tag, "s_type"=>'uri',
-				"p"=>'http://decipher.open.ac.uk/ontology/storyscope/hasRelatedSetting', "p_type"=>'uri',
+				"p"=>'storyscope:hasRelatedSetting', "p_type"=>'uri',
 				"o"=>$setting_uri, "o_type"=>'uri',
 				"o_datatype"=>"", "o_lang"=>"");
 	}
@@ -295,14 +299,14 @@ WHERE tag_settings.id = setting_id.id;";
 }
 
 function themes_of_tag_triples($previous_triples) {
- 	$query = "SELECT * FROM storyscope_lite.tag_themes;";
+ 	$query = "SELECT * FROM tag_themes;";
  	$result = db_query($query);
  	global $base_url;
  	$triples = array();
 
  	foreach($result as $record) {
  		$triples[] = array("s"=>$base_url.'/?tag='.$record->tag, "s_type"=>'uri',
- 				"p"=>'http://decipher.open.ac.uk/ontology/storyscope/hasRelatedTheme', "p_type"=>'uri',
+ 				"p"=>'storyscope:hasRelatedTheme', "p_type"=>'uri',
  				"o"=>$base_url.'/?tag='.$record->mid, "o_type"=>'uri',
  				"o_datatype"=>"", "o_lang"=>"");
  	}
@@ -331,7 +335,7 @@ WHERE setting_themes.setting_id = setting_id.id;";
 			$setting_uri = $base_url.'/?location='.$setting->location.'&time='.$setting->start;
 		}
 		$triples[] = array("s"=>$setting_uri, "s_type"=>'uri',
-				"p"=>'http://decipher.open.ac.uk/ontology/storyscope/hasRelatedTheme', "p_type"=>'uri',
+				"p"=>'storyscope:hasRelatedTheme', "p_type"=>'uri',
 				"o"=>$base_url.'/?tag='.$setting->mid, "o_type"=>'uri',
 				"o_datatype"=>"", "o_lang"=>"");		
 	}
@@ -362,10 +366,10 @@ function details_of_settings($previous_triples) {
 		
 		$triples[] = array("s"=>$setting_uri, "s_type"=>'uri',
 				"p"=>'http://www.w3.org/1999/02/22-rdf-syntax-ns#type', "p_type"=>'uri',
-				"o"=>'http://decipher.open.ac.uk/ontology/storyscope/Setting', "o_type"=>'uri',
+				"o"=>'storyscope:Setting', "o_type"=>'uri',
 				"o_datatype"=>"", "o_lang"=>"");
 		$triples[] = array("s"=>$setting_uri, "s_type"=>'uri',
-				"p"=>'http://decipher.open.ac.uk/ontology/storyscope/hasTime', "p_type"=>'uri',
+				"p"=>'storyscope:hasTime', "p_type"=>'uri',
 				"o"=>$setting_uri.'#time', "o_type"=>'uri',
 				"o_datatype"=>"", "o_lang"=>"");
 		
@@ -408,12 +412,12 @@ function tag_interpretation_triples($previous_triples) {
 	foreach($result as $record) {
 		$tag = $record->tag;
 		$triples[] = array("s"=>$base_url.'/?tag='.$tag, "s_type"=>'uri',
-				"p"=>'http://decipher.open.ac.uk/ontology/storyscope/interpretationOf', "p_type"=>'uri',
+				"p"=>'storyscope:interpretationOf', "p_type"=>'uri',
 				"o"=>'http://rdf.freebase.com/ns/m.'.substr($tag, 3), "o_type"=>'uri',
 				"o_datatype"=>"", "o_lang"=>"");	
 		$triples[] = array("s"=>$base_url.'/?tag='.$tag, "s_type"=>'uri',
 				"p"=>'http://www.w3.org/1999/02/22-rdf-syntax-ns#type', "p_type"=>'uri',
-				"o"=>'http://decipher.open.ac.uk/ontology/storyscope/Theme', "o_type"=>'uri',
+				"o"=>'storyscope:Theme', "o_type"=>'uri',
 				"o_datatype"=>"", "o_lang"=>"");
 	}
 	return array_merge($previous_triples, $triples);
@@ -425,7 +429,7 @@ function rdf_themes_of_site($previous_triples) {
 	$triples = array();
 	foreach($themes as $tag) {
 		$triples[] = array("s"=>$base_url.'?tag='.$tag, "s_type"=>'uri',
-				"p"=>'http://decipher.open.ac.uk/ontology/storyscope/themeOf', "p_type"=>'uri',
+				"p"=>'storyscope:themeOf', "p_type"=>'uri',
 				"o"=>$base_url, "o_type"=>'uri',
 				"o_datatype"=>"", "o_lang"=>"");
 	}
@@ -438,7 +442,7 @@ function rdf_title_type_of_site($previous_triples) {
 	$triples = array();
 	$triples[] = array("s"=>$base_url, "s_type"=>'uri',
 			"p"=>'http://www.w3.org/1999/02/22-rdf-syntax-ns#type', "p_type"=>'uri',
-			"o"=>'http://decipher.open.ac.uk/ontology/storyscope/Site', "o_type"=>'uri',
+			"o"=>'storyscope:Site', "o_type"=>'uri',
 			"o_datatype"=>"", "o_lang"=>"");
 	$triples[] = array("s"=>$base_url, "s_type"=>'uri',
 			"p"=>'http://purl.org/dc/elements/1.1#title', "p_type"=>'uri',
@@ -452,20 +456,20 @@ function rdf_tag_label_meaning_triples($story_alias, $tag, $previous_triples) {
 	$triples = array();
 	$tag_label = get_topic_name($tag);
 	$triples[] = array("s"=>$base_url.'/'.$story_alias.'?tag='.$tag, "s_type"=>'uri',
-			"p"=>'http://decipher.open.ac.uk/ontology/storyscope/tagOf', "p_type"=>'uri',
+			"p"=>'storyscope:tagOf', "p_type"=>'uri',
 			"o"=>$base_url.'/'.$story_alias.'#tagging', "o_type"=>'uri',
 			"o_datatype"=>"", "o_lang"=>"");
 	$triples[] = array("s"=>$base_url.'/'.$story_alias.'?tag='.$tag, "s_type"=>'uri',
 			"p"=>'http://www.w3.org/1999/02/22-rdf-syntax-ns#type', "p_type"=>'uri',
-			"o"=>'http://decipher.open.ac.uk/ontology/storyscope/Tag', "o_type"=>'uri',
+			"o"=>'storyscope:Tag', "o_type"=>'uri',
 			"o_datatype"=>"", "o_lang"=>"");	
 	$triples[] = array("s"=>$base_url.'/'.$story_alias.'?tag='.$tag, "s_type"=>'uri',
-			"p"=>'http://decipher.open.ac.uk/ontology/storyscope/tagMeaning', "p_type"=>'uri',
+			"p"=>'storyscope:tagMeaning', "p_type"=>'uri',
 			"o"=>'http://rdf.freebase.com/ns/m.'.substr($tag, 3), "o_type"=>'uri',
 			"o_datatype"=>"", "o_lang"=>"");
 	if($tag_label) {
 		$triples[] = array("s"=>$base_url.'/'.$story_alias.'?tag='.$tag, "s_type"=>'uri',
-				"p"=>'http://decipher.open.ac.uk/ontology/storyscope/tagLabel', "p_type"=>'uri',
+				"p"=>'storyscope:tagLabel', "p_type"=>'uri',
 				"o"=>$tag_label, "o_type"=>'literal',
 				"o_datatype"=>"", "o_lang"=>"");
 	}
@@ -476,12 +480,12 @@ function rdf_story_and_tagging_triples($story_alias, $previous_triples) {
 	global $base_url;
 	$triples = array();
 	$triples[] = array("s"=>$base_url.'/'.$story_alias.'#tagging', "s_type"=>'uri',
-			"p"=>'http://decipher.open.ac.uk/ontology/storyscope/taggedStory', "p_type"=>'uri',
+			"p"=>'storyscope:taggedStory', "p_type"=>'uri',
 			"o"=>$base_url.'/'.$story_alias, "o_type"=>'uri',
 			"o_datatype"=>"", "o_lang"=>"");
 	$triples[] = array("s"=>$base_url.'/'.$story_alias.'#tagging', "s_type"=>'uri',
 			"p"=>'http://www.w3.org/1999/02/22-rdf-syntax-ns#type', "p_type"=>'uri',
-			"o"=>'http://decipher.open.ac.uk/ontology/storyscope/Tagging', "o_type"=>'uri',
+			"o"=>'storyscope:Tagging', "o_type"=>'uri',
 			"o_datatype"=>"", "o_lang"=>"");
 	return array_merge($previous_triples, $triples);
 }
@@ -508,7 +512,7 @@ function rdf_triple_settings_of_nid($nid = 0, $location, $start, $end, $previous
 	}
 	
 	$triples[] = array("s"=>$base_url.$node_path, "s_type"=>'uri',
-			"p"=>'http://decipher.open.ac.uk/ontology/storyscope/hasRelatedSetting', "p_type"=>'uri',
+			"p"=>'storyscope:hasRelatedSetting', "p_type"=>'uri',
 			"o"=>$setting_uri, "o_type"=>'uri',
 			"o_datatype"=>"", "o_lang"=>"");
 	
@@ -541,7 +545,7 @@ function rdf_triple_themes_of_nid($nid = 0, $theme, $previous_triples) {
 	global $base_url;
 	$triples = array();
 	$triples[] = array("s"=>$base_url.$node_path, "s_type"=>'uri',
-			"p"=>'http://decipher.open.ac.uk/ontology/storyscope/hasRelatedTheme', "p_type"=>'uri',
+			"p"=>'storyscope:hasRelatedTheme', "p_type"=>'uri',
 			"o"=>$base_url.'/?tag='.$theme, "o_type"=>'uri',
 			"o_datatype"=>"", "o_lang"=>"");
 	return array_merge($previous_triples, $triples);
@@ -560,15 +564,15 @@ function rdf_title_description_type_of_node($node, $storyscope_type, $previous_t
 	$triples = array();
 	$triples[] = array("s"=>$base_url.$node_path, "s_type"=>'uri',
 			"p"=>'http://www.w3.org/1999/02/22-rdf-syntax-ns#type', "p_type"=>'uri',
-			"o"=>'http://decipher.open.ac.uk/ontology/storyscope/'.$storyscope_type, "o_type"=>'uri',
+			"o"=>'storyscope:'.$storyscope_type, "o_type"=>'uri',
 			"o_datatype"=>"", "o_lang"=>"");
 	$triples[] = array("s"=>$base_url.$node_path, "s_type"=>'uri',
 			"p"=>'http://purl.org/dc/elements/1.1#title', "p_type"=>'uri',
-			"o"=>$node->title, "o_type"=>'literal',
+			"o"=>htmlspecialchars(drupal_html_to_text($node->title)), "o_type"=>'literal',
 			"o_datatype"=>"", "o_lang"=>"");
 	$triples[] = array("s"=>$base_url.$node_path, "s_type"=>'uri',
 			"p"=>'http://purl.org/dc/elements/1.1#description', "p_type"=>'uri',
-			"o"=>$node->body['und'][0]['value'], "o_type"=>'literal',
+			"o"=>htmlspecialchars(drupal_html_to_text($node->body['und'][0]['value'])), "o_type"=>'literal',
 			"o_datatype"=>"", "o_lang"=>"");
 	return array_merge($previous_triples, $triples);
 }
