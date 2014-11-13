@@ -372,6 +372,10 @@ function details_of_settings($previous_triples) {
 				"p"=>'storyscope:hasTime', "p_type"=>'uri',
 				"o"=>$setting_uri.'#time', "o_type"=>'uri',
 				"o_datatype"=>"", "o_lang"=>"");
+		$triples[] = array("s"=>$setting_uri, "s_type"=>'uri',
+				"p"=>'storyscope:hasLocation', "p_type"=>'uri',
+				"o"=>'http://rdf.freebase.com/ns/m.'.substr($setting->location, 3), "o_type"=>'uri',
+				"o_datatype"=>"", "o_lang"=>"");
 		
 		if($setting->end) {
 			$triples[] = array("s"=>$setting_uri.'#time', "s_type"=>'uri',
@@ -403,7 +407,7 @@ function details_of_settings($previous_triples) {
 
 function tag_interpretation_triples($previous_triples) {
 	$result = db_select('tag_name','tn')
-	->fields('tn',array('tag'))
+	->fields('tn',array('tag','name'))
 	->execute();
 
 	global $base_url;
@@ -418,6 +422,11 @@ function tag_interpretation_triples($previous_triples) {
 		$triples[] = array("s"=>$base_url.'/?tag='.$tag, "s_type"=>'uri',
 				"p"=>'http://www.w3.org/1999/02/22-rdf-syntax-ns#type', "p_type"=>'uri',
 				"o"=>'storyscope:Theme', "o_type"=>'uri',
+				"o_datatype"=>"", "o_lang"=>"");
+		$name = $record->name;
+		$triples[] = array("s"=>'http://rdf.freebase.com/ns/m.'.substr($tag, 3), "s_type"=>'uri',
+				"p"=>'http://purl.org/dc/elements/1.1#title', "p_type"=>'uri',
+				"o"=>htmlspecialchars(drupal_html_to_text($name)), "o_type"=>'literal',
 				"o_datatype"=>"", "o_lang"=>"");
 	}
 	return array_merge($previous_triples, $triples);
@@ -446,7 +455,7 @@ function rdf_title_type_of_site($previous_triples) {
 			"o_datatype"=>"", "o_lang"=>"");
 	$triples[] = array("s"=>$base_url, "s_type"=>'uri',
 			"p"=>'http://purl.org/dc/elements/1.1#title', "p_type"=>'uri',
-			"o"=>$site_name, "o_type"=>'literal',
+			"o"=>htmlspecialchars(drupal_html_to_text($site_name)), "o_type"=>'literal',
 			"o_datatype"=>"", "o_lang"=>"");
 	return array_merge($previous_triples, $triples);
 }
