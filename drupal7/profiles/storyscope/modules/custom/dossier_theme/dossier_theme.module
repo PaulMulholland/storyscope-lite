@@ -19,6 +19,7 @@ function dossier_theme_block_info() {
   );
   return $blocks;
 }
+
 /**
 * Implements hook_block_view().
 */
@@ -144,7 +145,7 @@ JOIN tag_name ON tag_name.tag = frequency_table.location ORDER BY stories DESC, 
 			$output[] = $record;
 		}
 	}
-	if($dossier_nid) {
+	if($dossier_nid && !empty($setting_ids)) {
 		dec_save_settings('dossier_settings', 'dossier', $setting_ids, $dossier_nid);
 	}
 	return $output;
