@@ -900,24 +900,23 @@ function update_suggested_tags_for_story_node($node) {
 	->execute();
 	
 	if(isset($node->body['und'][0]['value'])) {
+		$title_text = $node->title;
 		$body_text = $node->body['und'][0]['value'];
+		$story_text = $title_text.'. '.$body_text;
 		$alchemyapi = new AlchemyAPI();
-		$response = $alchemyapi->concepts('text',$body_text, null);
+		$response = $alchemyapi->concepts('text',$story_text, null);
 		$suggested_tags = array();
-		dpm($response['concepts']);
 		if(!empty($response['concepts'])) {
 			foreach($response['concepts'] as $concept) {
 				if(isset($concept['text']) && isset($concept['freebase'])) {
 					$freebase_mid = translate_freebase_rdf_uri($concept['freebase']);
 					if($freebase_mid) {
 						$name = check_for_topic_name($freebase_mid);
-						dpm(array($name, $concept['text']));
 						$suggested_tags[] = array('story'=>$node->nid,'mid'=>$freebase_mid,'name'=>$name);
 					}
 				}
 			}
 		}
-		dpm($suggested_tags);
 		if(!empty($suggested_tags)) {
 			$query = db_insert('story_suggested_tags')->fields(array('story', 'mid', 'name'));
 			foreach($suggested_tags as $tag) {
