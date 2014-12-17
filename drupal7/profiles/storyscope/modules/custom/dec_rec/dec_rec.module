@@ -3621,7 +3621,7 @@ function dec_list_of_tags($tag_array, $max_value) {
 	$timeline_links = dec_tags_timeline_links($max_value);
 
 // 	$other_all_events = other_all_events($max_value);
-	$overlapping_settings = get_n_matching_settings_for_a_story2($max_value, 5);	
+	$overlapping_settings = get_n_matching_settings_for_a_story2($max_value, 10);	
 	
 	//matching themes (i.e. the story tags)
 // 	if(!empty($matching_themes)) {
