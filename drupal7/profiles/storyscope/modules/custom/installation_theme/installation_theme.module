@@ -44,9 +44,44 @@ function installation_theme_block_content() {
   return FALSE;
 }
 
+function cached_themes_for_an_installation() {
+	$query = "SELECT site_themes.mid as value, tag_name.name FROM site_themes, tag_name WHERE site_themes.mid = tag_name.tag;";
+	$result = db_query($query);
+	$output = array();
+	foreach($result as $item) {
+		$output[] = $item;
+	}
+	return $output;
+}
+
+function cached_settings_for_an_installation() {
+	$query = "SELECT setting_id.location, setting_id.start, setting_id.end, tag_name.name
+	FROM site_settings, setting_id, tag_name
+	WHERE site_settings.id = setting_id.id AND
+	setting_id.location = tag_name.tag;";
+	$result = db_query($query);
+	$output = array();
+	foreach($result as $item) {
+		$output[] = $item;
+	}
+	return $output;
+}
 
 function dec_installation_themes() {
-	$themes = themes_for_an_installation(10);
+	$n = 10;
+	
+	//retrieve cached themes for a dossier
+	$themes = cached_themes_for_an_installation();
+	
+	if(empty($themes)) {
+		//if no cache then calculate themes
+		$themes = themes_for_an_installation($n);
+	}
+	else {
+		//if cache then asynchronously recalculate themes
+		background_process_start('themes_for_an_installation', $n);
+	}
+	
 	$output = '<div>&nbsp';
 	if(!empty($themes)) {
 		$output .= '<div class="topic-block"><h2 class="pane-title"><i class="fa fa-link fa-lg">&nbsp;</i><span class="topic-title">Storyscope themes&nbsp;&nbsp;</span>' . '</h2></div>';
@@ -56,7 +91,19 @@ function dec_installation_themes() {
 		}
 		$output .=  '</ul><div style="clear:both;"></div>';
 	}
-	$settings = settings_for_an_installation(10);
+	
+	//retrieve cached settings for a dossier
+	$settings = cached_settings_for_an_installation();
+	
+	if(empty($settings)) {
+		//if no cache then calculate settings
+		$settings = settings_for_an_installation($n);
+	}
+	else {
+		//if cache then asynchronously recalculate settings
+		background_process_start('settings_for_an_installation', $n);
+	}
+	
 	if(!empty($settings)) {
 		$output .= '<div class="topic-block"><h2 class="pane-title"><i class="fa fa-compass fa-lg">&nbsp;</i><span class="topic-title">Storyscope settings&nbsp;&nbsp;</span>' . '</h2>';
 		$output .=  '<ul class="field-name-field-fb-tags">';

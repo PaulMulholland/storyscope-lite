@@ -46,10 +46,61 @@ function dossier_theme_block_content() {
   return FALSE;
 }
 
+
+function cached_themes_for_a_dossier($dossier_nid) {
+	$query = "SELECT dossier_themes.mid as value, tag_name.name FROM dossier_themes, tag_name 
+			WHERE dossier_themes.dossier = '".$dossier_nid."' AND
+dossier_themes.mid = tag_name.tag;";
+	$result = db_query($query);
+	$output = array();
+	foreach($result as $item) {
+		$output[] = $item;
+	}
+	return $output;
+}
+
+function recalculate_cached_dossier_themes($dossier_node) {
+	$story_array = read_stories_from_dossier_node($dossier_node);
+	$themes = themes_for_a_dossier($story_array, 10, $dossier_node->nid);
+}
+
+function recalculate_cached_dossier_settings($dossier_node, $story_array) {
+	if(!$story_array) {
+		$story_array = read_stories_from_dossier_node($dossier_node);
+	}
+	$settings = settings_for_a_dossier($story_array, 10, $dossier_node->nid);	
+}
+
+function cached_settings_for_a_dossier($dossier_nid) {
+	$query = "SELECT setting_id.location, setting_id.start, setting_id.end, tag_name.name FROM dossier_settings, setting_id, tag_name 
+WHERE dossier_settings.dossier = '".$dossier_nid."' AND
+dossier_settings.id = setting_id.id AND
+setting_id.location = tag_name.tag;";
+	$result = db_query($query);
+	$output = array();
+	foreach($result as $item) {
+		$output[] = $item;
+	}
+	return $output;
+}
+
 function dec_dossier_themes($dossier_nid) {
 	$dossier_node = node_load($dossier_nid);
-	$story_array = read_stories_from_dossier_node($dossier_node);
-	$themes = themes_for_a_dossier($story_array, 10, $dossier_nid);
+	
+	//retrieve cached themes for a dossier
+	$themes = cached_themes_for_a_dossier($dossier_nid);
+	
+	if(empty($themes)) {
+		//if no cache then calculate themes
+		$story_array = read_stories_from_dossier_node($dossier_node);
+		$themes = themes_for_a_dossier($story_array, 10, $dossier_nid);	
+	}
+	else {
+		//if cache then asynchronously recalculate themes
+		$story_array = FALSE;
+		background_process_start('recalculate_cached_dossier_themes', $dossier_node);
+	}
+	
 	$output = '';
 	$output = '<div>&nbsp';
 	if(!empty($themes)) {
@@ -60,7 +111,19 @@ function dec_dossier_themes($dossier_nid) {
 		}
 		$output .=  '</ul><div style="clear:both;"></div>';
 	}
-	$settings = settings_for_a_dossier($story_array, 10, $dossier_nid);
+	
+	$settings = cached_settings_for_a_dossier($dossier_nid);
+	
+	if(empty($settings)) {
+		if(!$story_array) {
+			$story_array = read_stories_from_dossier_node($dossier_node);
+		}
+		$settings = settings_for_a_dossier($story_array, 10, $dossier_nid);
+	}
+	else {
+		background_process_start('recalculate_cached_dossier_settings', $dossier_node, $story_array);
+	}
+	
 	if(!empty($settings)) {
 		$output .= '<div class="topic-block"><h2 class="pane-title"><i class="fa fa-compass fa-lg">&nbsp;</i><span class="topic-title">Dossier settings&nbsp;&nbsp;</span>' . '</h2></div>';
 		$output .=  '<ul class="field-name-field-fb-tags">';
