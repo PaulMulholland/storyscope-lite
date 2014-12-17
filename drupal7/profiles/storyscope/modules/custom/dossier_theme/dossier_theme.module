@@ -208,7 +208,7 @@ JOIN tag_name ON tag_name.tag = frequency_table.location ORDER BY stories DESC, 
 			$output[] = $record;
 		}
 	}
-	if($dossier_nid && !empty($setting_ids)) {
+	if($dossier_nid) {
 		dec_save_settings('dossier_settings', 'dossier', $setting_ids, $dossier_nid);
 	}
 	return $output;

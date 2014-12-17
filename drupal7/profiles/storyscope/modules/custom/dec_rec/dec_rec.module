@@ -536,15 +536,22 @@ function dec_rec_block_view($delta = '') {
 	return($block);
 }
 
+/**
+ * Update query_tag table on story node deletion
+ */
+function dec_rec_node_delete($node) {
+	if($node->type == 'story') {
+		delete_query_tags_for_story_node($node);
+	}
+}
 
 /**
- * Update query_tag table on story node update
+ * Update query_tag table on story node insert
  */
 function dec_rec_node_insert($node) {
 	if($node->type == 'story') {
 		update_query_tags_for_story_node($node);
 	}
-	
 }
 
 /**
@@ -582,6 +589,13 @@ function read_mids_from_story_node($story_node) {
 		}
 	}
 	return $mids;
+}
+
+function delete_query_tags_for_story_node($node) {
+	$nid = $node->nid;
+	db_delete('query_tag')
+	->condition('id', $nid)
+	->execute();
 }
 
 function update_query_tags_for_story_node($node) {
