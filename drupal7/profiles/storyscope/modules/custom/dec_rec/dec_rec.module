@@ -8957,6 +8957,7 @@ function save_tag_names_to_db($result) {
 	if(!empty($result)) {
 		foreach($result as $id=>$name) {
 			$name = my_escape_string($name);
+			$name = (strlen($name) > 255) ? substr($name,0,255) : $name;
 			$values_list .=", ('".$id."', '".$name."')";
 		}
 		if($values_list == "") {
