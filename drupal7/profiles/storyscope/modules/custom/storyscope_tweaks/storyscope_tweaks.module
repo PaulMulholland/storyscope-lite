@@ -27,14 +27,15 @@ function storyscope_tweaks_page_alter(&$page) {
 
         // First we see if the uri directs to a valid path.
         $path = drupal_lookup_path('source', $uri);
+
         $trail[$i]['path'] = $uri;
-        $trail[$i]['title'] = $uri; // Initialise it
+        $trail[$i]['title'] = 'temp';$uri; // Initialise it
 
         // Figure out the title of the current item.
         if ($path) {
           $item = menu_get_item($path);
           $trail[$i]['title'] = $item['title'];
-        }
+        }  
         else {
           // If it's not a valid path, load the menu item for the path.
           $item = menu_get_item($uri);
@@ -62,7 +63,8 @@ function storyscope_tweaks_page_alter(&$page) {
             $trail[$i]['title'] = $title;
           }
           else {
-            $trail[$i]['title'] = $last_arg;
+          	unset($trail[$i]);
+//             $trail[$i]['title'] = $last_arg;
           }
         }
 

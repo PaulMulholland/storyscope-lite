@@ -37,14 +37,43 @@ function story_search_theme_block_content() {
 	$n = 8;
 	$path = request_path();
 	$path_array = explode('/',request_path());
-	if(isset($_GET['storytag'])) {
-		$story_tag = $_GET['storytag'];
+	$rpa = array_reverse($path_array);
+	
+	$story_tag = FALSE;
+	if(isset($rpa[2]) && $rpa[2] == 'stories') {
+		$story_tag = '/'.$rpa[1].'/'.$rpa[0];
+		$option = FALSE;
+	}
+	elseif(isset($rpa[3]) && $rpa[3] == 'stories') {
+		$story_tag = '/'.$rpa[2].'/'.$rpa[1];
+		$option = $rpa[0];
+	}
+	if($story_tag) {
 		$name = get_topic_name($story_tag);
 		if(!$name) {
 			$name = $story_tag;
 		}
-		//stories ordered according to their theme match
-		$query = "SELECT  query_tag.id, COUNT(DISTINCT query_tag.tag) as tags, COUNT(DISTINCT value_table.event) as events
+		
+		if($option == 'themes') {
+			//stories ordered according to their theme match
+			$query = "SELECT  query_tag.id, COUNT(DISTINCT query_tag.tag) as tags, COUNT(DISTINCT value_table.event) as events
+	FROM query_tag, tag_event_id, event_attribute_value as value_table
+	WHERE
+	value_table.value = '".$story_tag."' AND
+	value_table.event = tag_event_id.event_id AND
+	query_tag.tag = tag_event_id.tag AND
+	value_table.attribute <> 'location'
+	GROUP BY query_tag.id
+	ORDER BY tags DESC, events DESC LIMIT ".$n.";";
+		}
+		else {
+			$query = "SELECT result_list.id, order_list.tags, order_list.events
+FROM
+(SELECT query_tag.id
+FROM query_tag
+WHERE query_tag.tag = '".$story_tag."') as result_list
+LEFT JOIN
+(SELECT  query_tag.id, COUNT(DISTINCT query_tag.tag) as tags, COUNT(DISTINCT value_table.event) as events
 FROM query_tag, tag_event_id, event_attribute_value as value_table
 WHERE
 value_table.value = '".$story_tag."' AND
@@ -52,7 +81,10 @@ value_table.event = tag_event_id.event_id AND
 query_tag.tag = tag_event_id.tag AND
 value_table.attribute <> 'location'
 GROUP BY query_tag.id
-ORDER BY tags DESC, events DESC LIMIT ".$n.";";
+ORDER BY tags DESC, events DESC LIMIT ".$n.") as order_list
+ON
+result_list.id = order_list.id;";
+		}
 		$result = db_query($query);
 		$story_array = array();
 		foreach ($result as $record) {

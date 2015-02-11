@@ -10,28 +10,96 @@
  */
 
 function stories_of_theme_menu() {
-	$items['dossier/%/story/%/stories'] = array(
+	$items['dossier/%/story/%/stories/%/%'] = array(
 	 'title' => 'Stories',
 	 'description' => 'Stories related to a topic',
 	 'page callback' => 'stories_for_a_topic',
+			'page arguments' => array(5,6,'tags'),
 	'access callback' => TRUE,
 	);
-	$items['dossier/%/stories'] = array(
-	 'title' => 'Stories',
+	$items['dossier/%/story/%/stories/%/%/tags'] = array(
+	 'title' => 'Tag of stories',
 	 'description' => 'Stories related to a topic',
+			'type' => MENU_DEFAULT_LOCAL_TASK,
 	 'page callback' => 'stories_for_a_topic',
+			'page arguments' => array(5,6,'tags'),
 	'access callback' => TRUE,
 	);
-	$items['front/stories'] = array(
-	 'title' => 'Stories',
+	$items['dossier/%/story/%/stories/%/%/themes'] = array(
+	 'title' => 'Theme of stories',
 	 'description' => 'Stories related to a topic',
+			'type' => MENU_LOCAL_TASK,
 	 'page callback' => 'stories_for_a_topic',
+			'page arguments' => array(5,6,'themes'),
 	'access callback' => TRUE,
 	);
-	$items['stories'] = array(
+	$items['dossier/%/stories/%/%'] = array(
 	 'title' => 'Stories',
 	 'description' => 'Stories related to a topic',
 	 'page callback' => 'stories_for_a_topic',
+	'page arguments' => array(3,4),
+	'access callback' => TRUE,
+	);
+	$items['dossier/%/stories/%/%/tags'] = array(
+	 'title' => 'Tag of stories',
+	 'description' => 'Stories related to a topic',
+	 'page callback' => 'stories_for_a_topic',
+	'type' => MENU_DEFAULT_LOCAL_TASK,
+	'page arguments' => array(3,4,'tags'),
+	'access callback' => TRUE,
+	);
+	$items['dossier/%/stories/%/%/themes'] = array(
+	 'title' => 'Theme of stories',
+	 'description' => 'Stories related to a topic',
+	 'page callback' => 'stories_for_a_topic',
+			'type' => MENU_LOCAL_TASK,
+			'page arguments' => array(3,4,'themes'),
+	'access callback' => TRUE,
+	);
+	$items['front/stories/%/%'] = array(
+	 'title' => 'Stories',
+	 'description' => 'Stories related to a topic',
+	 'page callback' => 'stories_for_a_topic',
+	'page arguments' => array(2,3),
+	'access callback' => TRUE,
+	);
+	$items['front/stories/%/%/tags'] = array(
+	 'title' => 'Tag of stories',
+	 'description' => 'Stories related to a topic',
+	'type' => MENU_DEFAULT_LOCAL_TASK,
+	 'page callback' => 'stories_for_a_topic',
+	'page arguments' => array(2,3,'tags'),
+	'access callback' => TRUE,
+	);
+	$items['front/stories/%/%/themes'] = array(
+	 'title' => 'Theme of stories',
+	'type' => MENU_LOCAL_TASK,
+	 'description' => 'Stories related to a topic',
+	 'page callback' => 'stories_for_a_topic',
+	'page arguments' => array(2,3,'themes'),
+	'access callback' => TRUE,
+	);
+	$items['stories/%/%'] = array(
+	 'title' => 'Stories',
+	 'description' => 'Stories related to a topic',
+	 'page callback' => 'stories_for_a_topic',
+	'page arguments' => array(1,2),
+	'access callback' => TRUE,
+	);
+	$items['stories/%/%/tags'] = array(
+	 'title' => 'Tag of stories',
+	 'description' => 'Stories related to a topic',
+	'type' => MENU_DEFAULT_LOCAL_TASK,
+	 'page callback' => 'stories_for_a_topic',
+	'page arguments' => array(1,2,'tags'),
+	'access callback' => TRUE,
+	);
+	$items['stories/%/%/themes'] = array(
+	 'title' => 'Theme of stories',
+	'type' => MENU_LOCAL_TASK,
+	 'description' => 'Stories related to a topic',
+	 'page callback' => 'stories_for_a_topic',
+	'page arguments' => array(1,2,'themes'),
 	'access callback' => TRUE,
 	);
 	$items['dossier/%/story/%/settingstories'] = array(
@@ -61,18 +129,46 @@ function stories_of_theme_menu() {
 	return $items;
 }
 
-function stories_for_a_topic($n = 8) {
-	if(isset($_GET['storytag'])) {
-		$topic = $_GET['storytag'];
+function stories_for_a_topic($m, $id, $option = 'tags', $n = 8) {
+	if(isset($m) && isset($id)) {
+		$topic = '/'.$m.'/'.$id;
 	}
 	else {
 		return '';
 	}
+// 	if(isset($_GET['storytag'])) {
+// 		$topic = $_GET['storytag'];
+// 	}
+// 	else {
+// 		return '';
+// 	}
+	drupal_set_breadcrumb(array(l('Home', '<front>')));
 	$output = '';
 	//check event space for the topic has been calculated
 	new_event_space_of_a_topic($topic);
 	//list of themes for a topic
 	$name = get_topic_name($topic);
+
+	if($option == 'tags') {
+		$query = "SELECT result_list.id, order_list.tags, order_list.events
+FROM
+(SELECT query_tag.id
+FROM query_tag
+WHERE query_tag.tag = '".$topic."') as result_list 
+LEFT JOIN 
+(SELECT  query_tag.id, COUNT(DISTINCT query_tag.tag) as tags, COUNT(DISTINCT value_table.event) as events
+FROM query_tag, tag_event_id, event_attribute_value as value_table
+WHERE
+value_table.value = '".$topic."' AND
+value_table.event = tag_event_id.event_id AND
+query_tag.tag = tag_event_id.tag AND
+value_table.attribute <> 'location'
+GROUP BY query_tag.id
+ORDER BY tags DESC, events DESC LIMIT ".$n.") as order_list
+ON
+result_list.id = order_list.id;";
+	}
+	else {
 		//stories ordered according to their theme match
 		$query = "SELECT  query_tag.id, COUNT(DISTINCT query_tag.tag) as tags, COUNT(DISTINCT value_table.event) as events
 FROM query_tag, tag_event_id, event_attribute_value as value_table
@@ -83,6 +179,8 @@ query_tag.tag = tag_event_id.tag AND
 value_table.attribute <> 'location'
 GROUP BY query_tag.id
 ORDER BY tags DESC, events DESC LIMIT ".$n.";";
+	}
+		
 		
 		drupal_set_title(t('Storyscope stories: '.$name));
 		$result = db_query($query);

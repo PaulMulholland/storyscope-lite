@@ -4016,13 +4016,29 @@ function dec_tag($topic) {
 					$output .= '<div class="button addtag-button">' . l( t('Add to Story') , $current_path . '/addtag' , array("html"=>TRUE, 'query'=>array('topic_name' => $name, 'mid' => $topic, 'destination' => (drupal_get_path_alias(current_path()) . '?tag=' . $topic)))) . '</div>';
 				}
 			}
-			$path_array = explode('/',request_path());
-			if(end($path_array) == 'stories' || end($path_array) == 'settingstories') {
+			if(request_path() == '') {
+				$path_array = array();
+			}
+			else {
+				$path_array = explode('/',request_path());
+			}
+
+			//if path contains stories (i.e. last page was also a story search) then strip this from URL
+			if(in_array('stories', $path_array)) {
+				$key = array_search('stories', $path_array);
+				$path_array = array_slice($path_array, 0, $key);
+			}
+			
+			if(end($path_array) == 'settingstories') {
 				array_pop($path_array);
 			}
 			$path_array[] = 'stories';
+
+			if(!empty($path_array)) {
+				
+			}
 			$next_path = implode('/',$path_array);
-			$output .= '<div class="topic-block"><h2><i class="fa fa-info-circle fa-lg">&nbsp;</i><span class="topic-title">' . t('About : '). $name . $topic_types . '&nbsp;&nbsp;</span>' . l('<span class="topic-search"><i class="fa fa-search">&nbsp;</i>' . '</span>', $next_path, array("query"=>array('storytag'=>$topic), "html"=>TRUE)) . '</h2>';
+			$output .= '<div class="topic-block"><h2><i class="fa fa-info-circle fa-lg">&nbsp;</i><span class="topic-title">' . t('About : '). $name . $topic_types . '&nbsp;&nbsp;</span>' . l('<span class="topic-search"><i class="fa fa-search">&nbsp;</i>' . '</span>', $next_path.$topic, array("query"=>array('storytag'=>$topic), "html"=>TRUE)) . '</h2>';
 		}
 
 
