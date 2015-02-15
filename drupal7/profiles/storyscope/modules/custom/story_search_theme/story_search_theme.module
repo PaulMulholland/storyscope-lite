@@ -112,18 +112,29 @@ result_list.id = order_list.id;";
 			$output .= '<div class="topic-block"><h2 class="pane-title"><i class="fa fa-compass fa-lg">&nbsp;</i><span class="topic-title">Settings of stories&nbsp;&nbsp;</span>' . '</h2></div>';
 			$output .=  '<ul class="field-name-field-fb-tags">';
 			foreach($settings as $setting) {
+				
 				if($setting->end && $setting->start && $setting->start !== $setting->end) {
-					$output .= l('<li class="tags">'. $setting->name.", ".$setting->start." to ".$setting->end . '</li>',request_path() ,array('html'=>'true', 'query' => array("storytag"=>$story_tag, 'location' => $setting->location, 'time' => $setting->start, 'end' => $setting->end)));
+					$output .= l('<li class="tags">'. $setting->name.", ".$setting->start." to ".$setting->end . '</li>',request_path(),array('html'=>'true', 'query' => array('location' => $setting->location, 'time' => $setting->start, 'end' => $setting->end)));
 				}
-				elseif($setting->start == $setting->end) {
-					$output .= l('<li class="tags">'. $setting->name.", ".$setting->start . '</li>',request_path() , array('html'=>'true', 'query' => array("storytag"=>$story_tag, 'location' => $setting->location, 'time' => $setting->start)));
+				elseif($setting->end && $setting->start && $setting->start == $setting->end) {
+					$output .= l('<li class="tags">'. $setting->name.", ".$setting->start . '</li>',request_path(), array('html'=>'true', 'query' => array('location' => $setting->location, 'time' => $setting->start)));
 				}
-				elseif($setting->start && !$setting->end) {
-					$output .= l('<li class="tags">'. $setting->name.", ".$setting->start . '</li>',request_path() ,array('html'=>'true', 'query' => array("storytag"=>$story_tag, 'location' => $setting->location, 'time' => $setting->start)));
+				elseif($setting->time) {
+					$output .= l('<li class="tags">'. $setting->name.", ".$setting->time . '</li>',request_path(),array('html'=>'true', 'query' => array('location' => $setting->location, 'time' => $setting->time)));
 				}
-				elseif($setting->end && !$setting->start) {
-					$output .= l('<li class="tags">'. $setting->name.", ".$setting->end . '</li>',request_path() ,array('html'=>'true', 'query' => array("storytag"=>$story_tag, 'location' => $setting->location, 'time' => $setting->end)));
-				}
+				
+// 				if($setting->end && $setting->start && $setting->start !== $setting->end) {
+// 					$output .= l('<li class="tags">'. $setting->name.", ".$setting->start." to ".$setting->end . '</li>',request_path() ,array('html'=>'true', 'query' => array("storytag"=>$story_tag, 'location' => $setting->location, 'time' => $setting->start, 'end' => $setting->end)));
+// 				}
+// 				elseif($setting->start == $setting->end) {
+// 					$output .= l('<li class="tags">'. $setting->name.", ".$setting->start . '</li>',request_path() , array('html'=>'true', 'query' => array("storytag"=>$story_tag, 'location' => $setting->location, 'time' => $setting->start)));
+// 				}
+// 				elseif($setting->start && !$setting->end) {
+// 					$output .= l('<li class="tags">'. $setting->name.", ".$setting->start . '</li>',request_path() ,array('html'=>'true', 'query' => array("storytag"=>$story_tag, 'location' => $setting->location, 'time' => $setting->start)));
+// 				}
+// 				elseif($setting->end && !$setting->start) {
+// 					$output .= l('<li class="tags">'. $setting->name.", ".$setting->end . '</li>',request_path() ,array('html'=>'true', 'query' => array("storytag"=>$story_tag, 'location' => $setting->location, 'time' => $setting->end)));
+// 				}
 		
 			}
 			$output .=  '</ul><div style="clear:both;"></div>';
@@ -178,7 +189,7 @@ start_table.attribute = time_attribute_name.attribute AND
 time_attribute_name.name = 'start_time') as event_start_table ON event_start_table.event = events_table.event
 ) as event_location_start
 LEFT JOIN
-(SELECT event_attribute_value.event, end_table.value as end
+(SELECT DISTINCT event_attribute_value.event, end_table.value as end
 FROM tag_event_id, query_tag, event_attribute_value, event_attribute_value as end_table, attribute_name as time_attribute_name
 WHERE
 query_tag.tag = tag_event_id.tag AND
@@ -233,7 +244,7 @@ start_table.attribute = time_attribute_name.attribute AND
 time_attribute_name.name = 'start_time') as event_start_table ON event_start_table.event = events_table.event
 ) as event_location_start
 LEFT JOIN
-(SELECT event_attribute_value.event, end_table.value as end
+(SELECT DISTINCT event_attribute_value.event, end_table.value as end
 FROM tag_event_id, query_tag, event_attribute_value, event_attribute_value as end_table, attribute_name as time_attribute_name
 WHERE
 query_tag.tag = tag_event_id.tag AND

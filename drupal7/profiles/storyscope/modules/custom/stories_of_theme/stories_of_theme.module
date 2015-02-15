@@ -267,7 +267,7 @@ start_table.attribute = time_attribute_name.attribute AND
 time_attribute_name.name = 'start_time') as event_start_table ON event_start_table.event = events_table.event
 ) as event_location_start
 LEFT JOIN
-(SELECT event_attribute_value.event, end_table.value as end
+(SELECT DISTINCT event_attribute_value.event, end_table.value as end
 FROM tag_event_id, query_tag, event_attribute_value, event_attribute_value as end_table, attribute_name as time_attribute_name
 WHERE 
 query_tag.tag = tag_event_id.tag AND
@@ -278,6 +278,7 @@ time_attribute_name.name = 'end_time') as event_end ON event_location_start.even
 WHERE (result_table.start < '".$end."' AND result_table.end > '".$start."') OR (result_table.start > '".$start."' AND result_table.start < '".$end."') OR (result_table.end > '".$start."' AND result_table.end < '".$end."')
 GROUP BY result_table.id
 ORDER BY tags;";
+
 	}
 	if($start || $end) {
 		if($start) {
@@ -322,7 +323,7 @@ start_table.attribute = time_attribute_name.attribute AND
 time_attribute_name.name = 'start_time') as event_start_table ON event_start_table.event = events_table.event
 ) as event_location_start
 LEFT JOIN
-(SELECT event_attribute_value.event, end_table.value as end
+(SELECT DISTINCT event_attribute_value.event, end_table.value as end
 FROM tag_event_id, query_tag, event_attribute_value, event_attribute_value as end_table, attribute_name as time_attribute_name
 WHERE
 query_tag.tag = tag_event_id.tag AND
@@ -333,7 +334,7 @@ time_attribute_name.name = 'end_time') as event_end ON event_location_start.even
 WHERE result_table.start = '".$time."' OR result_table.end = '".$time."' OR (result_table.start < '".$time."' AND result_table.end > '".$time."')
 GROUP BY result_table.id
 ORDER BY tags;";
-		
+
 	}
 
 	//stories ordered according to their match

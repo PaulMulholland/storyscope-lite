@@ -118,7 +118,7 @@ function dec_dossier_themes($dossier_nid) {
 		if(!$story_array) {
 			$story_array = read_stories_from_dossier_node($dossier_node);
 		}
-		$settings = settings_for_a_dossier($story_array, 10, $dossier_nid);
+		$settings = settings_for_a_dossier($story_array, 30, $dossier_nid);
 	}
 	else {
 		background_process_start('recalculate_cached_dossier_settings', $dossier_node, $story_array);
@@ -140,7 +140,7 @@ function dec_dossier_themes($dossier_nid) {
 			elseif($setting->end && !$setting->start) {
 				$output .= l('<li class="tags">'. $setting->name.", ".$setting->end . '</li>',request_path(), array('html'=>'true', 'query' => array('location' => $setting->location, 'time' => $setting->end)));
 			}
-		
+	
 		}
 	$output .=  '</ul><div style="clear:both;"></div>';
 	}
@@ -155,9 +155,53 @@ function settings_for_a_dossier($story_array, $n = 10, $dossier_nid = 0) {
 	$output = array();
 	if(!empty($story_array)) {
 		$story_string = "('".implode("','", $story_array)."')";	
+// 		$query = "SELECT *
+// FROM
+// (SELECT COUNT(DISTINCT event_location_start.id) as stories, COUNT(DISTINCT event_location_start.tag) as tags, COUNT(DISTINCT event_location_start.event) as frequency, event_location_start.location, event_location_start.start, event_end.end
+// FROM
+// (
+// SELECT events_table.id, events_table.tag, events_table.event, events_table.location, event_start_table.start
+// FROM
+// (SELECT DISTINCT query_tag.id, query_tag.tag, event_attribute_value.event, location_table.value as location
+// FROM tag_event_id, query_tag, event_attribute_value, event_attribute_value as location_table, event_attribute_value as start_table, attribute_name as location_attribute_name, attribute_name as time_attribute_name
+// WHERE query_tag.id IN ".$story_string." AND
+// query_tag.tag = tag_event_id.tag AND
+// tag_event_id.event_id = event_attribute_value.event AND
+// event_attribute_value.event = location_table.event AND
+// event_attribute_value.event = start_table.event AND
+// location_table.attribute = location_attribute_name.attribute AND
+// location_attribute_name.name = 'location' AND
+// ((start_table.attribute = time_attribute_name.attribute AND
+// time_attribute_name.name = 'start_time') OR
+// (start_table.attribute = time_attribute_name.attribute AND
+// time_attribute_name.name = 'end_time'))) as events_table
+// LEFT JOIN
+// (SELECT DISTINCT query_tag.tag, event_attribute_value.event, location_table.value as location, start_table.value as start
+// FROM tag_event_id, query_tag, event_attribute_value, event_attribute_value as location_table, event_attribute_value as start_table, attribute_name as location_attribute_name, attribute_name as time_attribute_name
+// WHERE query_tag.id IN ".$story_string." AND
+// query_tag.tag = tag_event_id.tag AND
+// tag_event_id.event_id = event_attribute_value.event AND
+// event_attribute_value.event = location_table.event AND
+// event_attribute_value.event = start_table.event AND
+// location_table.attribute = location_attribute_name.attribute AND
+// location_attribute_name.name = 'location' AND
+// start_table.attribute = time_attribute_name.attribute AND
+// time_attribute_name.name = 'start_time') as event_start_table ON event_start_table.event = events_table.event
+// ) as event_location_start
+// LEFT JOIN
+// (SELECT DISTINCT event_attribute_value.event, end_table.value as end
+// FROM tag_event_id, query_tag, event_attribute_value, event_attribute_value as end_table, attribute_name as time_attribute_name
+// WHERE query_tag.id IN ".$story_string." AND
+// query_tag.tag = tag_event_id.tag AND
+// tag_event_id.event_id = event_attribute_value.event AND
+// event_attribute_value.event = end_table.event AND
+// end_table.attribute = time_attribute_name.attribute AND
+// time_attribute_name.name = 'end_time') as event_end ON event_location_start.event = event_end.event
+// GROUP BY event_location_start.location, event_location_start.start, event_end.end) as frequency_table
+// JOIN tag_name ON tag_name.tag = frequency_table.location ORDER BY stories DESC, tags DESC, frequency DESC LIMIT ".$n.";";
 		$query = "SELECT *
 FROM
-(SELECT COUNT(DISTINCT event_location_start.id) as stories, COUNT(DISTINCT event_location_start.tag) as tags, COUNT(DISTINCT event_location_start.event) as frequency, event_location_start.location, event_location_start.start, event_end.end
+(SELECT COUNT(DISTINCT event_location_start.tag) as tags, GROUP_CONCAT(DISTINCT event_location_start.tag) as taglist, COUNT(DISTINCT event_location_start.event) as frequency, GROUP_CONCAT(DISTINCT event_location_start.event) as eventlist, event_location_start.location, event_location_start.start, event_end.end
 FROM
 (
 SELECT events_table.id, events_table.tag, events_table.event, events_table.location, event_start_table.start
@@ -189,7 +233,7 @@ start_table.attribute = time_attribute_name.attribute AND
 time_attribute_name.name = 'start_time') as event_start_table ON event_start_table.event = events_table.event
 ) as event_location_start
 LEFT JOIN
-(SELECT event_attribute_value.event, end_table.value as end
+(SELECT DISTINCT event_attribute_value.event, end_table.value as end
 FROM tag_event_id, query_tag, event_attribute_value, event_attribute_value as end_table, attribute_name as time_attribute_name
 WHERE query_tag.id IN ".$story_string." AND
 query_tag.tag = tag_event_id.tag AND
@@ -198,20 +242,41 @@ event_attribute_value.event = end_table.event AND
 end_table.attribute = time_attribute_name.attribute AND
 time_attribute_name.name = 'end_time') as event_end ON event_location_start.event = event_end.event
 GROUP BY event_location_start.location, event_location_start.start, event_end.end) as frequency_table
-JOIN tag_name ON tag_name.tag = frequency_table.location ORDER BY stories DESC, tags DESC, frequency DESC LIMIT ".$n.";";
-		$output = array();
+JOIN tag_name ON tag_name.tag = frequency_table.location ORDER BY tags DESC, frequency DESC LIMIT 50;";
+
+		
 		$result = db_query($query);
-		$output = array();
-		$setting_ids = array();
-		foreach ($result as $record) {
-			$setting_ids[] = check_setting_id($record->start, $record->end, $record->location);
-			$output[] = $record;
+		
+		$filtered_merged_array = filter_and_merge_settings($result);
+		
+		if(count($filtered_merged_array) > 10) {
+			$filtered_merged_array = array_slice($filtered_merged_array, 0, $n);
 		}
-	}
+		
+		$setting_ids = array();
+		foreach ($filtered_merged_array as $item) {
+			if($item->time) {
+				$setting_ids[] = check_setting_id($item->time, FALSE, $item->location);
+			}
+			else {
+				$setting_ids[] = check_setting_id($item->start, $item->end, $item->location);
+			}
+		}		
+	
+// 		$output = array();
+// 		$result = db_query($query);
+// 		$output = array();
+// 		$setting_ids = array();
+// 		foreach ($result as $record) {
+// 			$setting_ids[] = check_setting_id($record->start, $record->end, $record->location);
+// 			$output[] = $record;
+// 		}
+
 	if($dossier_nid) {
 		dec_save_settings('dossier_settings', 'dossier', $setting_ids, $dossier_nid);
 	}
-	return $output;
+	return $filtered_merged_array;
+		}
 }
 
 /**
@@ -223,9 +288,46 @@ function themes_for_a_dossier($story_array, $limit = 10, $dossier_nid = 0) {//**
 	$output = array();
 	if(!empty($story_array)) {
 		$story_string = "('".implode("','", $story_array)."')";
+// 		$query = "SELECT *
+// FROM
+// (SELECT tag_name.tag as value, tag_name.name, COUNT(tag_name.tag) as frequency, COUNT(DISTINCT data.annotation) annotations, COUNT(DISTINCT data.id) as stories 
+// FROM tag_name,
+// (SELECT tag_name.tag, query_tag.tag as annotation, query_tag.id
+// FROM tag_attribute, tag_attribute_id_value, tag_name, query_tag, theme_fact_property
+// WHERE 
+// query_tag.id IN ".$story_string." AND
+// query_tag.tag = tag_attribute.tag AND
+// tag_attribute.attribute = theme_fact_property.fb_property AND
+// tag_attribute.id = tag_attribute_id_value.tag_attribute_id and
+// tag_name.tag = tag_attribute_id_value.value
+// UNION ALL
+// SELECT tag_name.tag, query_tag.tag as annotation, query_tag.id
+// FROM tag_attribute, tag_attribute_id_value, tag_name, query_tag, theme_fact_property, fact_attribute_reverse
+// WHERE 
+// query_tag.id IN ".$story_string." AND
+// query_tag.tag = tag_attribute_id_value.value AND
+// tag_attribute_id_value.tag_attribute_id = tag_attribute.id AND 
+// tag_attribute.attribute = fact_attribute_reverse.attribute AND
+// fact_attribute_reverse.reverse = theme_fact_property.fb_property AND
+// tag_name.tag = tag_attribute.tag
+// UNION ALL
+// SELECT event_attribute_value.value as tag, event_table.tag as annotation, event_table.id
+// FROM 
+// (SELECT DISTINCT query_tag.tag, event_attribute_value.event, query_tag.id
+// FROM query_tag, event_attribute_value
+// WHERE 
+// query_tag.id IN ".$story_string." AND
+// query_tag.tag = event_attribute_value.value) as event_table, event_attribute_value, attribute_name
+// WHERE event_table.event = event_attribute_value.event AND
+// event_attribute_value.attribute = attribute_name.attribute AND
+// attribute_name.name <> 'location') as data
+// WHERE tag_name.tag = data.tag
+// GROUP BY tag_name.tag
+// ORDER BY stories DESC, annotations DESC, frequency DESC) as result
+// WHERE result.frequency >= 2 LIMIT ".$limit.";";
 		$query = "SELECT *
 FROM
-(SELECT tag_name.tag as value, tag_name.name, COUNT(tag_name.tag) as frequency, COUNT(DISTINCT data.annotation) annotations, COUNT(DISTINCT data.id) as stories 
+(SELECT tag_name.tag as value, tag_name.name, COUNT(tag_name.tag) as frequency, COUNT(DISTINCT data.annotation) annotations
 FROM tag_name,
 (SELECT tag_name.tag, query_tag.tag as annotation, query_tag.id
 FROM tag_attribute, tag_attribute_id_value, tag_name, query_tag, theme_fact_property
@@ -258,7 +360,7 @@ event_attribute_value.attribute = attribute_name.attribute AND
 attribute_name.name <> 'location') as data
 WHERE tag_name.tag = data.tag
 GROUP BY tag_name.tag
-ORDER BY stories DESC, annotations DESC, frequency DESC) as result
+ORDER BY annotations DESC, frequency DESC) as result
 WHERE result.frequency >= 2 LIMIT ".$limit.";";
 		$result = db_query($query);
 		foreach ($result as $record) {

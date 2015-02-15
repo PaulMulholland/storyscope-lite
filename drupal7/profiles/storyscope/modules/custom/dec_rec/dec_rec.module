@@ -2200,24 +2200,29 @@ LEFT JOIN tag_name ON tag_name.tag = event_value_table.value;";
 
 	}
 	
-	$table = theme(
-				'table', 
-				array(	'rows' => $output_with_titles, 
-						'header' => array(	
-										array( 	'data'=>'title', 
-												'data-class'=>'expand'), 
-										'activity', 
-										'agent', 
-										'start time',
-										'end time',
-										'location',
-										array(	'data'=>'tags', 
-												'data-sort-initial'=>'descending', 
-												'data-class'=>'expand')
-										),
-						'attributes' => array('data-filter'=> '#event-space-filter')
-					)
-				);
+	if(empty($output_with_titles)) {
+		$table = '';
+	}
+	else {
+		$table = theme(
+					'table', 
+					array(	'rows' => $output_with_titles, 
+							'header' => array(	
+											array( 	'data'=>'title', 
+													'data-class'=>'expand'), 
+											'activity', 
+											'agent', 
+											'start time',
+											'end time',
+											'location',
+											array(	'data'=>'tags', 
+													'data-sort-initial'=>'descending', 
+													'data-class'=>'expand')
+											),
+							'attributes' => array('data-filter'=> '#event-space-filter')
+						)
+					);
+	}
 	return '<div class="event-space-table">' . $table . '</div>';
 }
 
@@ -3612,7 +3617,7 @@ function dec_list_of_tags($tag_array, $max_value) {
 	//use this list for event table 
 	$event_list = event_list_for_story_id($max_value);
 	
-	//retrieve title, description and image for events******here
+	//retrieve title, description and image for events
 	$handle = background_process_start('check_for_name_description_image', $event_list);
 	
 	$themes = top_n_themes_of_story($max_value, 10);
@@ -3659,15 +3664,18 @@ function dec_list_of_tags($tag_array, $max_value) {
 			if($setting->end && $setting->start && $setting->start !== $setting->end) {
 				$output .= l('<li class="tags">'. $setting->name.", ".$setting->start." to ".$setting->end . '</li>',request_path(),array('html'=>'true', 'query' => array('location' => $setting->location, 'time' => $setting->start, 'end' => $setting->end)));				
 			}
-			elseif($setting->start == $setting->end) {
+			elseif($setting->end && $setting->start && $setting->start == $setting->end) {
 				$output .= l('<li class="tags">'. $setting->name.", ".$setting->start . '</li>',request_path(), array('html'=>'true', 'query' => array('location' => $setting->location, 'time' => $setting->start)));
 			}
-			elseif($setting->start && !$setting->end) {
-				$output .= l('<li class="tags">'. $setting->name.", ".$setting->start . '</li>',request_path(),array('html'=>'true', 'query' => array('location' => $setting->location, 'time' => $setting->start)));
+			elseif($setting->time) {
+				$output .= l('<li class="tags">'. $setting->name.", ".$setting->time . '</li>',request_path(),array('html'=>'true', 'query' => array('location' => $setting->location, 'time' => $setting->time)));
 			}
-			elseif($setting->end && !$setting->start) {
-				$output .= l('<li class="tags">'. $setting->name.", ".$setting->end . '</li>',request_path(),array('html'=>'true', 'query' => array('location' => $setting->location, 'time' => $setting->end)));
-			}
+// 			elseif($setting->start && !$setting->end) {
+// 				$output .= l('<li class="tags">'. $setting->name.", ".$setting->start . '</li>',request_path(),array('html'=>'true', 'query' => array('location' => $setting->location, 'time' => $setting->start)));
+// 			}
+// 			elseif($setting->end && !$setting->start) {
+// 				$output .= l('<li class="tags">'. $setting->name.", ".$setting->end . '</li>',request_path(),array('html'=>'true', 'query' => array('location' => $setting->location, 'time' => $setting->end)));
+// 			}
 		
 		}
 	$output .=  '</ul>';
@@ -4115,15 +4123,17 @@ function dec_tag($topic) {
 		$output .=  '<ul class="field-name-field-fb-tags">';
 		
 		foreach($settings as $setting) {
-			if(isset($setting->end_time) && isset($setting->start_time) && $setting->start_time !== $setting->end_time) {
-				$output .= story_search_link_check('<li class="tags">' .$setting->name.", ".$setting->start_time." to ".$setting->end_time . '</li>',request_path(),array('html'=>'true', 'query' => array('location' => $setting->location, 'time' => $setting->start_time, 'end' => $setting->end_time)));
+			
+			if($setting->end && $setting->start && $setting->start !== $setting->end) {
+				$output .= l('<li class="tags">'. $setting->name.", ".$setting->start." to ".$setting->end . '</li>',request_path(),array('html'=>'true', 'query' => array('location' => $setting->location, 'time' => $setting->start, 'end' => $setting->end)));
 			}
-			elseif(isset($setting->start_time)) {
-				$output .= story_search_link_check('<li class="tags">' .$setting->name.", ".$setting->start_time . '</li>',request_path(),array('html'=>'true', 'query' => array('location' => $setting->location, 'time' => $setting->start_time)));
+			elseif($setting->end && $setting->start && $setting->start == $setting->end) {
+				$output .= l('<li class="tags">'. $setting->name.", ".$setting->start . '</li>',request_path(), array('html'=>'true', 'query' => array('location' => $setting->location, 'time' => $setting->start)));
 			}
-			elseif(isset($setting->end_time)) {
-				$output .= story_search_link_check('<li class="tags">' .$setting->name.", ".$setting->end_time  . '</li>',request_path(),array('html'=>'true', 'query' => array('location' => $setting->location, 'time' => $setting->end_time)));
+			elseif($setting->time) {
+				$output .= l('<li class="tags">'. $setting->name.", ".$setting->time . '</li>',request_path(),array('html'=>'true', 'query' => array('location' => $setting->location, 'time' => $setting->time)));
 			}
+			
 		}
 		$output .=  '</ul><div style="clear:both;"></div>';
 	}
@@ -5156,10 +5166,10 @@ time_table.attribute = attribute_name.attribute AND
 /**
  * Get settings for a story
  */
-function get_n_matching_settings_for_a_story2($story, $n = 5) {
+function get_n_matching_settings_for_a_story2($story, $n = 10) {
 	$query = "SELECT *
 FROM
-(SELECT COUNT(DISTINCT event_location_start.tag) as tags, COUNT(DISTINCT event_location_start.event) as frequency, event_location_start.location, event_location_start.start, event_end.end 
+(SELECT COUNT(DISTINCT event_location_start.tag) as tags, COUNT(DISTINCT event_location_start.event) as frequency, event_location_start.location, event_location_start.start, event_end.end, GROUP_CONCAT(DISTINCT event_location_start.tag) as taglist, GROUP_CONCAT(DISTINCT event_location_start.event) as eventlist 
 FROM 
 (
 SELECT events_table.tag, events_table.event, events_table.location, event_start_table.start
@@ -5200,27 +5210,168 @@ event_attribute_value.event = end_table.event AND
 end_table.attribute = time_attribute_name.attribute AND
 time_attribute_name.name = 'end_time') as event_end ON event_location_start.event = event_end.event
 GROUP BY event_location_start.location, event_location_start.start, event_end.end) as frequency_table
-JOIN tag_name ON tag_name.tag = frequency_table.location ORDER BY tags DESC, frequency DESC LIMIT ".$n.";";
+JOIN tag_name ON tag_name.tag = frequency_table.location ORDER BY tags DESC, frequency DESC LIMIT 50;";
 
-	$output = array();
 	$result = db_query($query);
-	$output = array();
-	$setting_ids = array();
-	foreach ($result as $record) {
-		$output[] = $record;
-		$setting_ids[] = check_setting_id($record->start, $record->end, $record->location);
+
+	$filtered_merged_array = filter_and_merge_settings($result);
+	
+	if(count($filtered_merged_array) > 10) {
+		$filtered_merged_array = array_slice($filtered_merged_array, 0, $n);
 	}
+	
+	$setting_ids = array();
+	foreach ($filtered_merged_array as $item) {
+		if($item->time) {
+			$setting_ids[] = check_setting_id($item->time, FALSE, $item->location);
+		}
+		else {
+			$setting_ids[] = check_setting_id($item->start, $item->end, $item->location);
+		}
+	}
+	
 	//cache settings of the story
 	dec_save_settings('story_settings', 'story', $setting_ids, $story);
+	
+	return $filtered_merged_array;
+}
 
-	return $output;
+function filter_and_merge_settings($result) {
+
+	$tidied_array = array();
+	foreach ($result as $record) {
+		if($record->start && $record->end) {
+			$record->start = $record->start;
+			$record->end = $record->end;
+			$record->time = FALSE;
+			$record->taglist = explode(',',$record->taglist);
+			$record->eventlist = explode(',',$record->eventlist);
+			$tidied_array[] = $record;
+		}
+		elseif($record->start) {
+			$record->time = $record->start;
+			$record->start = FALSE;
+			$record->end = FALSE;
+			$record->taglist = explode(',',$record->taglist);
+			$record->eventlist = explode(',',$record->eventlist);
+			$tidied_array[] = $record;
+		}
+		elseif($record->end) {
+			$record->time = $record->end;
+			$record->start = FALSE;
+			$record->end = FALSE;
+			$record->taglist = explode(',',$record->taglist);
+			$record->eventlist = explode(',',$record->eventlist);
+			$tidied_array[] = $record;
+		}
+	
+	}
+
+	$merged_array = array();
+	//merge settings
+	foreach ($tidied_array as $record) {
+		if(empty($merged_array)) {
+			$merged_array[] = $record;
+		}
+		else {
+			$next_merged_array = array();
+			$current_merge = FALSE;
+			foreach($merged_array as $merged_item) {
+				if($test = mergable_with($merged_item, $record)) {
+					$current_merge = $test;
+				}
+				else {
+					$next_merged_array[] = $merged_item;
+				}
+			}
+			$merged_array = $next_merged_array;
+	
+			if($current_merge) {
+				$merged_array[] = $current_merge;
+			}
+			else {
+				$merged_array[] = $record;
+			}
+		}
+	}
+
+	$filtered_merged_array = array();
+	foreach($merged_array as $merged_item) {
+		if($merged_item->tags > 1 || $merged_item->frequency > 1) {
+			$filtered_merged_array[] = $merged_item;
+		}
+	}
+
+	usort($filtered_merged_array, "setting_sort");
+
+	return $filtered_merged_array;
+}
+
+function setting_sort($b, $a) {
+	return ($a->tags > $b->tags) || ($a->tags == $b->tags && $a->frequency >= $b->frequency);
+}
+
+function mergable_with($merged_item, $record) {
+	//must be same location	(could later add contained location)
+	//must overlap in time
+	if($merged_item->location == $record->location) {
+		if($merged_item->time && $record->time) {
+			if($merged_item->time == $record->time) {
+				$record->taglist = array_unique(array_merge($record->taglist, $merged_item->taglist));
+				$record->eventlist = array_unique(array_merge($record->eventlist, $merged_item->eventlist));
+				$record->tags = count($record->taglist);
+				$record->frequency = count($record->eventlist);
+				return $record;
+			}
+			else {
+				return FALSE;
+			}
+		}
+		elseif($merged_item->time && $record->start <= $merged_item->time && $record->end >= $merged_item->time) {
+			$record->taglist = array_unique(array_merge($record->taglist, $merged_item->taglist));
+			$record->eventlist = array_unique(array_merge($record->eventlist, $merged_item->eventlist));
+			$record->tags = count($record->taglist);
+			$record->frequency = count($record->eventlist);
+			return $record;
+		}
+		elseif($record->time && $merged_item->start <= $record->time && $merged_item->end >= $record->time) {
+			$merged_item->taglist = array_unique(array_merge($record->taglist, $merged_item->taglist));
+			$merged_item->eventlist = array_unique(array_merge($record->eventlist, $merged_item->eventlist));
+			$merged_item->tags = count($merged_item->taglist);
+			$merged_item->frequency = count($merged_item->eventlist);
+			return $merged_item;
+		}
+		elseif($record->start <= $merged_item->end && $merged_item->start <= $record->end) {
+			$res = new stdClass();
+			$res->time = FALSE;
+			$res->start = min(array($record->start, $merged_item->start));
+			$res->end = max(array($merged_item->end, $record->end));
+			$res->location = $record->location;
+			$res->name = $record->name;
+			$res->taglist = array_unique(array_merge($record->taglist, $merged_item->taglist));
+			$res->eventlist = array_unique(array_merge($record->eventlist, $merged_item->eventlist));
+			$res->tags = count($res->taglist);
+			$res->frequency = count($res->eventlist);			
+			return $res;
+		}
+		else {
+			return FALSE;
+		}
+	}
+	else {
+		return FALSE;
+	}
+}
+
+function remove_mergable_items($mergables, $merged_array) {
+	array_diff($merged_array, $mergables);
 }
 
 /**
  * Calculate settings for a tag
  */
-function get_n_settings_for_a_tag($topic, $n = 5) {
-	$query = "SELECT result_list.location, result_list.name, result_list.start_time, result_list.end_time, COUNT(*) as frequency
+function get_n_settings_for_a_tag($topic, $n = 10) {
+	$query = "SELECT result_list.location, result_list.name, result_list.start_time as start, result_list.end_time as end, COUNT(result_list.event) as frequency, 1 as tags, GROUP_CONCAT(result_list.event) as eventlist, '".$topic."' as taglist
 FROM
 (SELECT event_name_start_table.event, event_name_start_table.location, event_name_start_table.name, event_name_start_table.start_time, event_end_table.end_time
 FROM
@@ -5260,18 +5411,43 @@ event_value.event = event_time.event AND
 event_time.attribute = time_attribute_name.attribute AND
 time_attribute_name.name = 'end_time') as event_end_table ON event_end_table.event = event_name_start_table.event) as result_list
 GROUP BY result_list.location, result_list.start_time, result_list.end_time
-ORDER BY frequency DESC LIMIT ".$n.";";
+ORDER BY frequency DESC LIMIT 50;";
 
 	$result = db_query($query);
-	$output = array();
+	
+
+	$filtered_merged_array = filter_and_merge_settings($result);
+	
 	$setting_ids = array();
-	foreach ($result as $record) {
-		$output[] = $record;
-		$setting_ids[] = check_setting_id($record->start_time, $record->end_time, $record->location);
+	foreach ($filtered_merged_array as $item) {
+		if($item->time) {
+			$setting_ids[] = check_setting_id($item->time, FALSE, $item->location);
+		}
+		else {
+			$setting_ids[] = check_setting_id($item->start, $item->end, $item->location);
+		}
 	}
+	
+	//cache settings of the story
 	dec_save_settings('tag_settings', 'tag', $setting_ids, $topic);
 
-	return $output;
+	if(count($filtered_merged_array) > 10) {
+		$filtered_merged_array = array_slice($filtered_merged_array, 0, $n);
+	}
+	return $filtered_merged_array;
+
+
+	
+	
+// 	$output = array();
+// 	$setting_ids = array();
+// 	foreach ($result as $record) {
+// 		$output[] = $record;
+// 		$setting_ids[] = check_setting_id($record->start_time, $record->end_time, $record->location);
+// 	}
+// 	dec_save_settings('tag_settings', 'tag', $setting_ids, $topic);
+
+// 	return $output;
 }
 
 /**
